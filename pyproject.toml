@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "roki"
+version = "0.1.0"
+description = ""
+authors = ["Rodrigo Eiti Kimura <rodrigoeitikimura@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+typer = "^0.12.5"
+adafruit-circuitpython-ble = "^10.0.7"
+adafruit-extended-bus = "^1.0.2"
+adafruit-circuitpython-hid = "^6.1.1"
+adafruit-circuitpython-neopixel = "^6.3.11"
+adafruit-circuitpython-simpleio = "^3.0.13"
+rshell = "^0.0.33"
+adafruit-ampy = "^1.1.0"
+adafruit-circuitpython-matrixkeypad = "^1.2.16"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+roki = "roki.cli.app:app"
