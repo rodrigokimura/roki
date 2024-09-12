@@ -1,10 +1,8 @@
 import adafruit_ble
-import time
 import board
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
-
 from keypad import KeyMatrix
 
 from roki.firmware.config import Config
@@ -18,7 +16,6 @@ MAX_EVENTS = 30
 
 
 def main():
-    hid = HID
     key_matrix = KeyMatrix(
         row_pins=tuple(getattr(board, pin) for pin in ROWS),
         column_pins=tuple(getattr(board, pin) for pin in COLS),
@@ -27,11 +24,11 @@ def main():
         max_events=MAX_EVENTS,
     )
 
-    device_info = DeviceInfoService(
+    DeviceInfoService(
         software_revision=adafruit_ble.__version__,
         manufacturer="Adafruit Industries",
     )
-    advertisement = ProvideServicesAdvertisement(hid)
+    advertisement = ProvideServicesAdvertisement(HID)
     # Advertise as "Keyboard" (0x03C1) icon when pairing
     # https://www.bluetooth.com/specifications/assigned-numbers/
     advertisement.appearance = 961
@@ -42,28 +39,18 @@ def main():
     ble.name = "Roki"
     if ble.connected:
         print("already connected")
-        for c in ble.connections:
-            if c:
-                c.disconnect()
+        for conn in ble.connections:
+            if conn:
+                conn.disconnect()
 
     print("advertising")
-    ble.start_advertising(
-        advertisement,
-        scan_response,
-        # interval=0.5,
-        # timeout=60,
-    )
+    ble.start_advertising(advertisement, scan_response)
 
     print("config created")
     config = Config.read()
     while True:
         while not ble.connected:
             pass
-            # print("skipping...")
-            # time.sleep(0.1)
-
-        # print("Start typing:")
-        # print(".", end="")
 
         while ble.connected:
             event = key_matrix.events.get()
@@ -71,17 +58,13 @@ def main():
                 row, col = get_coords(event.key_number, len(COLS))
 
                 key = config.layer.primary_keys[row][col]
-                print(key.key_names)
 
                 if event.pressed:
                     key.press()
                 else:
                     key.release()
 
-        ble.start_advertising(
-            advertisement,
-            # scan_response,
-        )
+        ble.start_advertising(advertisement)
 
 
 def get_coords(i: int, col_count: int = 6):
@@ -92,4 +75,3 @@ def get_coords(i: int, col_count: int = 6):
 
 if __name__ == "__main__":
     main()
-    # print(dir(board))
