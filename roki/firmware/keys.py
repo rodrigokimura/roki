@@ -132,6 +132,7 @@ def init(c: Config):
         media: MediaFunction(),
         Manager(c): Commands(),
     }
+    return kb
 
 
 class KeyWrapper:

@@ -50,13 +50,30 @@ class Config:
     layers: tuple[Layer, ...]
 
     def __init__(self, layers: list[dict] | None = None) -> None:
-        init(self)
+        self.kb = init(self)
         self.layer_index = 0
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
 
     @property
+    def scroll_lock(self):
+        return self.kb.led_on(4)
+
+    def change_scroll_lock(self):
+        sl = 71
+        self.kb.press(sl)
+        self.kb.release(sl)
+
+    def layer_0(self):
+        if self.scroll_lock is True:
+            self.change_scroll_lock()
+
+    def layer_1(self):
+        if self.scroll_lock is False:
+            self.change_scroll_lock()
+
+    @property
     def layer(self):
-        return self.layers[self.layer_index]
+        return self.layers[int(self.scroll_lock]
 
     @classmethod
     def read(cls):
