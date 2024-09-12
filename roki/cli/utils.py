@@ -1,5 +1,4 @@
 import json
-import pathlib
 import subprocess
 
 
@@ -38,14 +37,19 @@ def run_command(cmd: str, shell=False):
         subprocess.call(cmd.split(), umask=0)
 
 
-def create_mount_point(device: str, path: pathlib.Path):
+def install_circuitpython_libs(path: str, file: str):
+    cmd = f"circup --path {path} install --auto-file {file}"
+    run_command(cmd)
+
+
+def create_mount_point(device: str, path: str):
     # options = "rw,nosuid,nodev,uid=1000,gid=1000,shortname=mixed,dmask=0077,utf8=1,showexec,flush,uhelper=udisks2"
     # cmd = f"sudo mount -o options={options} /dev/{device} {path}"
     cmd = f"sudo mount -o uid=1000,gid=1000 /dev/{device} {path}"
     run_command(cmd)
 
 
-def unmount(path: pathlib.Path):
+def unmount(path: str):
     run_command(f"sudo umount {path}")
 
 
@@ -62,3 +66,8 @@ def get_serial_device():
             )
         except StopIteration:
             ...
+
+
+def debug_code(file: str):
+    if SERIAL_DEVICE := get_serial_device():
+        run_command(f"ampy -p {SERIAL_DEVICE} run {file}")

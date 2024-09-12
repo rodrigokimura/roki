@@ -1,21 +1,22 @@
-import pathlib
-import toml
-
 import typer
 
 from roki.cli.file_management import (
+    copy_file,
     copy_tree,
     create_empty_file,
     create_tree,
+    delete_file,
     delete_files_by_extension,
 )
 from roki.cli.utils import (
     create_mount_point,
+    debug_code,
     get_devices,
-    get_serial_device,
-    run_command,
+    install_circuitpython_libs,
     unmount,
 )
+
+firmware_relative_tree = "roki/firmware"
 
 app = typer.Typer(name="roki")
 
@@ -40,54 +41,47 @@ def list_devices(left: bool = True):
     print(f"Mounting device {chosen}")
 
     mountpoint_path = "/run/media/roki"
-    print(f"Creating directory for mountpoint: {mountpoint_path}")
-    p = pathlib.Path(mountpoint_path)
-    run_command(f"sudo mkdir {mountpoint_path} -p")
 
-    create_mount_point(chosen, p)
+    print(f"Creating directory for mountpoint: {mountpoint_path}")
+    create_tree(mountpoint_path)
+
+    create_mount_point(chosen, mountpoint_path)
 
     print("Copying files...")
-    firmware_relative_tree = "roki_firmware"
     firmware_location = f"{mountpoint_path}/{firmware_relative_tree}"
     delete_files_by_extension(["py", "json", "toml"], mountpoint_path)
     create_tree(firmware_location)
     copy_tree(firmware_relative_tree, firmware_location)
     create_empty_file(f"{mountpoint_path}/roki/__init__.py")
 
-    run_command(f"sudo rm {mountpoint_path}/roki/firmware/code.py -vf", shell=True)
-    run_command(f"sudo rm {mountpoint_path}/roki/firmware/config.json -vf", shell=True)
-    run_command(
-        f"sudo rm {mountpoint_path}/roki/firmware/settings.toml -vf", shell=True
-    )
-    run_command(
-        f"sudo cp roki/firmware/code.py {mountpoint_path}/code.py -vf", shell=True
-    )
-    run_command(
-        f"sudo cp roki/firmware/config.json {mountpoint_path}/config.json -vf",
-        shell=True,
-    )
+    root_files = [
+        "code.py",
+        "config.json",
+    ]
+    for file in root_files:
+        delete_file(f"{firmware_location}/{file}")
+        copy_file(f"{firmware_relative_tree}/{file}", mountpoint_path)
 
-    with open("roki/firmware/settings.toml", mode="w") as f:
-        toml.dump({"IS_LEFT_SIDE": int(left), "ENABLE_SERIAL": 0}, f)
-    run_command(
-        f"sudo cp roki/firmware/settings.toml {mountpoint_path}/settings.toml -vf",
-        shell=True,
-    )
+    settings = "settings.toml"
+    with open(f"{firmware_relative_tree}/{settings}", mode="w") as f:
+        f.write(f"IS_LEFT_SIDE={int(left)}")
+        copy_file(f"{firmware_relative_tree}/{settings}", mountpoint_path)
+        delete_file(f"{firmware_relative_tree}/{settings}")
 
     print("Installing libs...")
-
-    cmd = f"circup --path {mountpoint_path} install --auto"
-    run_command(cmd)
-    cmd = f"circup --path {mountpoint_path} install --auto-file {mountpoint_path}/roki/firmware/keys.py"
-    run_command(cmd)
+    install_circuitpython_libs(mountpoint_path, f"{mountpoint_path}/code.py")
+    python_firmware_files = [
+        "keys.py",
+    ]
+    for file in python_firmware_files:
+        install_circuitpython_libs(mountpoint_path, f"{firmware_location}/{file}")
 
     print("Unmounting...")
-    unmount(p)
+    unmount(mountpoint_path)
 
 
 @app.command()
 def run():
     """Run code.py"""
 
-    if SERIAL_DEVICE := get_serial_device():
-        run_command(f"ampy -p {SERIAL_DEVICE} run roki/firmware/code.py")
+    debug_code(f"{firmware_relative_tree}/code.py")
