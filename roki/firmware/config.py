@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 
 from roki.firmware.keys import KeyWrapper, init
 
@@ -56,11 +57,16 @@ class Config:
 
     @property
     def scroll_lock(self):
-        return self.kb.led_on(4)
+        try:
+            return self.kb.led_on(4)
+        except AttributeError as e:
+            print(e)
+            return False
 
     def change_scroll_lock(self):
         sl = 71
         self.kb.press(sl)
+        time.sleep(0.09)
         self.kb.release(sl)
 
     def layer_0(self):
@@ -73,7 +79,7 @@ class Config:
 
     @property
     def layer(self):
-        return self.layers[int(self.scroll_lock]
+        return self.layers[int(self.scroll_lock)]
 
     @classmethod
     def read(cls):
