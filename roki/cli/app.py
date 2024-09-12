@@ -3,6 +3,12 @@ import toml
 
 import typer
 
+from roki.cli.file_management import (
+    copy_tree,
+    create_empty_file,
+    create_tree,
+    delete_files_by_extension,
+)
 from roki.cli.utils import (
     create_mount_point,
     get_devices,
@@ -39,15 +45,15 @@ def list_devices(left: bool = True):
     run_command(f"sudo mkdir {mountpoint_path} -p")
 
     create_mount_point(chosen, p)
+
     print("Copying files...")
-    run_command(f"sudo rm {mountpoint_path}/*.py -vf", shell=True)
-    run_command(f"sudo rm {mountpoint_path}/*.json -vf", shell=True)
-    run_command(f"sudo rm {mountpoint_path}/*.toml -vf", shell=True)
-    run_command(f"sudo mkdir {mountpoint_path}/roki/firmware -p", shell=True)
-    run_command(
-        f"sudo cp roki/firmware/* {mountpoint_path}/roki/firmware/ -rpvf", shell=True
-    )
-    run_command(f"sudo touch {mountpoint_path}/roki/__init__.py", shell=True)
+    firmware_relative_tree = "roki_firmware"
+    firmware_location = f"{mountpoint_path}/{firmware_relative_tree}"
+    delete_files_by_extension(["py", "json", "toml"], mountpoint_path)
+    create_tree(firmware_location)
+    copy_tree(firmware_relative_tree, firmware_location)
+    create_empty_file(f"{mountpoint_path}/roki/__init__.py")
+
     run_command(f"sudo rm {mountpoint_path}/roki/firmware/code.py -vf", shell=True)
     run_command(f"sudo rm {mountpoint_path}/roki/firmware/config.json -vf", shell=True)
     run_command(
