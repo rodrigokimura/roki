@@ -33,8 +33,10 @@ def list_devices(left: bool = True):
     if len(options) > 1:
         index = typer.prompt("Select a number")
         chosen = options.get(index)
-    else:
+    elif len(options) == 1:
         chosen = devices[0]
+    else:
+        chosen = None
     if not chosen:
         raise typer.Abort()
 
