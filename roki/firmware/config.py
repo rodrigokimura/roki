@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import time
 
 from roki.firmware.keys import KeyWrapper, init
 
@@ -59,36 +58,14 @@ class Config:
     is_left_side: bool
 
     def __init__(self, layers: list[dict] | None = None) -> None:
-        self.kb = init(self)
+        init(self)
         self.layer_index = 0
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
-        self.is_left_side = bool(os.getenv("IS_LEFT_SIDE", True))
-
-    @property
-    def scroll_lock(self):
-        try:
-            return self.kb.led_on(4)
-        except AttributeError as e:
-            print(e)
-            return False
-
-    def change_scroll_lock(self):
-        sl = 71
-        self.kb.press(sl)
-        time.sleep(0.09)
-        self.kb.release(sl)
-
-    def layer_0(self):
-        if self.scroll_lock is True:
-            self.change_scroll_lock()
-
-    def layer_1(self):
-        if self.scroll_lock is False:
-            self.change_scroll_lock()
+        self.is_left_side = bool(os.getenv("IS_LEFT_SIDE", False))
 
     @property
     def layer(self):
-        return self.layers[int(self.scroll_lock)]
+        return self.layers[self.layer_index]
 
     @classmethod
     def read(cls):

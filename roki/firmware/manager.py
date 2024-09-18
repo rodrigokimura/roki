@@ -18,19 +18,21 @@ class Manager:
 
     def on_press(self, command: Command) -> None:
         if command.press_or_hold:
-            if command.index == 0:
-                self.config.layer_0()
-            else:
-                self.config.layer_1()
+            if command.index != self.config.layer_index:
+                self._prev = self.config.layer_index
+                self.config.layer_index = command.index
         else:
-            self.config.change_scroll_lock()
+            if command.type_ == "inc":
+                index = self.config.layer_index + 1
+                max_layer = len(self.config.layers) - 1
+                self.config.layer_index = min(index, max_layer)
+            elif command.type_ == "dec":
+                index = self.config.layer_index - 1
+                self.config.layer_index = max(index, 0)
 
     def on_release(self, command: Command) -> None:
         if command.type_ == "hold":
-            if command.index == 0:
-                self.config.layer_1()
-            else:
-                self.config.layer_0()
+            self.config.layer_index = self._prev
 
 
 class Commands:
