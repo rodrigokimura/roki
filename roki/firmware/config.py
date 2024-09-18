@@ -30,6 +30,7 @@ class Layer:
     name: str
     color: tuple[int, int, int]
     primary_keys: tuple[tuple[KeyWrapper, ...], ...]
+    secondary_keys: tuple[tuple[KeyWrapper, ...], ...]
 
     @classmethod
     def from_dict(cls, data: dict) -> Layer:
@@ -42,6 +43,12 @@ class Layer:
             tuple(reversed([KeyWrapper(k) for k in row]))
             for row in data.get(
                 "primary_keys" if is_left_side else "secondary_keys", (("",),)
+            )
+        )
+        i.secondary_keys = tuple(
+            tuple(reversed([KeyWrapper(k) for k in row]))
+            for row in data.get(
+                "secondary_keys" if is_left_side else "primary_keys", (("",),)
             )
         )
         return i

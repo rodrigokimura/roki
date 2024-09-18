@@ -8,6 +8,7 @@ from keypad import KeyMatrix
 from roki.firmware.config import Config
 from roki.firmware.keys import HID
 from roki.firmware.service import RokiService
+from roki.firmware.utils import diff_bitmaps, to_bytes
 
 ROWS = ["P0_24", "P1_00", "P0_11", "P1_04", "P1_06"]
 COLS = ["P0_09", "P0_10", "P1_11", "P1_13", "P1_15", "P0_02"]
@@ -34,10 +35,11 @@ def main():
         run_as_peripheral(key_matrix, config)
 
 
-def run_as_peripheral(key_matrix: KeyMatrix, config: Config):
+def run_as_peripheral(key_matrix: KeyMatrix, _: Config):
     ble = adafruit_ble.BLERadio()
     service = RokiService()
     advertisement = ProvideServicesAdvertisement(service)
+    matrix_buffer = [[False] * len(COLS) for _ in ROWS]
 
     while True:
         print("Advertise Roki peripheral...")
@@ -51,9 +53,11 @@ def run_as_peripheral(key_matrix: KeyMatrix, config: Config):
         while ble.connected:
             if event := key_matrix.events.get():
                 row, col = get_coords(event.key_number, len(COLS))
-                service.row = row
-                service.column = col
-                service.state = int(event.pressed)
+
+                matrix_buffer[row][col] = event.pressed
+
+                service.write(to_bytes(matrix_buffer))
+
                 print("Service updated.")
 
 
@@ -69,7 +73,10 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
     scan_response = Advertisement()
     scan_response.complete_name = "Roki"
 
-    per_conn: adafruit_ble.BLEConnection | None = None
+    curr_bitmap = bytearray(len(ROWS))
+    last_bitmap = bytearray(len(ROWS))
+
+    peripheral_conn: adafruit_ble.BLEConnection | None = None
 
     ble = adafruit_ble.BLERadio()
     ble.name = "Roki"
@@ -79,11 +86,11 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
             if conn:
                 conn.disconnect()
 
-    if not per_conn:
+    if not peripheral_conn:
         print("Scanning for peripheral keyboard side...")
         for adv in ble.start_scan(ProvideServicesAdvertisement):
             if RokiService in adv.services:  # type: ignore
-                per_conn = ble.connect(adv)
+                peripheral_conn = ble.connect(adv)
                 print("Connected")
                 break
         ble.stop_scan()
@@ -101,15 +108,26 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
                 row, col = get_coords(event.key_number, len(COLS))
 
                 key = config.layer.primary_keys[row][col]
-                print(key.key_names)
 
                 if event.pressed:
                     key.press()
                 else:
                     key.release()
-            if per_conn and per_conn.connected:
-                s: RokiService = per_conn[RokiService]  # type: ignore
-                print(s.row, s.column)
+
+            if peripheral_conn and peripheral_conn.connected:
+                service: RokiService = peripheral_conn[RokiService]  # type: ignore
+
+                service.readinto(curr_bitmap)
+
+                for (row, col), pressed in diff_bitmaps(last_bitmap, curr_bitmap):
+                    key = config.layer.secondary_keys[row][col]
+
+                    if pressed:
+                        key.press()
+                    else:
+                        key.release()
+
+                last_bitmap[:] = curr_bitmap
 
         ble.start_advertising(advertisement)
 

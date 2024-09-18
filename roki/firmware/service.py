@@ -1,33 +1,58 @@
-from adafruit_ble.characteristics.int import IntCharacteristic
+import _bleio
+from adafruit_ble.attributes import Attribute
+from adafruit_ble.characteristics import Characteristic, ComplexCharacteristic
 from adafruit_ble.services import Service
 from adafruit_ble.uuid import VendorUUID
 
-
-class RowCharacteristic(IntCharacteristic):
-    def __init__(self, *, min_value: int = 0, max_value: int = 4, **kwargs) -> None:
-        super().__init__("<i", min_value, max_value, **kwargs)
+BUFFER_SIZE = 5
 
 
-class ColumnCharacteristic(IntCharacteristic):
-    def __init__(self, *, min_value: int = 0, max_value: int = 5, **kwargs) -> None:
-        super().__init__("<i", min_value, max_value, **kwargs)
+class PacketBufferUUID(VendorUUID):
+    def __init__(self, uuid16):
+        uuid128 = bytearray("reffuBtekcaP".encode("utf-8") + b"\x00\x00\xaf\xad")
+        uuid128[-3] = uuid16 >> 8
+        uuid128[-4] = uuid16 & 0xFF
+        super().__init__(uuid128)
 
 
-class StateCharacteristic(IntCharacteristic):
-    def __init__(self, *, min_value: int = 0, max_value: int = 1, **kwargs) -> None:
-        super().__init__("<i", min_value, max_value, **kwargs)
+class PacketBufferCharacteristic(ComplexCharacteristic):
+    def __init__(
+        self,
+        *,
+        uuid=None,
+        buffer_size=4,
+        properties=Characteristic.WRITE_NO_RESPONSE
+        | Characteristic.NOTIFY
+        | Characteristic.READ,
+        read_perm=Attribute.OPEN,
+        write_perm=Attribute.OPEN,
+    ):
+        self.buffer_size = buffer_size
+        super().__init__(
+            uuid=uuid,
+            properties=properties,
+            read_perm=read_perm,
+            write_perm=write_perm,
+            max_length=BUFFER_SIZE,
+            fixed_length=False,
+        )
+
+    def bind(self, service):
+        bound_characteristic = super().bind(service)
+        return _bleio.PacketBuffer(
+            bound_characteristic,
+            buffer_size=self.buffer_size,
+            max_packet_size=BUFFER_SIZE,
+        )
 
 
 class RokiService(Service):
-    uuid = VendorUUID("d0a37544-a8d9-462c-950a-43f103748eb4")
-    row = RowCharacteristic(
-        uuid=VendorUUID("2c305b04-3ef7-4771-aa1a-3130d352f895"),
-    )
-    column = ColumnCharacteristic(
-        uuid=VendorUUID("0a13e4a8-d291-4edf-8ac8-ea72a1395443")
-    )
-    state = StateCharacteristic(uuid=VendorUUID("00596aeb-e3c5-4e50-9d60-634888ea1d77"))
+    uuid = PacketBufferUUID(0x0001)
 
-    def __init__(self, service=None) -> None:
-        super().__init__(service=service)
-        self.connectable = True
+    packets = PacketBufferCharacteristic(uuid=PacketBufferUUID(0x0101))
+
+    def readinto(self, buf):
+        return self.packets.readinto(buf)
+
+    def write(self, buf, *, header=None):
+        return self.packets.write(buf, header=header)
