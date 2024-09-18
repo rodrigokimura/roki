@@ -30,6 +30,7 @@ class Layer:
     name: str
     color: tuple[int, int, int]
     primary_keys: tuple[tuple[KeyWrapper, ...], ...]
+    secondary_keys: tuple[tuple[KeyWrapper, ...], ...]
 
     @classmethod
     def from_dict(cls, data: dict) -> Layer:
@@ -44,16 +45,24 @@ class Layer:
                 "primary_keys" if is_left_side else "secondary_keys", (("",),)
             )
         )
+        i.secondary_keys = tuple(
+            tuple(reversed([KeyWrapper(k) for k in row]))
+            for row in data.get(
+                "secondary_keys" if is_left_side else "primary_keys", (("",),)
+            )
+        )
         return i
 
 
 class Config:
     layers: tuple[Layer, ...]
+    is_left_side: bool
 
     def __init__(self, layers: list[dict] | None = None) -> None:
         self.kb = init(self)
         self.layer_index = 0
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
+        self.is_left_side = bool(os.getenv("IS_LEFT_SIDE", True))
 
     @property
     def scroll_lock(self):

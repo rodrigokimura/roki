@@ -144,7 +144,6 @@ class KeyWrapper:
         else:
             keys = [key.upper() for key in keys]
 
-        self.key_names = keys
         self.params = tuple(
             (sender, key_container.get(key))
             for sender, key_container in sender_map.items()
