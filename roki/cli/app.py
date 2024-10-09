@@ -67,8 +67,8 @@ def list_devices(left: bool = True):
     settings = "settings.toml"
     with open(f"{firmware_relative_tree}/{settings}", mode="w") as f:
         f.write(f"IS_LEFT_SIDE={int(left)}")
-        copy_file(f"{firmware_relative_tree}/{settings}", mountpoint_path)
-        delete_file(f"{firmware_relative_tree}/{settings}")
+    copy_file(f"{firmware_relative_tree}/{settings}", mountpoint_path)
+    delete_file(f"{firmware_relative_tree}/{settings}")
 
     print("Installing libs...")
     install_circuitpython_libs(mountpoint_path, f"{mountpoint_path}/code.py")
