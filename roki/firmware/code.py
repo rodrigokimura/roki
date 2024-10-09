@@ -14,7 +14,7 @@ ROWS = ["P0_24", "P1_00", "P0_11", "P1_04", "P1_06"]
 COLS = ["P0_09", "P0_10", "P1_11", "P1_13", "P1_15", "P0_02"]
 COLUMNS_TO_ANODES = False
 INTERVAL = 0.01
-MAX_EVENTS = 30
+MAX_EVENTS = 5
 
 
 def main():
@@ -40,6 +40,8 @@ def run_as_peripheral(key_matrix: KeyMatrix, _: Config):
     service = RokiService()
     advertisement = ProvideServicesAdvertisement(service)
     matrix_buffer = [[False] * len(COLS) for _ in ROWS]
+
+    disconnect(ble)
 
     while True:
         print("Advertise Roki peripheral...")
@@ -76,24 +78,12 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
     curr_bitmap = bytearray(len(ROWS))
     last_bitmap = bytearray(len(ROWS))
 
-    peripheral_conn: adafruit_ble.BLEConnection | None = None
-
     ble = adafruit_ble.BLERadio()
     ble.name = "Roki"
-    if ble.connected:
-        print("already connected")
-        for conn in ble.connections:
-            if conn:
-                conn.disconnect()
 
-    if not peripheral_conn:
-        print("Scanning for peripheral keyboard side...")
-        for adv in ble.start_scan(ProvideServicesAdvertisement):
-            if RokiService in adv.services:  # type: ignore
-                peripheral_conn = ble.connect(adv)
-                print("Connected")
-                break
-        ble.stop_scan()
+    disconnect(ble)
+
+    peripheral_conn = connect_to_peripheral_side(ble)
 
     print("advertising")
     ble.start_advertising(advertisement, scan_response)
@@ -114,7 +104,7 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
                 else:
                     key.release()
 
-            if peripheral_conn and peripheral_conn.connected:
+            if peripheral_conn.connected:
                 service: RokiService = peripheral_conn[RokiService]  # type: ignore
 
                 service.readinto(curr_bitmap)
@@ -128,6 +118,8 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
                         key.release()
 
                 last_bitmap[:] = curr_bitmap
+            else:
+                peripheral_conn = connect_to_peripheral_side(ble)
 
         ble.start_advertising(advertisement)
 
@@ -136,6 +128,29 @@ def get_coords(i: int, col_count: int = 6):
     c = i % col_count
     r = i // col_count
     return r, c
+
+
+def disconnect(ble: adafruit_ble.BLERadio):
+    if ble.connected:
+        print("already connected")
+        for conn in ble.connections:
+            if conn:
+                conn.disconnect()
+
+
+def connect_to_peripheral_side(
+    ble: adafruit_ble.BLERadio,
+) -> adafruit_ble.BLEConnection:
+    peripheral_conn: adafruit_ble.BLEConnection | None = None
+    while peripheral_conn is None:
+        print("Scanning for peripheral keyboard side...")
+        for adv in ble.start_scan(ProvideServicesAdvertisement):
+            if RokiService in adv.services:  # type: ignore
+                peripheral_conn = ble.connect(adv)
+                print("Connected")
+                break
+        ble.stop_scan()
+    return peripheral_conn
 
 
 if __name__ == "__main__":
