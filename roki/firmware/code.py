@@ -15,6 +15,7 @@ COLS = ["P0_09", "P0_10", "P1_11", "P1_13", "P1_15", "P0_02"]
 COLUMNS_TO_ANODES = False
 INTERVAL = 0.01
 MAX_EVENTS = 5
+CONNECTION_INTERVAL = 7.5
 
 
 def main():
@@ -147,6 +148,7 @@ def connect_to_peripheral_side(
         for adv in ble.start_scan(ProvideServicesAdvertisement):
             if RokiService in adv.services:  # type: ignore
                 peripheral_conn = ble.connect(adv)
+                peripheral_conn.connection_interval = CONNECTION_INTERVAL
                 print("Connected")
                 break
         ble.stop_scan()
