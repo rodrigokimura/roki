@@ -21,8 +21,8 @@ class Roki:
         max_events: int = 5,
         connection_interval: float = 7.5,
     ):
-        self.rows = rows
-        self.cols = cols
+        self.row_count = len(rows)
+        self.col_count = len(cols)
         self.connection_interval = connection_interval
         self.key_matrix = KeyMatrix(
             row_pins=tuple(getattr(board, pin) for pin in rows),
@@ -53,8 +53,8 @@ class Roki:
         scan_response = Advertisement()
         scan_response.complete_name = "Roki"
 
-        curr_bitmap = bytearray(len(self.rows))
-        last_bitmap = bytearray(len(self.rows))
+        curr_bitmap = bytearray(self.row_count)
+        last_bitmap = bytearray(self.row_count)
 
         ble = adafruit_ble.BLERadio()
         ble.name = "Roki"
@@ -73,7 +73,7 @@ class Roki:
             while ble.connected:
                 event = self.key_matrix.events.get()
                 if event:
-                    row, col = get_coords(event.key_number, len(self.cols))
+                    row, col = get_coords(event.key_number, self.col_count)
 
                     key = self.config.layer.primary_keys[row][col]
 
@@ -107,7 +107,7 @@ class Roki:
         ble = adafruit_ble.BLERadio()
         service = RokiService()
         advertisement = ProvideServicesAdvertisement(service)
-        matrix_buffer = [[False] * len(self.cols) for _ in self.rows]
+        matrix_buffer = [[False] * self.col_count for _ in range(self.row_count)]
 
         disconnect(ble)
 
@@ -122,7 +122,7 @@ class Roki:
             print("Connected")
             while ble.connected:
                 if event := self.key_matrix.events.get():
-                    row, col = get_coords(event.key_number, len(self.cols))
+                    row, col = get_coords(event.key_number, self.col_count)
 
                     matrix_buffer[row][col] = event.pressed
 
