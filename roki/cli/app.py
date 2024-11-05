@@ -71,9 +71,9 @@ def list_devices(left: bool = True):
     delete_file(f"{firmware_relative_tree}/{settings}")
 
     print("Installing libs...")
-    install_circuitpython_libs(mountpoint_path, f"{mountpoint_path}/code.py")
     python_firmware_files = [
         "keys.py",
+        "kb.py",
     ]
     for file in python_firmware_files:
         install_circuitpython_libs(mountpoint_path, f"{firmware_location}/{file}")
