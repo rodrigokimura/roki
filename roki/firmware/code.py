@@ -1,5 +1,6 @@
 import adafruit_ble
 import board
+import rotaryio
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
@@ -12,10 +13,13 @@ from roki.firmware.utils import diff_bitmaps, to_bytes
 
 ROWS = ["P0_24", "P1_00", "P0_11", "P1_04", "P1_06"]
 COLS = ["P0_09", "P0_10", "P1_11", "P1_13", "P1_15", "P0_02"]
+ROTARY_ENCODER = ("P0_17", "P0_20")
 COLUMNS_TO_ANODES = False
 INTERVAL = 0.01
 MAX_EVENTS = 5
 CONNECTION_INTERVAL = 7.5
+
+encoder = rotaryio.IncrementalEncoder(*(getattr(board, pin) for pin in ROTARY_ENCODER))
 
 
 def main():
@@ -90,6 +94,7 @@ def run_as_central(key_matrix: KeyMatrix, config: Config):
     ble.start_advertising(advertisement, scan_response)
 
     while True:
+        print(encoder.position)
         while not ble.connected:
             pass
 
