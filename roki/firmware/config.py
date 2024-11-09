@@ -22,14 +22,16 @@ def parse_color(
     if isinstance(color, (list, tuple)):
         return int(color[0]), int(color[1]), int(color[2])
 
-    raise NotImplementedError
-
 
 class Layer:
     name: str
     color: tuple[int, int, int]
     primary_keys: tuple[tuple[KeyWrapper, ...], ...]
     secondary_keys: tuple[tuple[KeyWrapper, ...], ...]
+    primary_encoder_cw: KeyWrapper
+    primary_encoder_ccw: KeyWrapper
+    secondary_encoder_cw: KeyWrapper
+    secondary_encoder_ccw: KeyWrapper
 
     @classmethod
     def from_dict(cls, data: dict) -> Layer:
@@ -44,12 +46,19 @@ class Layer:
                 "primary_keys" if is_left_side else "secondary_keys", (("",),)
             )
         )
+        cw, ccw = data.get("primary_encoder", ("", ""))
+        i.primary_encoder_cw = KeyWrapper(cw)
+        i.primary_encoder_ccw = KeyWrapper(ccw)
+
         i.secondary_keys = tuple(
             tuple(reversed([KeyWrapper(k) for k in row]))
             for row in data.get(
                 "secondary_keys" if is_left_side else "primary_keys", (("",),)
             )
         )
+        cw, ccw = data.get("primary_encoder", ("", ""))
+        i.secondary_encoder_cw = KeyWrapper(cw)
+        i.secondary_encoder_ccw = KeyWrapper(ccw)
         return i
 
 
