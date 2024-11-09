@@ -1,3 +1,29 @@
+class Debouncer:
+    def __init__(self, initial_value: int):
+        self.value = initial_value
+        self.last_value = initial_value
+
+    def update(self, value: int):
+        self.last_value = self.value
+        self.value = value
+
+    @property
+    def changed(self):
+        return self.last_value != self.value
+
+    @property
+    def rose(self):
+        return self.value > self.last_value
+
+    @property
+    def fell(self):
+        return self.value < self.last_value
+
+    @property
+    def diff(self):
+        return self.value - self.last_value
+
+
 def to_int(bools: list[bool]):
     return sum(b << i for i, b in enumerate(bools))
 
@@ -20,7 +46,7 @@ def get_coords(i: int, col_count: int = 6):
     return r, c
 
 
-def diff_bitmaps(a: bytearray, b: bytearray, byte_size=6):
+def diff_bitmaps(a: bytes | bytearray, b: bytes | bytearray, byte_size=6):
     for r, (x, y) in enumerate(zip(a, b)):
         for c in range(byte_size):
             if ((x >> c) & 1) != (value := ((y >> c) & 1)):
