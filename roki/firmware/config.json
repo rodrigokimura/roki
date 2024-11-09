@@ -4,10 +4,38 @@
       "name": "main",
       "color": "#3584e4",
       "primary_keys": [
-        ["ESCAPE", "ONE", "TWO", "THREE", "FOUR", "FIVE"],
-        ["TAB", "Q", "W", "E", "R", "T"],
-        ["LEFT_SHIFT", "A", "S", "D", "F", "G"],
-        ["LAYER_1_HOLD", "Z", "X", "C", "V", "B"],
+        [
+          "ESCAPE",
+          "ONE",
+          "TWO",
+          "THREE",
+          "FOUR",
+          "FIVE"
+        ],
+        [
+          "TAB",
+          "Q",
+          "W",
+          "E",
+          "R",
+          "T"
+        ],
+        [
+          "LEFT_SHIFT",
+          "A",
+          "S",
+          "D",
+          "F",
+          "G"
+        ],
+        [
+          "LAYER_1_HOLD",
+          "Z",
+          "X",
+          "C",
+          "V",
+          "B"
+        ],
         [
           "LEFT_CONTROL",
           "LEFT_GUI",
@@ -18,10 +46,38 @@
         ]
       ],
       "secondary_keys": [
-        ["SIX", "SEVEN", "EIGHT", "NINE", "ZERO", "ESCAPE"],
-        ["Y", "U", "I", "O", "P", "GRAVE_ACCENT"],
-        ["H", "J", "K", "L", "FORWARD_SLASH", "RIGHT_SHIFT"],
-        ["N", "M", "COMMA", "PERIOD", "KEYPAD_BACKSLASH", "LAYER_1_HOLD"],
+        [
+          "SIX",
+          "SEVEN",
+          "EIGHT",
+          "NINE",
+          "ZERO",
+          "ESCAPE"
+        ],
+        [
+          "Y",
+          "U",
+          "I",
+          "O",
+          "P",
+          "GRAVE_ACCENT"
+        ],
+        [
+          "H",
+          "J",
+          "K",
+          "L",
+          "FORWARD_SLASH",
+          "RIGHT_SHIFT"
+        ],
+        [
+          "N",
+          "M",
+          "COMMA",
+          "PERIOD",
+          "KEYPAD_BACKSLASH",
+          "LAYER_1_HOLD"
+        ],
         [
           "ESCAPE",
           "BACKSPACE",
@@ -30,21 +86,78 @@
           "RIGHT_GUI",
           "RIGHT_CONTROL"
         ]
+      ],
+      "primary_encoder": [
+        "VOLUME_INCREMENT",
+        "VOLUME_DECREMENT"
+      ],
+      "secondary_encoder": [
+        "UP_ARROW",
+        "DOWN_ARROW"
       ]
     },
     {
       "name": "secondary",
       "color": "#e01b24",
       "primary_keys": [
-        ["F1", "F2", "F3", "F4", "F5", "F6"],
-        [null, null, null, null, null, null],
-        ["LEFT_SHIFT", "QUOTE", null, null, null, null],
-        ["LAYER_1_HOLD", null, null, "SEMICOLON", null, null],
-        ["LEFT_CONTROL", "LEFT_GUI", "LEFT_ALT", null, null, null]
+        [
+          "F1",
+          "F2",
+          "F3",
+          "F4",
+          "F5",
+          "F6"
+        ],
+        [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "LEFT_SHIFT",
+          "QUOTE",
+          null,
+          null,
+          null,
+          null
+        ],
+        [
+          "LAYER_1_HOLD",
+          null,
+          null,
+          "SEMICOLON",
+          null,
+          null
+        ],
+        [
+          "LEFT_CONTROL",
+          "LEFT_GUI",
+          "LEFT_ALT",
+          null,
+          null,
+          null
+        ]
       ],
       "secondary_keys": [
-        ["F7", "F8", "F9", "F10", "F11", "F12"],
-        ["MINUS", "EQUALS", null, null, "PLAY_PAUSE", "VOLUME_INCREMENT"],
+        [
+          "F7",
+          "F8",
+          "F9",
+          "F10",
+          "F11",
+          "F12"
+        ],
+        [
+          "MINUS",
+          "EQUALS",
+          null,
+          null,
+          "PLAY_PAUSE",
+          "VOLUME_INCREMENT"
+        ],
         [
           "LEFT_ARROW",
           "DOWN_ARROW",
@@ -53,8 +166,22 @@
           null,
           "VOLUME_DECREMENT"
         ],
-        [null, null, "LEFT_BRACKET", null, null, "LAYER_1_HOLD"],
-        [null, "DELETE", null, "RIGHT_ALT", "RIGHT_GUI", "RIGHT_CONTROL"]
+        [
+          null,
+          null,
+          "LEFT_BRACKET",
+          null,
+          null,
+          "LAYER_1_HOLD"
+        ],
+        [
+          null,
+          "DELETE",
+          null,
+          "RIGHT_ALT",
+          "RIGHT_GUI",
+          "RIGHT_CONTROL"
+        ]
       ]
     }
   ]

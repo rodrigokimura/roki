@@ -4,7 +4,12 @@ from adafruit_ble.characteristics import Characteristic, ComplexCharacteristic
 from adafruit_ble.services import Service
 from adafruit_ble.uuid import VendorUUID
 
-BUFFER_SIZE = 5
+from roki.firmware.keys import TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: no cover
+    from circuitpython_typing import ReadableBuffer, WriteableBuffer
+
+BUFFER_SIZE = 7
 
 
 class PacketBufferUUID(VendorUUID):
@@ -20,7 +25,7 @@ class PacketBufferCharacteristic(ComplexCharacteristic):
         self,
         *,
         uuid=None,
-        buffer_size=4,
+        buffer_size=7,
         properties=Characteristic.WRITE_NO_RESPONSE
         | Characteristic.NOTIFY
         | Characteristic.READ,
@@ -37,7 +42,7 @@ class PacketBufferCharacteristic(ComplexCharacteristic):
             fixed_length=False,
         )
 
-    def bind(self, service):
+    def bind(self, service: Service):  # type: ignore
         bound_characteristic = super().bind(service)
         return _bleio.PacketBuffer(
             bound_characteristic,
@@ -51,8 +56,8 @@ class RokiService(Service):
 
     packets = PacketBufferCharacteristic(uuid=PacketBufferUUID(0x0101))
 
-    def readinto(self, buf):
-        return self.packets.readinto(buf)
+    def readinto(self, buf: WriteableBuffer) -> int:
+        return self.packets.readinto(buf)  # type: ignore
 
-    def write(self, buf, *, header=None):
-        return self.packets.write(buf, header=header)
+    def write(self, buf: ReadableBuffer, *, header: bytes | None = None) -> int:
+        return self.packets.write(buf, header=header)  # type: ignore
