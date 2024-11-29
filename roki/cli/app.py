@@ -1,3 +1,5 @@
+from http.server import HTTPServer
+
 import typer
 
 from roki.cli.file_management import (
@@ -8,6 +10,7 @@ from roki.cli.file_management import (
     delete_file,
     delete_files_by_extension,
 )
+from roki.cli.html_generator import Generator, WebHandler
 from roki.cli.utils import (
     create_mount_point,
     debug_code,
@@ -87,3 +90,18 @@ def run():
     """Run code.py"""
 
     debug_code(f"{firmware_relative_tree}/code.py")
+
+
+@app.command()
+def serve():
+    """Run configuration server"""
+
+    server = HTTPServer(("0.0.0.0", 8000), WebHandler)
+    server.serve_forever()
+
+
+@app.command()
+def generate():
+    """Generate html file"""
+
+    Generator().generate_html()

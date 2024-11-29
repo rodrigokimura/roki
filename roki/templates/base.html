@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>RokiX Configuration</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
+    {% include "_javascript.html" %}
+    <script>
+      $(document).ready(init);
+    </script>
+  </head>
+  <body>
+    <style>
+    {% include "_style.css" %}
+    </style>
+    <div class="ui main container">
+      <div class="ui basic fitted inverted segment frame">
+        <div class="ui top attached inverted tabular menu layers"></div>
+      </div>
+      <div
+        class="ui inverted basic green icon button"
+        onclick="addLayer()"
+        title="Add layer"
+      >
+        <i class="add icon"></i>
+      </div>
+      <div
+        class="ui inverted right floated basic primary icon button"
+        onclick="exportConfig()"
+        title="Download config file"
+      >
+        <i class="download icon"></i>
+      </div>
+      <input
+        type="file"
+        id="invisibleupload1"
+        class="ui invisible file input"
+      />
+      <label
+        for="invisibleupload1"
+        class="ui inverted right floated basic icon button"
+        title="Import config file"
+      >
+        <i class="upload icon"></i>
+      </label>
+    </div>
+    <div class="ui basic modal" id="key-selector">
+      <i class="close icon"></i>
+      <div class="header">Key selection</div>
+      <div class="content">
+        <div class="ui fluid inverted search multiple selection very long dropdown">
+          <i class="dropdown icon"></i>
+          <div class="default text">Select key</div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
