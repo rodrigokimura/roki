@@ -1,0 +1,59 @@
+body {
+  height: 80vh;
+  background-color: #1b1c1d !important;
+}
+
+.inverted.input input {
+  background-color: #1b1c1d !important;
+  color: #fff !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.inverted.input input:hover {
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.container {
+  margin-top: 3em;
+}
+
+.keyboard {
+  margin-top: 3em;
+  position: relative;
+}
+
+.side {
+  position: relative;
+}
+
+.key,
+.mc,
+.led {
+  position: absolute;
+  width: 3em;
+  height: 3em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center !important;
+  padding: 0 0.2em !important;
+  margin: none !important;
+}
+
+.mc {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2) inset;
+  border-radius: 0.2rem;
+}
+
+.modal {
+  width: 600px !important;
+}
+
+.hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
