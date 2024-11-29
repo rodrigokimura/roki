@@ -10,14 +10,7 @@ class Configuration {
     const UUID = crypto.randomUUID();
     this.layers.push({ uuid: UUID, name: name, color: "#cacbcd" });
     $(".layers").append(`<a class="item" data-tab="${UUID}">${name}</a>`);
-    $(".frame").append(`
-      <div class="ui keyboard inverted bottom attached tab segment" data-tab="${UUID}">
-        <div class="primary side"></div>
-        <div class="secondary side"></div>
-        <input type="color" class="hidden">
-        <div class="ui inverted basic red icon delete button" onclick="deleteLayer()" title="Delete layer"><i class="close icon"></i></div>
-        <div class="ui inverted basic yellow icon edit button" onclick="renameLayer()" title="Rename layer"><i class="edit icon"></i></div>
-      </div>`);
+    $(".frame").append(`<div class="ui keyboard inverted bottom attached tab segment" data-tab="${UUID}"><div class="primary side"></div><div class="secondary side"></div><input type="color" class="hidden"><div class="ui inverted basic red icon delete button" onclick="deleteLayer()" title="Delete layer"><i class="close icon"></i></div><div class="ui inverted basic yellow icon edit button" onclick="renameLayer()" title="Rename layer"><i class="edit icon"></i></div></div>`);
     $(`.menu .item[data-tab='${UUID}']`).tab();
     $(`.keyboard[data-tab='${UUID}'] input[type=color]`).change((e) => {
       let c = e.target.value;
