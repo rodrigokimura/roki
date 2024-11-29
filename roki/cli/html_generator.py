@@ -1,7 +1,7 @@
 import json
-import minify_html
 from http.server import BaseHTTPRequestHandler
 
+import minify_html
 from jinja2 import Environment, PackageLoader
 
 from roki.cli.config.keys import KEYS
@@ -30,7 +30,7 @@ class Generator:
         )
 
     def get_html(self):
-        keys = json.dumps([k.model_dump() for k in KEYS])
+        keys = json.dumps([k.model_dump() for k in KEYS], separators=(",", ":"))
         template = self.env.get_template("base.html")
         html = template.render(keys=keys)
 
@@ -39,8 +39,6 @@ class Generator:
                 html,
                 minify_js=True,
                 minify_css=True,
-                remove_processing_instructions=True,
-                remove_bangs=True,
             )
 
         return html
