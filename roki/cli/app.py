@@ -18,6 +18,7 @@ from roki.cli.utils import (
     install_circuitpython_libs,
     unmount,
 )
+from tui.app import Configurator
 
 firmware_relative_tree = "roki/firmware"
 
@@ -105,3 +106,12 @@ def generate():
     """Generate html file"""
 
     Generator().generate_html()
+
+
+@app.command()
+def config():
+    """Open configurator TUI"""
+
+    print("Opening configurator TUI")
+    app = Configurator()
+    app.run()
