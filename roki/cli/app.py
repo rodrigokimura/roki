@@ -1,4 +1,5 @@
 from http.server import HTTPServer
+from typing import Literal
 
 import typer
 
@@ -25,9 +26,15 @@ firmware_relative_tree = "roki/firmware"
 app = typer.Typer(name="roki")
 
 
-@app.command(name="list")
-def list_devices(left: bool = True):
-    """List available devices"""
+@app.command(name="u")
+@app.command(name="upload")
+def upload_code(side: str = typer.Option("r")):
+    """Upload code and libs to device"""
+
+    side = side.lower()
+    if side.lower() not in "rl":
+        print("Invalid option: side must be 'r' or 'l'")
+        raise typer.Abort()
 
     devices = get_devices()
     options = {n: dev for n, dev in enumerate(devices, start=1)}
@@ -70,7 +77,7 @@ def list_devices(left: bool = True):
 
     settings = "settings.toml"
     with open(f"{firmware_relative_tree}/{settings}", mode="w") as f:
-        f.write(f"IS_LEFT_SIDE={int(left)}")
+        f.write(f"IS_LEFT_SIDE={int(side == 'l')}")
     copy_file(f"{firmware_relative_tree}/{settings}", mountpoint_path)
     delete_file(f"{firmware_relative_tree}/{settings}")
 
@@ -81,6 +88,7 @@ def list_devices(left: bool = True):
     ]
     for file in python_firmware_files:
         install_circuitpython_libs(mountpoint_path, f"{firmware_location}/{file}")
+    install_circuitpython_libs(mountpoint_path, "code.py")
 
     print("Unmounting...")
     unmount(mountpoint_path)
