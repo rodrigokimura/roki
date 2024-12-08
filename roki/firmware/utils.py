@@ -1,3 +1,14 @@
+class Cycle:
+    def __init__(self, initial_value: int = 0, limit: int = 100) -> None:
+        self.value = initial_value
+        self.limit = limit
+
+    def increment(self):
+        self.value += 1
+        if self.value >= self.limit:
+            self.value = 0
+
+
 class Debouncer:
     def __init__(self, initial_value: int):
         self.value = initial_value

@@ -9,7 +9,7 @@ from keypad import KeyMatrix
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
 from roki.firmware.service import RokiService
-from roki.firmware.utils import Debouncer, diff_bitmaps, get_coords, to_bytes
+from roki.firmware.utils import Cycle, Debouncer, get_coords
 
 
 class Roki:
@@ -21,7 +21,7 @@ class Roki:
         encoder_pins: tuple[str, ...],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
-        interval: float = 0.01,
+        interval: float = 0.001,
         max_events: int = 5,
         connection_interval: float = 7.5,
     ):
@@ -66,7 +66,7 @@ class Roki:
         self.config = Config.read()
         self.ble = adafruit_ble.BLERadio()
 
-    def run(self):
+    async def run(self):
         pass
 
     def disconnect(self):
@@ -78,7 +78,7 @@ class Roki:
 
 
 class Primary(Roki):
-    def run(self):
+    async def run(self):
         DeviceInfoService(
             software_revision=adafruit_ble.__version__,
             manufacturer="Adafruit Industries",
@@ -90,10 +90,6 @@ class Primary(Roki):
         scan_response = Advertisement()
         scan_response.complete_name = "Roki"
 
-        self.secondary_encoder_ccw_bumps = Debouncer(0)
-        self.secondary_encoder_cw_bumps = Debouncer(0)
-        last_bitmap = bytearray(self.row_count)
-
         self.ble.name = "Roki"
 
         self.disconnect()
@@ -102,20 +98,33 @@ class Primary(Roki):
 
         print("advertising")
         self.ble.start_advertising(advertisement, scan_response)
+        self.buffer = bytearray(3)
+        self.current_counter = 0
 
         while True:
             while not self.ble.connected:
                 pass
 
             while self.ble.connected:
-                self.process_primary_keys()
-                self.process_primary_encoder()
+                await self.process_primary_keys()
+                await self.process_primary_encoder()
 
                 if self.peripheral_conn.connected:
-                    keys_state, encoder_state = self.get_secondary_state()
-                    self.process_secondary_encoder(*encoder_state)
-                    self.process_secondary_keys(last_bitmap, keys_state)
-                    print(".", end="")
+                    counter, message_id, payload = self.get_message()
+                    if self.current_counter != counter:
+                        self.current_counter = counter
+                        if message_id < 30:
+                            row, col = get_coords(message_id)
+                            key = self.config.layer.secondary_keys[row][col]
+                            self.process_key(key, bool(payload))
+                        elif message_id == 30:
+                            for _ in range(payload):
+                                self.config.layer.secondary_encoder_cw.press()
+                                self.config.layer.secondary_encoder_cw.release()
+                        elif message_id == 31:
+                            for _ in range(payload):
+                                self.config.layer.secondary_encoder_ccw.press()
+                                self.config.layer.secondary_encoder_ccw.release()
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
                         self.connection_interval
@@ -123,13 +132,12 @@ class Primary(Roki):
 
             self.ble.start_advertising(advertisement)
 
-    def get_secondary_state(self):
-        buffer = bytearray(self.row_count + 2)
+    def get_message(self):
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
-        service.readinto(buffer)
-        return buffer[: self.row_count], buffer[self.row_count :]
+        service.readinto(self.buffer)
+        return self.buffer[0], self.buffer[1], self.buffer[2]
 
-    def process_primary_encoder(self):
+    async def process_primary_encoder(self):
         self.encoder_position.update(self.encoder.position)
         if self.encoder_position.rose:
             for _ in range(self.encoder_position.diff):
@@ -140,37 +148,13 @@ class Primary(Roki):
                 self.config.layer.primary_encoder_ccw.press()
                 self.config.layer.primary_encoder_ccw.release()
 
-    def process_secondary_encoder(self, cw_bumps: int, ccw_bumps: int):
-        self.secondary_encoder_ccw_bumps.update(ccw_bumps)
-        self.secondary_encoder_cw_bumps.update(cw_bumps)
-        if (
-            self.secondary_encoder_ccw_bumps.changed
-            and self.secondary_encoder_ccw_bumps.value
-        ):
-            self.config.layer.secondary_encoder_cw.press()
-            self.config.layer.secondary_encoder_cw.release()
-        if (
-            self.secondary_encoder_cw_bumps.changed
-            and self.secondary_encoder_cw_bumps.value
-        ):
-            self.config.layer.secondary_encoder_ccw.press()
-            self.config.layer.secondary_encoder_ccw.release()
-
-    def process_primary_keys(self):
+    async def process_primary_keys(self):
         event = self.key_matrix.events.get()
         if event:
             row, col = get_coords(event.key_number, self.col_count)
 
             key = self.config.layer.primary_keys[row][col]
             self.process_key(key, event.pressed)
-
-    def process_secondary_keys(
-        self, last_bitmap: bytearray, curr_bitmap: bytes | bytearray
-    ):
-        for (row, col), pressed in diff_bitmaps(last_bitmap, curr_bitmap):
-            key = self.config.layer.secondary_keys[row][col]
-            self.process_key(key, pressed)
-        last_bitmap[:] = curr_bitmap
 
     def process_key(self, key: KeyWrapper, pressed: bool):
         if pressed:
@@ -197,12 +181,13 @@ class Primary(Roki):
 
 
 class Secondary(Roki):
-    def run(self):
+    async def run(self):
         self.service = RokiService()
         advertisement = ProvideServicesAdvertisement(self.service)
-        self.matrix_buffer = [[False] * self.col_count for _ in range(self.row_count)]
 
         self.disconnect()
+
+        self.counter = Cycle()
 
         while True:
             print("Advertise Roki peripheral...")
@@ -214,29 +199,26 @@ class Secondary(Roki):
 
             print("Connected")
             while self.ble.connected:
-                self.send_encoder_bumps()
+                await self.process_encoder()
+                await self.process_keys()
 
-                if event := self.key_matrix.events.get():
-                    row, col = get_coords(event.key_number, self.col_count)
-
-                    self.matrix_buffer[row][col] = event.pressed
-                    self.send_keys()
-
-                print("Service updated.")
-
-    def send_encoder_bumps(self):
+    async def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
         if self.encoder_position.rose:
-            self.service.write(
-                bytes(self.row_count) + bytes((self.encoder_position.diff, 0))
-            )
+            message_id = 30
+            payload = self.encoder_position.diff
+            await self.send_message(message_id, payload)
         elif self.encoder_position.fell:
-            self.service.write(
-                bytes(self.row_count) + bytes((0, -self.encoder_position.diff))
-            )
-        else:
-            self.service.write(bytes(self.row_count) + bytes((0, 0)))
+            message_id = 31
+            payload = -self.encoder_position.diff
+            await self.send_message(message_id, payload)
 
-    def send_keys(self):
-        keys_bytes = to_bytes(self.matrix_buffer)
-        self.service.write(keys_bytes + bytes((0, 0)))
+    async def process_keys(self):
+        if event := self.key_matrix.events.get():
+            message_id = event.key_number
+            payload = int(event.pressed)
+            await self.send_message(message_id, payload)
+
+    async def send_message(self, message_id: int, payload: int):
+        self.counter.increment()
+        self.service.write(bytes((self.counter.value, message_id, payload)))
