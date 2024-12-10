@@ -10,4 +10,4 @@ def generator():
 
 def test_generate_keys(generator: Generator):
     result = generator.get_html()
-    print(result)
+    assert result
