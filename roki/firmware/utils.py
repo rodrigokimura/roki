@@ -62,3 +62,7 @@ def diff_bitmaps(a: bytes | bytearray, b: bytes | bytearray, byte_size=6):
         for c in range(byte_size):
             if ((x >> c) & 1) != (value := ((y >> c) & 1)):
                 yield (r, c), bool(value)
+
+
+def convert_analog_resolution(value: int):
+    return round(value / 4096 - 8)  # convert to [-8; 8]

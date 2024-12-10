@@ -4,12 +4,13 @@ import rotaryio  # type: ignore
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
+from analogio import AnalogIn
 from keypad import KeyMatrix
 
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
 from roki.firmware.service import RokiService
-from roki.firmware.utils import Cycle, Debouncer, get_coords
+from roki.firmware.utils import Cycle, Debouncer, convert_analog_resolution, get_coords
 
 
 class Roki:
@@ -18,7 +19,8 @@ class Roki:
         cls,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
-        encoder_pins: tuple[str, ...],
+        thumb_stick_pins: tuple[str, str],
+        encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
         interval: float = 0.001,
@@ -29,6 +31,7 @@ class Roki:
         return (Primary if config.is_left_side else Secondary)(
             row_pins,
             column_pins,
+            thumb_stick_pins,
             encoder_pins,
             encoder_divisor,
             columns_to_anodes,
@@ -41,7 +44,8 @@ class Roki:
         self,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
-        encoder_pins: tuple[str, ...],
+        thumb_stick_pins: tuple[str, str],
+        encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
         interval: float = 0.01,
@@ -54,6 +58,11 @@ class Roki:
         self.encoder = rotaryio.IncrementalEncoder(
             getattr(board, a), getattr(board, b), encoder_divisor
         )
+
+        x, y = thumb_stick_pins
+        self.thumb_stick_x = AnalogIn(getattr(board, x))
+        self.thumb_stick_y = AnalogIn(getattr(board, y))
+
         self.encoder_position = Debouncer(self.encoder.position)
         self.connection_interval = connection_interval
         self.key_matrix = KeyMatrix(
@@ -108,6 +117,7 @@ class Primary(Roki):
             while self.ble.connected:
                 await self.process_primary_keys()
                 await self.process_primary_encoder()
+                await self.process_thumb_stick()
 
                 if self.peripheral_conn.connected:
                     counter, message_id, payload = self.get_message()
@@ -125,6 +135,9 @@ class Primary(Roki):
                             for _ in range(payload):
                                 self.config.layer.secondary_encoder_ccw.press()
                                 self.config.layer.secondary_encoder_ccw.release()
+                        elif message_id == 32:
+                            pass
+
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
                         self.connection_interval
@@ -136,6 +149,14 @@ class Primary(Roki):
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
         service.readinto(self.buffer)
         return self.buffer[0], self.buffer[1], self.buffer[2]
+
+    async def process_thumb_stick(self):
+        from .keys import mouse
+
+        x = convert_analog_resolution(self.thumb_stick_x.value)
+        y = convert_analog_resolution(self.thumb_stick_y.value)
+
+        mouse.move(x, y)
 
     async def process_primary_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -217,6 +238,16 @@ class Secondary(Roki):
         if event := self.key_matrix.events.get():
             message_id = event.key_number
             payload = int(event.pressed)
+            await self.send_message(message_id, payload)
+
+    async def process_thumb_stick(self):
+        if x := convert_analog_resolution(self.thumb_stick_x.value):
+            message_id = 32
+            payload = x
+            await self.send_message(message_id, payload)
+        if y := convert_analog_resolution(self.thumb_stick_y.value):
+            message_id = 33
+            payload = y
             await self.send_message(message_id, payload)
 
     async def send_message(self, message_id: int, payload: int):
