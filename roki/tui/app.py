@@ -2,9 +2,9 @@ from textual import on
 from textual.app import App, ComposeResult
 from textual.widgets import Footer, Header
 
-from tui.screens.key_editor import KeyEditor
-from tui.widgets.key import Key
-from tui.widgets.keyboard import Keyboard
+from roki.tui.screens.key_editor import KeyEditor
+from roki.tui.widgets.key import Key
+from roki.tui.widgets.keyboard import Keyboard
 
 
 class Configurator(App):
