@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup
 
-from tui.widgets.side import Side
+from roki.tui.widgets.side import Side
 
 
 class Keyboard(HorizontalGroup):

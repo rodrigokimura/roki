@@ -1,7 +1,7 @@
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, VerticalGroup
 
-from tui.widgets.key import Key
+from roki.tui.widgets.key import Key
 
 
 class Side(VerticalGroup):
