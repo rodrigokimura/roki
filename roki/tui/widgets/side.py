@@ -1,8 +1,7 @@
-from textual import on
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, VerticalGroup
 
-from tui.widgets.key import Key
+from roki.tui.widgets.key import Key
 
 
 class Side(VerticalGroup):
@@ -38,7 +37,3 @@ class Column(VerticalGroup):
     def compose(self) -> ComposeResult:
         for row in range(4):
             yield Key(id=f"key_{row}_{self.index}", label="0")
-
-    @on(Key.Pressed)
-    def handle_key_press(self, event: Key.Pressed):
-        self.app.notify(str(event.control.id))

@@ -35,34 +35,19 @@ class Debouncer:
         return self.value - self.last_value
 
 
-def to_int(bools: list[bool]):
-    return sum(b << i for i, b in enumerate(bools))
-
-
-def from_int(i: int, size=6):
-    return [bool((i >> j) & 1) for j in range(size)]
-
-
-def to_bytes(bools: list[list[bool]]):
-    return bytes(to_int(b) for b in bools)
-
-
-def from_bytes(b: bytes):
-    return [from_int(i) for i in b]
-
-
 def get_coords(i: int, col_count: int = 6):
     c = i % col_count
     r = i // col_count
     return r, c
 
 
-def diff_bitmaps(a: bytes | bytearray, b: bytes | bytearray, byte_size=6):
-    for r, (x, y) in enumerate(zip(a, b)):
-        for c in range(byte_size):
-            if ((x >> c) & 1) != (value := ((y >> c) & 1)):
-                yield (r, c), bool(value)
-
-
 def convert_analog_resolution(value: int):
     return round(value / 4096 - 8)  # convert to [-8; 8]
+
+
+def encode_vector(x: int, y: int):
+    return int("".join(bin(i)[2:].zfill(4) for i in (x, y)), 2)
+
+
+def decode_vector(i: int):
+    return int(bin(i)[2:].zfill(8)[:4], 2), int(bin(i)[2:].zfill(8)[4:], 2)

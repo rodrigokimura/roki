@@ -1,5 +1,4 @@
 from http.server import HTTPServer
-from typing import Literal
 
 import typer
 
@@ -19,7 +18,7 @@ from roki.cli.utils import (
     install_circuitpython_libs,
     unmount,
 )
-from tui.app import Configurator
+from roki.tui.app import Configurator
 
 firmware_relative_tree = "roki/firmware"
 
