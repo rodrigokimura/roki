@@ -10,7 +10,13 @@ from keypad import KeyMatrix
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
 from roki.firmware.service import RokiService
-from roki.firmware.utils import Cycle, Debouncer, convert_analog_resolution, get_coords
+from roki.firmware.utils import (
+    Cycle,
+    Debouncer,
+    convert_analog_resolution,
+    decode_vector,
+    get_coords,
+)
 
 
 class Roki:
@@ -117,7 +123,7 @@ class Primary(Roki):
             while self.ble.connected:
                 await self.process_primary_keys()
                 await self.process_primary_encoder()
-                await self.process_thumb_stick()
+                await self.process_primary_thumb_stick()
 
                 if self.peripheral_conn.connected:
                     counter, message_id, payload = self.get_message()
@@ -136,7 +142,10 @@ class Primary(Roki):
                                 self.config.layer.secondary_encoder_ccw.press()
                                 self.config.layer.secondary_encoder_ccw.release()
                         elif message_id == 32:
-                            pass
+                            x, y = decode_vector(payload)
+                            x -= 7.5
+                            y -= 7.5
+                            self._process_thumb_stick(x, y)
 
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
@@ -150,13 +159,15 @@ class Primary(Roki):
         service.readinto(self.buffer)
         return self.buffer[0], self.buffer[1], self.buffer[2]
 
-    async def process_thumb_stick(self):
+    async def process_primary_thumb_stick(self):
+        x = self.thumb_stick_x.value // 4096 - 7.5
+        y = self.thumb_stick_y.value // 4096 - 7.5
+        self._process_thumb_stick(x, y)
+
+    def _process_thumb_stick(self, x: float, y: float):
         from .keys import mouse
 
-        x = convert_analog_resolution(self.thumb_stick_x.value)
-        y = convert_analog_resolution(self.thumb_stick_y.value)
-
-        mouse.move(x, y)
+        mouse.move(int(x), int(y))
 
     async def process_primary_encoder(self):
         self.encoder_position.update(self.encoder.position)

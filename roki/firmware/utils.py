@@ -42,7 +42,7 @@ def get_coords(i: int, col_count: int = 6):
 
 
 def convert_analog_resolution(value: int):
-    return round(value / 4096 - 8)  # convert to [-8; 8]
+    return value // 4096 - 7.5  # convert to [-7.5; 7.5]
 
 
 def encode_vector(x: int, y: int):
