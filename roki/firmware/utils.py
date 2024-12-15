@@ -42,8 +42,9 @@ def get_coords(i: int, col_count: int = 6):
 
 
 def encode_vector(x: int, y: int):
-    return int("".join(bin(i)[2:].zfill(4) for i in (x, y)), 2)
+    return (x << 4) + y
 
 
 def decode_vector(i: int):
-    return int(bin(i)[2:].zfill(8)[:4], 2), int(bin(i)[2:].zfill(8)[4:], 2)
+    x = i >> 4
+    return x, i - (x << 4)

@@ -4,12 +4,19 @@ import rotaryio  # type: ignore
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
+from analogio import AnalogIn
 from keypad import KeyMatrix
 
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
 from roki.firmware.service import RokiService
-from roki.firmware.utils import Cycle, Debouncer, get_coords
+from roki.firmware.utils import (
+    Cycle,
+    Debouncer,
+    decode_vector,
+    encode_vector,
+    get_coords,
+)
 
 
 class Roki:
@@ -18,7 +25,8 @@ class Roki:
         cls,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
-        encoder_pins: tuple[str, ...],
+        thumb_stick_pins: tuple[str, str],
+        encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
         interval: float = 0.001,
@@ -29,6 +37,7 @@ class Roki:
         return (Primary if config.is_left_side else Secondary)(
             row_pins,
             column_pins,
+            thumb_stick_pins,
             encoder_pins,
             encoder_divisor,
             columns_to_anodes,
@@ -41,7 +50,8 @@ class Roki:
         self,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
-        encoder_pins: tuple[str, ...],
+        thumb_stick_pins: tuple[str, str],
+        encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
         interval: float = 0.01,
@@ -54,6 +64,11 @@ class Roki:
         self.encoder = rotaryio.IncrementalEncoder(
             getattr(board, a), getattr(board, b), encoder_divisor
         )
+
+        x, y = thumb_stick_pins
+        self.thumb_stick_x = AnalogIn(getattr(board, x))
+        self.thumb_stick_y = AnalogIn(getattr(board, y))
+
         self.encoder_position = Debouncer(self.encoder.position)
         self.connection_interval = connection_interval
         self.key_matrix = KeyMatrix(
@@ -108,6 +123,7 @@ class Primary(Roki):
             while self.ble.connected:
                 await self.process_primary_keys()
                 await self.process_primary_encoder()
+                await self.process_primary_thumb_stick()
 
                 if self.peripheral_conn.connected:
                     counter, message_id, payload = self.get_message()
@@ -125,6 +141,12 @@ class Primary(Roki):
                             for _ in range(payload):
                                 self.config.layer.secondary_encoder_ccw.press()
                                 self.config.layer.secondary_encoder_ccw.release()
+                        elif message_id == 32:
+                            x, y = decode_vector(payload)
+                            x -= 7.5
+                            y -= 7.5
+                            self._process_thumb_stick(x, y)
+
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
                         self.connection_interval
@@ -136,6 +158,16 @@ class Primary(Roki):
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
         service.readinto(self.buffer)
         return self.buffer[0], self.buffer[1], self.buffer[2]
+
+    async def process_primary_thumb_stick(self):
+        x = self.thumb_stick_x.value // 4096 - 7.5
+        y = self.thumb_stick_y.value // 4096 - 7.5
+        self._process_thumb_stick(x, y)
+
+    def _process_thumb_stick(self, x: float, y: float):
+        from .keys import mouse
+
+        mouse.move(int(x), int(y))
 
     async def process_primary_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -169,7 +201,7 @@ class Primary(Roki):
         while peripheral_conn is None:
             print("Scanning for peripheral keyboard side...")
             for adv in self.ble.start_scan(
-                ProvideServicesAdvertisement, buffer_size=256
+                ProvideServicesAdvertisement, buffer_size=256  # type: ignore
             ):
                 if RokiService in adv.services:  # type: ignore
                     peripheral_conn = self.ble.connect(adv)
@@ -188,6 +220,7 @@ class Secondary(Roki):
         self.disconnect()
 
         self.counter = Cycle()
+        self.send_thumb_stick_message = False
 
         while True:
             print("Advertise Roki peripheral...")
@@ -201,6 +234,7 @@ class Secondary(Roki):
             while self.ble.connected:
                 await self.process_encoder()
                 await self.process_keys()
+                await self.process_thumb_stick()
 
     async def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -218,6 +252,19 @@ class Secondary(Roki):
             message_id = event.key_number
             payload = int(event.pressed)
             await self.send_message(message_id, payload)
+
+    async def process_thumb_stick(self):
+        x = self.thumb_stick_x.value // 4096
+        y = self.thumb_stick_y.value // 4096
+        message_id = 32
+        if x > 0 or y > 0:
+            payload = encode_vector(x, y)
+            await self.send_message(message_id, payload)
+            self.send_thumb_stick_message = True
+        elif self.send_thumb_stick_message:
+            payload = encode_vector(x, y)
+            await self.send_message(message_id, payload)
+            self.send_thumb_stick_message = False
 
     async def send_message(self, message_id: int, payload: int):
         self.counter.increment()
