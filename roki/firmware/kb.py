@@ -13,8 +13,8 @@ from roki.firmware.service import RokiService
 from roki.firmware.utils import (
     Cycle,
     Debouncer,
-    convert_analog_resolution,
     decode_vector,
+    encode_vector,
     get_coords,
 )
 
@@ -201,7 +201,7 @@ class Primary(Roki):
         while peripheral_conn is None:
             print("Scanning for peripheral keyboard side...")
             for adv in self.ble.start_scan(
-                ProvideServicesAdvertisement, buffer_size=256
+                ProvideServicesAdvertisement, buffer_size=256  # type: ignore
             ):
                 if RokiService in adv.services:  # type: ignore
                     peripheral_conn = self.ble.connect(adv)
@@ -220,6 +220,7 @@ class Secondary(Roki):
         self.disconnect()
 
         self.counter = Cycle()
+        self.send_thumb_stick_message = False
 
         while True:
             print("Advertise Roki peripheral...")
@@ -233,6 +234,7 @@ class Secondary(Roki):
             while self.ble.connected:
                 await self.process_encoder()
                 await self.process_keys()
+                await self.process_thumb_stick()
 
     async def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -252,14 +254,17 @@ class Secondary(Roki):
             await self.send_message(message_id, payload)
 
     async def process_thumb_stick(self):
-        if x := convert_analog_resolution(self.thumb_stick_x.value):
-            message_id = 32
-            payload = x
+        x = self.thumb_stick_x.value // 4096
+        y = self.thumb_stick_y.value // 4096
+        message_id = 32
+        if x > 0 or y > 0:
+            payload = encode_vector(x, y)
             await self.send_message(message_id, payload)
-        if y := convert_analog_resolution(self.thumb_stick_y.value):
-            message_id = 33
-            payload = y
+            self.send_thumb_stick_message = True
+        elif self.send_thumb_stick_message:
+            payload = encode_vector(x, y)
             await self.send_message(message_id, payload)
+            self.send_thumb_stick_message = False
 
     async def send_message(self, message_id: int, payload: int):
         self.counter.increment()
