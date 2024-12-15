@@ -2,3 +2,5 @@
 roki/firmware/settings.toml
 index.html
 .coverage
+*.FCBak
+*.bak
