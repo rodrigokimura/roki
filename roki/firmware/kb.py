@@ -80,6 +80,7 @@ class Roki:
         )
         self.config = Config.read()
         self.ble = adafruit_ble.BLERadio()
+        self.mouse_speed = 100
 
     async def run(self):
         pass
@@ -127,7 +128,10 @@ class Primary(Roki):
 
                 if self.peripheral_conn.connected:
                     counter, message_id, payload = self.get_message()
+
                     if self.current_counter != counter:
+                        print(counter, message_id, payload)
+
                         self.current_counter = counter
                         if message_id < 30:
                             row, col = get_coords(message_id)
@@ -160,14 +164,19 @@ class Primary(Roki):
         return self.buffer[0], self.buffer[1], self.buffer[2]
 
     async def process_primary_thumb_stick(self):
-        x = self.thumb_stick_x.value // 4096 - 7.5
-        y = self.thumb_stick_y.value // 4096 - 7.5
+        print(self.thumb_stick_x.value)
+        print(self.thumb_stick_y.value)
+        x = (self.thumb_stick_x.value / 4096) - 7.5
+        y = (self.thumb_stick_y.value / 4096) - 7.5
+
         self._process_thumb_stick(x, y)
 
     def _process_thumb_stick(self, x: float, y: float):
         from .keys import mouse
 
-        mouse.move(int(x), int(y))
+        print(f"Mouse: {x} x {y}")
+        if x and y:
+            mouse.move(int(x * self.mouse_speed), int(y * self.mouse_speed))
 
     async def process_primary_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -181,8 +190,9 @@ class Primary(Roki):
                 self.config.layer.primary_encoder_ccw.release()
 
     async def process_primary_keys(self):
-        event = self.key_matrix.events.get()
-        if event:
+        if event := self.key_matrix.events.get():
+            print(event.key_number)
+
             row, col = get_coords(event.key_number, self.col_count)
 
             key = self.config.layer.primary_keys[row][col]
@@ -201,7 +211,8 @@ class Primary(Roki):
         while peripheral_conn is None:
             print("Scanning for peripheral keyboard side...")
             for adv in self.ble.start_scan(
-                ProvideServicesAdvertisement, buffer_size=256  # type: ignore
+                ProvideServicesAdvertisement,
+                buffer_size=256,  # type: ignore
             ):
                 if RokiService in adv.services:  # type: ignore
                     peripheral_conn = self.ble.connect(adv)
@@ -234,7 +245,7 @@ class Secondary(Roki):
             while self.ble.connected:
                 await self.process_encoder()
                 await self.process_keys()
-                await self.process_thumb_stick()
+                # await self.process_thumb_stick()
 
     async def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -268,4 +279,4 @@ class Secondary(Roki):
 
     async def send_message(self, message_id: int, payload: int):
         self.counter.increment()
-        self.service.write(bytes((self.counter.value, message_id, payload)))
+        self.service.write(bytes((self.counter.value, message_id, abs(payload))))

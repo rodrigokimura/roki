@@ -48,3 +48,22 @@ def encode_vector(x: int, y: int):
 def decode_vector(i: int):
     x = i >> 4
     return x, i - (x << 4)
+
+
+def map_range():
+    pass
+
+
+def blink_led(led_pin: str = "LED", delay: float = 0.1, times: int = 10):
+    import time
+
+    import board
+    from digitalio import DigitalInOut, Direction
+
+    led = DigitalInOut(getattr(board, led_pin))  # type: ignore
+    led.direction = Direction.OUTPUT
+    led.switch_to_output(value=False)
+    led.value = False
+    for _ in range(times):
+        led.value = not led.value
+        time.sleep(delay)

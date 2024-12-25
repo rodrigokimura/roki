@@ -9,7 +9,7 @@ from roki.firmware.keys import TYPE_CHECKING
 if TYPE_CHECKING:  # pragma: no cover
     from circuitpython_typing import ReadableBuffer, WriteableBuffer
 
-BUFFER_SIZE = 7
+BUFFER_SIZE = 3
 
 
 class PacketBufferUUID(VendorUUID):
@@ -25,7 +25,7 @@ class PacketBufferCharacteristic(ComplexCharacteristic):
         self,
         *,
         uuid=None,
-        buffer_size=7,
+        buffer_size=3,
         properties=Characteristic.WRITE_NO_RESPONSE
         | Characteristic.NOTIFY
         | Characteristic.READ,
