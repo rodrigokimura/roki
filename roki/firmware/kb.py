@@ -1,4 +1,5 @@
 import adafruit_ble
+from roki.firmware.calibration import Calibration
 import board
 import rotaryio  # type: ignore
 from adafruit_ble.advertising import Advertisement
@@ -25,7 +26,7 @@ class Roki:
         cls,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
-        thumb_stick_pins: tuple[str, str],
+        thumb_stick_pins: tuple[str, str, str],
         encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
@@ -50,7 +51,7 @@ class Roki:
         self,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
-        thumb_stick_pins: tuple[str, str],
+        thumb_stick_pins: tuple[str, str, str],
         encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
         columns_to_anodes: bool = False,
@@ -65,7 +66,9 @@ class Roki:
             getattr(board, a), getattr(board, b), encoder_divisor
         )
 
-        x, y = thumb_stick_pins
+        b, x, y = thumb_stick_pins
+
+        self.calibration = Calibration(b, x, y)
         self.thumb_stick_x = AnalogIn(getattr(board, x))
         self.thumb_stick_y = AnalogIn(getattr(board, y))
 
@@ -211,8 +214,8 @@ class Primary(Roki):
         while peripheral_conn is None:
             print("Scanning for peripheral keyboard side...")
             for adv in self.ble.start_scan(
-                ProvideServicesAdvertisement,
-                buffer_size=256,  # type: ignore
+                ProvideServicesAdvertisement,  # type: ignore
+                buffer_size=256,
             ):
                 if RokiService in adv.services:  # type: ignore
                     peripheral_conn = self.ble.connect(adv)
