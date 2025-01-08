@@ -1,24 +1,9 @@
 import json
-from http.server import BaseHTTPRequestHandler
 
 import minify_html
 from jinja2 import Environment, PackageLoader
 
 from roki.cli.config.keys import KEYS
-
-
-class WebHandler(BaseHTTPRequestHandler):
-    def get_response(self):
-        return Generator().get_html()
-
-    def do_GET(self):
-        if self.path != "/":
-            return ""
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html")
-        self.end_headers()
-        self.wfile.write(self.get_response().encode("utf-8"))
 
 
 class Generator:

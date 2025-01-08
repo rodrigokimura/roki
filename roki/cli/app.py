@@ -1,6 +1,7 @@
-from http.server import HTTPServer
-
 import typer
+import uvicorn
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from roki.cli.file_management import (
     copy_file,
@@ -10,7 +11,7 @@ from roki.cli.file_management import (
     delete_file,
     delete_files_by_extension,
 )
-from roki.cli.html_generator import Generator, WebHandler
+from roki.cli.html_generator import Generator
 from roki.cli.utils import (
     create_mount_point,
     debug_code,
@@ -104,11 +105,23 @@ def run():
 def serve():
     """Run configuration server"""
 
-    server = HTTPServer(("0.0.0.0", 8000), WebHandler)
-    server.serve_forever()
+    generate()
+
+    password = typer.prompt("SSL keyfile password", hide_input=True)
+
+    app = FastAPI()
+    app.mount("", StaticFiles(directory=".", html=True), name="static")
+
+    uvicorn.run(
+        app,
+        ssl_keyfile="key.pem",
+        ssl_certfile="cert.pem",
+        ssl_keyfile_password=password,
+    )
 
 
-@app.command()
+@app.command(name="g")
+@app.command(name="generate")
 def generate():
     """Generate html file"""
 
