@@ -60,7 +60,7 @@ def blink_led(led_pin: str = "LED", delay: float = 0.1, times: int = 10):
     import board
     from digitalio import DigitalInOut, Direction
 
-    led = DigitalInOut(getattr(board, led_pin))  # type: ignore
+    led = DigitalInOut(getattr(board, led_pin))
     led.direction = Direction.OUTPUT
     led.switch_to_output(value=False)
     led.value = False

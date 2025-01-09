@@ -1,13 +1,14 @@
 import adafruit_ble
-from roki.firmware.calibration import Calibration
 import board
-import rotaryio  # type: ignore
+import rotaryio
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
 from analogio import AnalogIn
+from digitalio import DigitalInOut, Direction
 from keypad import KeyMatrix
 
+from roki.firmware.calibration import Calibration
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
 from roki.firmware.service import RokiService
@@ -68,9 +69,14 @@ class Roki:
 
         b, x, y = thumb_stick_pins
 
-        self.calibration = Calibration(b, x, y)
+        thumb_stick_button = DigitalInOut(getattr(board, b))
+        thumb_stick_button.direction = Direction.INPUT
         self.thumb_stick_x = AnalogIn(getattr(board, x))
         self.thumb_stick_y = AnalogIn(getattr(board, y))
+
+        self.calibration = Calibration(
+            thumb_stick_button, self.thumb_stick_x, self.thumb_stick_y
+        )
 
         self.encoder_position = Debouncer(self.encoder.position)
         self.connection_interval = connection_interval

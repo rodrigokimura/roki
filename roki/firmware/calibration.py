@@ -1,24 +1,20 @@
 import json
 import time
 
-import board
 from analogio import AnalogIn
-from digitalio import DigitalInOut, Direction
+from digitalio import DigitalInOut
 
 
 class Calibration:
     def __init__(
         self,
-        button_pin: str = "P0_22",
-        thumb_stick_x_pin: str = "AIN7",
-        thumb_stick_y_pin: str = "AIN5",
+        button: DigitalInOut,
+        thumb_stick_x: AnalogIn,
+        thumb_stick_y: AnalogIn,
     ):
-        x, y = thumb_stick_x_pin, thumb_stick_y_pin
-        self.button_pin = button_pin
-        self.button = DigitalInOut(getattr(board, button_pin))  # type: ignore
-        self.button.direction = Direction.INPUT
-        self.thumb_stick_x = AnalogIn(getattr(board, x))
-        self.thumb_stick_y = AnalogIn(getattr(board, y))
+        self.button = button
+        self.thumb_stick_x = thumb_stick_x
+        self.thumb_stick_y = thumb_stick_y
         self.max_x = -float("inf")
         self.min_x = float("inf")
         self.max_y = -float("inf")
