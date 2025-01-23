@@ -18,13 +18,13 @@ python-dotenv = "*"
 
 [[package]]
 name = "adafruit-blinka"
-version = "8.50.0"
+version = "8.51.0"
 description = "CircuitPython APIs for non-CircuitPython versions of Python such as CPython on Linux and MicroPython."
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "Adafruit_Blinka-8.50.0-py3-none-any.whl", hash = "sha256:a0832316ac4155df956a1e35561c75e37e6f8d8e2f28b58859c80207e7819351"},
-    {file = "adafruit_blinka-8.50.0.tar.gz", hash = "sha256:64feecaa7f806fdd02b39521b5b400ebfb629a06a27a3360644375af0bbe67c2"},
+    {file = "Adafruit_Blinka-8.51.0-py3-none-any.whl", hash = "sha256:f01635f4fb5c5255167dea5c0b8feb20cc162f8e8d0140696e236796f897a834"},
+    {file = "adafruit_blinka-8.51.0.tar.gz", hash = "sha256:844f15be775ee5c418446969a427c5a3847928e644f2b1a35542acff5b208f3a"},
 ]
 
 [package.dependencies]
@@ -33,7 +33,7 @@ Adafruit-PlatformDetect = ">=3.70.1"
 Adafruit-PureIO = ">=1.1.7"
 binho-host-adapter = ">=0.1.6"
 pyftdi = ">=0.40.0"
-sysv-ipc = {version = ">=1.1.0", markers = "sys_platform == \"linux\" and platform_machine != \"mips\""}
+sysv_ipc = {version = ">=1.1.0", markers = "sys_platform == \"linux\" and platform_machine != \"mips\""}
 
 [[package]]
 name = "adafruit-blinka-bleio"
@@ -66,13 +66,13 @@ adafruit-blinka-bleio = "*"
 
 [[package]]
 name = "adafruit-circuitpython-busdevice"
-version = "5.2.10"
+version = "5.2.11"
 description = "CircuitPython bus device classes to manage bus sharing."
 optional = false
 python-versions = "*"
 files = [
-    {file = "adafruit_circuitpython_busdevice-5.2.10-py3-none-any.whl", hash = "sha256:9e37e303b9cced482aec004eb37a6480c5ccac60d3cfe6ea4d9c4c0a818f1fc0"},
-    {file = "adafruit_circuitpython_busdevice-5.2.10.tar.gz", hash = "sha256:b3797242cb2aeb27ed6382f7946d62ab4d6dbb16631e71e50b12ba07afec0e87"},
+    {file = "adafruit_circuitpython_busdevice-5.2.11-py3-none-any.whl", hash = "sha256:d4379c9ae86a15f7044dea815a94525ca9eda6a7c0b2fa0e75cf9e700c9384b8"},
+    {file = "adafruit_circuitpython_busdevice-5.2.11.tar.gz", hash = "sha256:a9a1310bee7021703ccc247bb3ff04d0873573948a6c7bee9016361cd6707a71"},
 ]
 
 [package.dependencies]
@@ -81,13 +81,13 @@ adafruit-circuitpython-typing = "*"
 
 [[package]]
 name = "adafruit-circuitpython-connectionmanager"
-version = "3.1.2"
+version = "3.1.3"
 description = "A urllib3.poolmanager/urllib3.connectionpool-like library for managing sockets and connections"
 optional = false
 python-versions = "*"
 files = [
-    {file = "adafruit_circuitpython_connectionmanager-3.1.2-py3-none-any.whl", hash = "sha256:1d3af302e587d4ab0827f4382d2eeb400a152688a2eb14272189f971d7ff477b"},
-    {file = "adafruit_circuitpython_connectionmanager-3.1.2.tar.gz", hash = "sha256:330485ac00da6c5f1ca567e77493cddb55ab9674afed341eddf5f9b85bd22fdb"},
+    {file = "adafruit_circuitpython_connectionmanager-3.1.3-py3-none-any.whl", hash = "sha256:9df3a4c617dae27bad1ac8607f1a084312c8498d831ebe1c6a2c8d5cb309daea"},
+    {file = "adafruit_circuitpython_connectionmanager-3.1.3.tar.gz", hash = "sha256:0f133bdedf454ede0c0a866ed605fe166cc85f75cfcea74758e3622ae403e5f9"},
 ]
 
 [package.dependencies]
@@ -95,13 +95,13 @@ Adafruit-Blinka = "*"
 
 [[package]]
 name = "adafruit-circuitpython-requests"
-version = "4.1.8"
+version = "4.1.9"
 description = "A requests-like library for web interfacing"
 optional = false
 python-versions = "*"
 files = [
-    {file = "adafruit_circuitpython_requests-4.1.8-py3-none-any.whl", hash = "sha256:6ab3744175f1ddaf2ecfb2510c9ea2cf717c21848695849fcdf28de6e856fd04"},
-    {file = "adafruit_circuitpython_requests-4.1.8.tar.gz", hash = "sha256:50d787bc05d953318f4ee654230195e631eb379e33179c465a68f763d4638914"},
+    {file = "adafruit_circuitpython_requests-4.1.9-py3-none-any.whl", hash = "sha256:d0f0a899c6ef143eab9a50a9625be43f5f8da7b9688c1496891999fa20107c93"},
+    {file = "adafruit_circuitpython_requests-4.1.9.tar.gz", hash = "sha256:b9eeb252b43946f1a90c34ca8844e07bb1e01cd210c927f561d0e10b97c5ff9d"},
 ]
 
 [package.dependencies]
@@ -130,13 +130,13 @@ typing_extensions = ">=4.0,<5.0"
 
 [[package]]
 name = "adafruit-platformdetect"
-version = "3.76.1"
+version = "3.77.0"
 description = "Platform detection for use by libraries like Adafruit-Blinka."
 optional = false
 python-versions = "*"
 files = [
-    {file = "Adafruit_PlatformDetect-3.76.1-py3-none-any.whl", hash = "sha256:57e392918ea542279d61abd2291953b2dfe0d87822a73683b4af6c4a6beae326"},
-    {file = "adafruit_platformdetect-3.76.1.tar.gz", hash = "sha256:c45a2aca66d812cecbedb3f4fe9b02cf8e1264eef209b300ae6f467cba36e4b8"},
+    {file = "Adafruit_PlatformDetect-3.77.0-py3-none-any.whl", hash = "sha256:93f599c21e7db2d92bc32ac69ba5063876404c4af87d11358863e62f407409be"},
+    {file = "adafruit_platformdetect-3.77.0.tar.gz", hash = "sha256:adce6386059637e92b4cb5d3430d016119cd3eb19f9276920c54515f3d798949"},
 ]
 
 [[package]]
@@ -529,24 +529,24 @@ files = [
 
 [[package]]
 name = "circuitpython-stubs"
-version = "9.2.1"
+version = "9.2.3"
 description = "PEP 561 type stubs for CircuitPython"
 optional = false
 python-versions = "*"
 files = [
-    {file = "circuitpython_stubs-9.2.1-py3-none-any.whl", hash = "sha256:a4406645412e159dbeb996d02b50def59ad3442975409d76ff1dd151de1d97da"},
-    {file = "circuitpython_stubs-9.2.1.tar.gz", hash = "sha256:f7b711df9e808de3741b2bd443cd082274087205ccd2c2ce8f1bc5672b82558a"},
+    {file = "circuitpython_stubs-9.2.3-py3-none-any.whl", hash = "sha256:d07343751a3163d53d5df1b7e17303e51f22046fe22dea08ea8bda38cb8365ff"},
+    {file = "circuitpython_stubs-9.2.3.tar.gz", hash = "sha256:c7c12a34cab124f121b7d3ae7ccd1ab2d7766e5d0ef9c728951b9472d5f66a81"},
 ]
 
 [[package]]
 name = "circup"
-version = "2.1.0"
+version = "2.1.1"
 description = "A tool to manage/update libraries on CircuitPython devices."
 optional = false
 python-versions = ">=3.9"
 files = [
-    {file = "circup-2.1.0-py3-none-any.whl", hash = "sha256:e39cd9963f57db04b7ab3d4dce3911bb2ace2811ddf3838eafa7b59756659756"},
-    {file = "circup-2.1.0.tar.gz", hash = "sha256:194a9d077b92de62f2c18317cdc8d65a7376836c1ae5b87af291f4c818153705"},
+    {file = "circup-2.1.1-py3-none-any.whl", hash = "sha256:42aa94f3ccd7b4d0834b3c4faa531b5f163f420806d1cbe091496e77a1a6f05f"},
+    {file = "circup-2.1.1.tar.gz", hash = "sha256:a1a5c2b33b6e169647a602945d4ca7823d6dc4708db5af8a9ce111504178290f"},
 ]
 
 [package.dependencies]
@@ -739,23 +739,23 @@ files = [
 
 [[package]]
 name = "fastapi"
-version = "0.115.6"
+version = "0.115.7"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "fastapi-0.115.6-py3-none-any.whl", hash = "sha256:e9240b29e36fa8f4bb7290316988e90c381e5092e0cbe84e7818cc3713bcf305"},
-    {file = "fastapi-0.115.6.tar.gz", hash = "sha256:9ec46f7addc14ea472958a96aae5b5de65f39721a46aaf5705c480d9a8b76654"},
+    {file = "fastapi-0.115.7-py3-none-any.whl", hash = "sha256:eb6a8c8bf7f26009e8147111ff15b5177a0e19bb4a45bc3486ab14804539d21e"},
+    {file = "fastapi-0.115.7.tar.gz", hash = "sha256:0f106da6c01d88a6786b3248fb4d7a940d071f6f488488898ad5d354b25ed015"},
 ]
 
 [package.dependencies]
 pydantic = ">=1.7.4,<1.8 || >1.8,<1.8.1 || >1.8.1,<2.0.0 || >2.0.0,<2.0.1 || >2.0.1,<2.1.0 || >2.1.0,<3.0.0"
-starlette = ">=0.40.0,<0.42.0"
+starlette = ">=0.40.0,<0.46.0"
 typing-extensions = ">=4.8.0"
 
 [package.extras]
-all = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>=0.23.0)", "itsdangerous (>=1.1.0)", "jinja2 (>=2.11.2)", "orjson (>=3.2.1)", "pydantic-extra-types (>=2.0.0)", "pydantic-settings (>=2.0.0)", "python-multipart (>=0.0.7)", "pyyaml (>=5.3.1)", "ujson (>=4.0.1,!=4.0.2,!=4.1.0,!=4.2.0,!=4.3.0,!=5.0.0,!=5.1.0)", "uvicorn[standard] (>=0.12.0)"]
-standard = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>=0.23.0)", "jinja2 (>=2.11.2)", "python-multipart (>=0.0.7)", "uvicorn[standard] (>=0.12.0)"]
+all = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>=0.23.0)", "itsdangerous (>=1.1.0)", "jinja2 (>=3.1.5)", "orjson (>=3.2.1)", "pydantic-extra-types (>=2.0.0)", "pydantic-settings (>=2.0.0)", "python-multipart (>=0.0.18)", "pyyaml (>=5.3.1)", "ujson (>=4.0.1,!=4.0.2,!=4.1.0,!=4.2.0,!=4.3.0,!=5.0.0,!=5.1.0)", "uvicorn[standard] (>=0.12.0)"]
+standard = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>=0.23.0)", "jinja2 (>=3.1.5)", "python-multipart (>=0.0.18)", "uvicorn[standard] (>=0.12.0)"]
 
 [[package]]
 name = "findimports"
@@ -1321,13 +1321,13 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "prompt-toolkit"
-version = "3.0.48"
+version = "3.0.50"
 description = "Library for building powerful interactive command lines in Python"
 optional = false
-python-versions = ">=3.7.0"
+python-versions = ">=3.8.0"
 files = [
-    {file = "prompt_toolkit-3.0.48-py3-none-any.whl", hash = "sha256:f49a827f90062e411f1ce1f854f2aedb3c23353244f8108b89283587397ac10e"},
-    {file = "prompt_toolkit-3.0.48.tar.gz", hash = "sha256:d6623ab0477a80df74e646bdbc93621143f5caf104206aa29294d53de1a03d90"},
+    {file = "prompt_toolkit-3.0.50-py3-none-any.whl", hash = "sha256:9b6427eb19e479d98acff65196a307c555eb567989e6d88ebbb1b509d9779198"},
+    {file = "prompt_toolkit-3.0.50.tar.gz", hash = "sha256:544748f3860a2623ca5cd6d2795e7a14f3d0e1c3c9728359013f79877fc89bab"},
 ]
 
 [package.dependencies]
@@ -1426,13 +1426,13 @@ files = [
 
 [[package]]
 name = "pydantic"
-version = "2.10.4"
+version = "2.10.5"
 description = "Data validation using Python type hints"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pydantic-2.10.4-py3-none-any.whl", hash = "sha256:597e135ea68be3a37552fb524bc7d0d66dcf93d395acd93a00682f1efcb8ee3d"},
-    {file = "pydantic-2.10.4.tar.gz", hash = "sha256:82f12e9723da6de4fe2ba888b5971157b3be7ad914267dea8f05f82b28254f06"},
+    {file = "pydantic-2.10.5-py3-none-any.whl", hash = "sha256:4dd4e322dbe55472cb7ca7e73f4b63574eecccf2835ffa2af9021ce113c83c53"},
+    {file = "pydantic-2.10.5.tar.gz", hash = "sha256:278b38dbbaec562011d659ee05f63346951b3a248a6f3642e1bc68894ea2b4ff"},
 ]
 
 [package.dependencies]
@@ -1921,20 +1921,20 @@ files = [
 
 [[package]]
 name = "starlette"
-version = "0.41.3"
+version = "0.45.2"
 description = "The little ASGI library that shines."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.9"
 files = [
-    {file = "starlette-0.41.3-py3-none-any.whl", hash = "sha256:44cedb2b7c77a9de33a8b74b2b90e9f50d11fcf25d8270ea525ad71a25374ff7"},
-    {file = "starlette-0.41.3.tar.gz", hash = "sha256:0e4ab3d16522a255be6b28260b938eae2482f98ce5cc934cb08dce8dc3ba5835"},
+    {file = "starlette-0.45.2-py3-none-any.whl", hash = "sha256:4daec3356fb0cb1e723a5235e5beaf375d2259af27532958e2d79df549dad9da"},
+    {file = "starlette-0.45.2.tar.gz", hash = "sha256:bba1831d15ae5212b22feab2f218bab6ed3cd0fc2dc1d4442443bb1ee52260e0"},
 ]
 
 [package.dependencies]
-anyio = ">=3.4.0,<5"
+anyio = ">=3.6.2,<5"
 
 [package.extras]
-full = ["httpx (>=0.22.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.7)", "pyyaml"]
+full = ["httpx (>=0.27.0,<0.29.0)", "itsdangerous", "jinja2", "python-multipart (>=0.0.18)", "pyyaml"]
 
 [[package]]
 name = "sysv-ipc"
