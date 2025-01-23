@@ -14,7 +14,7 @@ from roki.cli.file_management import (
 from roki.cli.html_generator import Generator
 from roki.cli.utils import (
     create_mount_point,
-    debug_code,
+    debug_codes,
     get_devices,
     install_circuitpython_libs,
     unmount,
@@ -68,6 +68,7 @@ def upload_code(side: str = typer.Option("r")):
     create_empty_file(f"{mountpoint_path}/roki/__init__.py")
 
     root_files = [
+        "boot.py",
         "code.py",
         "config.json",
     ]
@@ -88,6 +89,8 @@ def upload_code(side: str = typer.Option("r")):
     ]
     for file in python_firmware_files:
         install_circuitpython_libs(mountpoint_path, f"{firmware_location}/{file}")
+
+    install_circuitpython_libs(mountpoint_path, "boot.py")
     install_circuitpython_libs(mountpoint_path, "code.py")
 
     print("Unmounting...")
@@ -97,8 +100,8 @@ def upload_code(side: str = typer.Option("r")):
 @app.command()
 def run():
     """Run code.py"""
-
-    debug_code(f"{firmware_relative_tree}/code.py")
+    files = [f"{firmware_relative_tree}/boot.py", f"{firmware_relative_tree}/code.py"]
+    debug_codes(files)
 
 
 @app.command()

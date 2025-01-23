@@ -71,3 +71,9 @@ def get_serial_device():
 def debug_code(file: str):
     if SERIAL_DEVICE := get_serial_device():
         run_command(f"ampy -p {SERIAL_DEVICE} run {file}")
+
+
+def debug_codes(files: list[str]):
+    if SERIAL_DEVICE := get_serial_device():
+        for file in files:
+            run_command(f"ampy -p {SERIAL_DEVICE} run {file}")

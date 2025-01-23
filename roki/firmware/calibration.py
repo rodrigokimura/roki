@@ -4,6 +4,8 @@ import time
 from analogio import AnalogIn
 from digitalio import DigitalInOut
 
+from roki.firmware.utils import blink_led
+
 
 class Calibration:
     def __init__(
@@ -23,13 +25,16 @@ class Calibration:
         self.running = True
 
     def start(self) -> None:
+        print("Starting calibration...")
+
         if not self._startup_condition():
             return
 
         self._notify()
 
         # allow user to release the button
-        time.sleep(1)
+        blink_led()
+        time.sleep(5)
 
         while self.running:
             self.max_x = max(self.max_x, self.thumb_stick_x.value)
@@ -43,7 +48,7 @@ class Calibration:
         self._write_config()
 
     def _startup_condition(self) -> bool:
-        return self.button.value
+        return not self.button.value
 
     def _notify(self) -> None:
         pass
@@ -71,8 +76,13 @@ class Calibration:
             "min_y": self.min_y,
         }
 
-        with open("calibration.json", mode="w") as file:
-            json.dump(data, file)
+        try:
+            blink_led()
+            with open("calibration.json", mode="w") as file:
+                json.dump(data, file)
+            blink_led()
+        except OSError:
+            pass
 
     def read(self):
         with open("calibration.json", mode="r") as file:

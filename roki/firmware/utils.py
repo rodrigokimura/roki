@@ -54,7 +54,8 @@ def map_range():
     pass
 
 
-def blink_led(led_pin: str = "LED", delay: float = 0.1, times: int = 10):
+def blink_led(led_pin: str = "LED", delay: float = 0.3, times: int = 10):
+    print("Blinking LED")
     import time
 
     import board
@@ -67,3 +68,4 @@ def blink_led(led_pin: str = "LED", delay: float = 0.1, times: int = 10):
     for _ in range(times):
         led.value = not led.value
         time.sleep(delay)
+    led.deinit()
