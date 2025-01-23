@@ -5,7 +5,7 @@ from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
 from analogio import AnalogIn
-from digitalio import DigitalInOut, Direction
+from digitalio import DigitalInOut, Direction, Pull
 from keypad import KeyMatrix
 
 from roki.firmware.calibration import Calibration
@@ -71,6 +71,8 @@ class Roki:
 
         thumb_stick_button = DigitalInOut(getattr(board, b))
         thumb_stick_button.direction = Direction.INPUT
+        thumb_stick_button.pull = Pull.UP
+
         self.thumb_stick_x = AnalogIn(getattr(board, x))
         self.thumb_stick_y = AnalogIn(getattr(board, y))
 
@@ -104,6 +106,10 @@ class Roki:
 
 class Primary(Roki):
     async def run(self):
+        print("Running...")
+
+        self.calibration.start()
+
         DeviceInfoService(
             software_revision=adafruit_ble.__version__,
             manufacturer="Adafruit Industries",

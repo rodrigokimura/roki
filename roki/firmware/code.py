@@ -3,7 +3,6 @@ import asyncio
 import board
 
 from roki.firmware.kb import Roki
-from roki.firmware.utils import blink_led
 
 
 async def main():
@@ -20,5 +19,4 @@ async def main():
 if __name__ == "__main__":
     print(dir(board))
 
-    blink_led()
     asyncio.run(main())
