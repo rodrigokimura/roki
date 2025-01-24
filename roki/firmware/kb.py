@@ -15,8 +15,8 @@ from roki.firmware.service import RokiService
 from roki.firmware.utils import (
     Cycle,
     Debouncer,
-    decode_vector,
-    encode_vector,
+    decode_float,
+    encode_float,
     get_coords,
 )
 
@@ -94,7 +94,17 @@ class Roki:
         self.mouse_speed = 10
 
     async def run(self):
+        print("Preparing...")
+        self.start_calibration()
+
+        print("Running...")
+        await self.main_loop()
+
+    async def main_loop(self):
         pass
+
+    def start_calibration(self):
+        self.calibration.start()
 
     def disconnect(self):
         if self.ble.connected:
@@ -105,11 +115,7 @@ class Roki:
 
 
 class Primary(Roki):
-    async def run(self):
-        print("Running...")
-
-        self.calibration.start()
-
+    async def main_loop(self):
         DeviceInfoService(
             software_revision=adafruit_ble.__version__,
             manufacturer="Adafruit Industries",
@@ -163,7 +169,7 @@ class Primary(Roki):
                         elif message_id == 32:
                             x = payload_1
                             y = payload_2
-                            # self._process_thumb_stick(x, y)
+                            self._process_thumb_stick(decode_float(x), decode_float(y))
 
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
@@ -236,7 +242,7 @@ class Primary(Roki):
 
 
 class Secondary(Roki):
-    async def run(self):
+    async def main_loop(self):
         self.service = RokiService()
         advertisement = ProvideServicesAdvertisement(self.service)
 
@@ -257,7 +263,7 @@ class Secondary(Roki):
             while self.ble.connected:
                 await self.process_encoder()
                 await self.process_keys()
-                # await self.process_thumb_stick()
+                await self.process_thumb_stick()
 
     async def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -282,14 +288,15 @@ class Secondary(Roki):
         )
         message_id = 32
         if x > 0 or y > 0:
-            # payload = encode_vector(x, y)
-            await self.send_message(message_id, (0, 0))
+            await self.send_message(message_id, (encode_float(x), encode_float(y)))
             self.send_thumb_stick_message = True
         elif self.send_thumb_stick_message:
-            # payload = encode_vector(x, y)
-            await self.send_message(message_id, (0, 0))
+            await self.send_message(message_id, (encode_float(x), encode_float(y)))
             self.send_thumb_stick_message = False
 
     async def send_message(self, message_id: int, payload: tuple[int, int]):
         self.counter.increment()
-        self.service.write(bytes((self.counter.value, message_id, abs(payload))))
+        payload_1, payload_2 = payload
+        self.service.write(
+            bytes((self.counter.value, message_id, abs(payload_1), abs(payload_2)))
+        )
