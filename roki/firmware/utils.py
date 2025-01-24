@@ -55,15 +55,17 @@ def encode_float(value: float):
     [-1.0; 1.0] -> [0; 255]
     """
     negative = int(value < 0)
-    value = round(abs(value) * (2**7 - 1))  # 0-127
+    value = round(abs(value) * (2**7 - 1))
     return (negative << 7) + value
-    # return value * (2**sign)
 
 
 def decode_float(value: int):
+    """
+    [0; 255] -> [-1.0; 1.0]
+    """
     negative = value >> 7
-    value = value - (negative << 7)
-    return -negative * (value / 2**7)
+    value -= negative << 7
+    return (1, -1)[negative] * (value / (2**7 - 1))
 
 
 def blink_led(led_pin: str = "LED", delay: float = 0.3, times: int = 10):

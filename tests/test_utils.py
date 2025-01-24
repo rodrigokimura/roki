@@ -12,11 +12,12 @@ def test_decode_vector():
 
 
 def test_encode_float():
-    assert encode_float(-0.2) == 153
+    assert encode_float(-1) == 255
+    assert encode_float(1) == 127
+    assert encode_float(0) == 0
 
 
 def test_decode_float():
-    print(encode_float(0.5))
-    # decode_float()
-    r = decode_float(64)
-    print(r)
+    assert decode_float(0) == 0
+    assert decode_float(127) == 1
+    assert decode_float(255) == -1
