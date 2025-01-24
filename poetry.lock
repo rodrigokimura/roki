@@ -112,6 +112,20 @@ Adafruit-Circuitpython-ConnectionManager = "*"
 optional = ["requests"]
 
 [[package]]
+name = "adafruit-circuitpython-ticks"
+version = "1.1.2"
+description = "Work with intervals and deadlines in milliseconds"
+optional = false
+python-versions = "*"
+files = [
+    {file = "adafruit_circuitpython_ticks-1.1.2-py3-none-any.whl", hash = "sha256:b780421d0037ec18733bbeef1937d8e67f6905c49e269dcf1ac91d5962bf71f4"},
+    {file = "adafruit_circuitpython_ticks-1.1.2.tar.gz", hash = "sha256:f9e88cf26f4b4c90f149cabf4798dda4047d020a05067888d8203a8dd2873664"},
+]
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+
+[[package]]
 name = "adafruit-circuitpython-typing"
 version = "1.11.2"
 description = "Types needed for type annotation that are not in `typing`"
@@ -2263,4 +2277,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "c0c49ac23b354a0dabd3f48563abb57acd8499b027824112bce223f7cc50a1ac"
+content-hash = "580e4843d702c57614a5cab8ad48e5528f5d0822753f4652e11b3b97cf426cfa"

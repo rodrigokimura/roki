@@ -91,7 +91,7 @@ class Roki:
         )
         self.config = Config.read()
         self.ble = adafruit_ble.BLERadio()
-        self.mouse_speed = 100
+        self.mouse_speed = 10
 
     async def run(self):
         pass
@@ -129,7 +129,7 @@ class Primary(Roki):
 
         print("advertising")
         self.ble.start_advertising(advertisement, scan_response)
-        self.buffer = bytearray(3)
+        self.buffer = bytearray(4)
         self.current_counter = 0
 
         while True:
@@ -142,29 +142,28 @@ class Primary(Roki):
                 await self.process_primary_thumb_stick()
 
                 if self.peripheral_conn.connected:
-                    counter, message_id, payload = self.get_message()
+                    counter, message_id, payload_1, payload_2 = self.get_message()
 
                     if self.current_counter != counter:
-                        print(counter, message_id, payload)
+                        print(counter, message_id, payload_1)
 
                         self.current_counter = counter
                         if message_id < 30:
                             row, col = get_coords(message_id)
                             key = self.config.layer.secondary_keys[row][col]
-                            self.process_key(key, bool(payload))
+                            self.process_key(key, bool(payload_1))
                         elif message_id == 30:
-                            for _ in range(payload):
+                            for _ in range(payload_1):
                                 self.config.layer.secondary_encoder_cw.press()
                                 self.config.layer.secondary_encoder_cw.release()
                         elif message_id == 31:
-                            for _ in range(payload):
+                            for _ in range(payload_1):
                                 self.config.layer.secondary_encoder_ccw.press()
                                 self.config.layer.secondary_encoder_ccw.release()
                         elif message_id == 32:
-                            x, y = decode_vector(payload)
-                            x -= 7.5
-                            y -= 7.5
-                            self._process_thumb_stick(x, y)
+                            x = payload_1
+                            y = payload_2
+                            # self._process_thumb_stick(x, y)
 
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
@@ -176,20 +175,18 @@ class Primary(Roki):
     def get_message(self):
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
         service.readinto(self.buffer)
-        return self.buffer[0], self.buffer[1], self.buffer[2]
+        return self.buffer[0], self.buffer[1], self.buffer[2], self.buffer[3]
 
     async def process_primary_thumb_stick(self):
-        print(self.thumb_stick_x.value)
-        print(self.thumb_stick_y.value)
-        x = (self.thumb_stick_x.value / 4096) - 7.5
-        y = (self.thumb_stick_y.value / 4096) - 7.5
-
+        x, y = self.calibration.get_normalized(
+            self.thumb_stick_x.value, self.thumb_stick_y.value
+        )
         self._process_thumb_stick(x, y)
 
     def _process_thumb_stick(self, x: float, y: float):
         from .keys import mouse
 
-        print(f"Mouse: {x} x {y}")
+        print(f"Mouse: ({x}, {y})")
         if x and y:
             mouse.move(int(x * self.mouse_speed), int(y * self.mouse_speed))
 
@@ -267,31 +264,32 @@ class Secondary(Roki):
         if self.encoder_position.rose:
             message_id = 30
             payload = self.encoder_position.diff
-            await self.send_message(message_id, payload)
+            await self.send_message(message_id, (payload, 0))
         elif self.encoder_position.fell:
             message_id = 31
             payload = -self.encoder_position.diff
-            await self.send_message(message_id, payload)
+            await self.send_message(message_id, (payload, 0))
 
     async def process_keys(self):
         if event := self.key_matrix.events.get():
             message_id = event.key_number
             payload = int(event.pressed)
-            await self.send_message(message_id, payload)
+            await self.send_message(message_id, (payload, 0))
 
     async def process_thumb_stick(self):
-        x = self.thumb_stick_x.value // 4096
-        y = self.thumb_stick_y.value // 4096
+        x, y = self.calibration.get_normalized(
+            self.thumb_stick_x.value, self.thumb_stick_y.value
+        )
         message_id = 32
         if x > 0 or y > 0:
-            payload = encode_vector(x, y)
-            await self.send_message(message_id, payload)
+            # payload = encode_vector(x, y)
+            await self.send_message(message_id, (0, 0))
             self.send_thumb_stick_message = True
         elif self.send_thumb_stick_message:
-            payload = encode_vector(x, y)
-            await self.send_message(message_id, payload)
+            # payload = encode_vector(x, y)
+            await self.send_message(message_id, (0, 0))
             self.send_thumb_stick_message = False
 
-    async def send_message(self, message_id: int, payload: int):
+    async def send_message(self, message_id: int, payload: tuple[int, int]):
         self.counter.increment()
         self.service.write(bytes((self.counter.value, message_id, abs(payload))))

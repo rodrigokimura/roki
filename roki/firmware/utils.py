@@ -50,8 +50,20 @@ def decode_vector(i: int):
     return x, i - (x << 4)
 
 
-def map_range():
-    pass
+def encode_float(value: float):
+    """
+    [-1.0; 1.0] -> [0; 255]
+    """
+    negative = int(value < 0)
+    value = round(abs(value) * (2**7 - 1))  # 0-127
+    return (negative << 7) + value
+    # return value * (2**sign)
+
+
+def decode_float(value: int):
+    negative = value >> 7
+    value = value - (negative << 7)
+    return -negative * (value / 2**7)
 
 
 def blink_led(led_pin: str = "LED", delay: float = 0.3, times: int = 10):

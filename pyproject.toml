@@ -16,6 +16,7 @@ minify-html = "*"
 jinja2 = "*"
 circuitpython-stubs = "*"
 types-circuitpython = "*"
+adafruit-circuitpython-ticks = "*"
 
 [tool.poetry.group.manager.dependencies]
 circup = "*"
