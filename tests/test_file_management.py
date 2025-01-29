@@ -33,6 +33,15 @@ def test_copy_tree(mock_run_command: MagicMock):
     mock_run_command.assert_called_once_with("sudo cp abc/def/* . -rpvf", shell=True)
 
 
+def test_copy_tree_with_extensions(mock_run_command: MagicMock):
+    copy_tree("abc/def", ".", ["txt", "py"])
+    calls = mock_run_command.call_args_list
+    assert len(calls) == 2
+    call1, call2 = calls
+    assert call1.args == ("sudo cp abc/def/*.txt . -rpvf",)
+    assert call2.args == ("sudo cp abc/def/*.py . -rpvf",)
+
+
 def test_copy_file(mock_run_command: MagicMock):
     copy_file("abc/def.txt", "xyz")
     mock_run_command.assert_called_once_with("sudo cp abc/def.txt xyz/ -vf", shell=True)

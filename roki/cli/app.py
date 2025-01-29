@@ -67,7 +67,7 @@ def upload_code(side: str = typer.Option("r")):
     delete_file(f"{mountpoint_path}/config.json")
 
     create_tree(firmware_location)
-    copy_tree(firmware_relative_tree, firmware_location)
+    copy_tree(firmware_relative_tree, firmware_location, ["py", "json"])
     create_empty_file(f"{mountpoint_path}/roki/__init__.py")
 
     root_files = [
