@@ -152,8 +152,6 @@ class Primary(Roki):
                     counter, message_id, payload_1, payload_2 = self.get_message()
 
                     if self.current_counter != counter:
-                        print(counter, message_id, payload_1)
-
                         self.current_counter = counter
                         if message_id == KEY:
                             row, col = get_coords(payload_1)
@@ -167,9 +165,9 @@ class Primary(Roki):
                                 self.config.layer.secondary_encoder_ccw.press()
                                 self.config.layer.secondary_encoder_ccw.release()
                         elif message_id == THUMB_STICK:
-                            x = payload_1
-                            y = payload_2
-                            self._process_thumb_stick(decode_float(x), decode_float(y))
+                            self._process_thumb_stick(
+                                decode_float(payload_1), decode_float(payload_2)
+                            )
 
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
@@ -192,8 +190,7 @@ class Primary(Roki):
     def _process_thumb_stick(self, x: float, y: float):
         from .keys import mouse
 
-        print(f"Mouse: ({x}, {y})")
-        if x and y:
+        if x != 0 or y != 0:
             mouse.move(int(x * self.mouse_speed), int(y * self.mouse_speed))
 
     async def process_primary_encoder(self):
@@ -287,7 +284,7 @@ class Secondary(Roki):
             self.thumb_stick_x.value, self.thumb_stick_y.value
         )
         message_id = THUMB_STICK
-        if x > 0 or y > 0:
+        if x != 0 or y != 0:
             await self.send_message(message_id, (encode_float(x), encode_float(y)))
             self.send_thumb_stick_message = True
         elif self.send_thumb_stick_message:
