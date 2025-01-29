@@ -11,6 +11,7 @@ from keypad import KeyMatrix
 from roki.firmware.calibration import Calibration
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
+from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 from roki.firmware.service import RokiService
 from roki.firmware.utils import (
     Cycle,
@@ -154,19 +155,18 @@ class Primary(Roki):
                         print(counter, message_id, payload_1)
 
                         self.current_counter = counter
-                        if message_id < 30:
-                            row, col = get_coords(message_id)
+                        if message_id == KEY:
+                            row, col = get_coords(payload_1)
                             key = self.config.layer.secondary_keys[row][col]
-                            self.process_key(key, bool(payload_1))
-                        elif message_id == 30:
+                            self.process_key(key, bool(payload_2))
+                        elif message_id == ENCODER:
                             for _ in range(payload_1):
                                 self.config.layer.secondary_encoder_cw.press()
                                 self.config.layer.secondary_encoder_cw.release()
-                        elif message_id == 31:
-                            for _ in range(payload_1):
+                            for _ in range(payload_2):
                                 self.config.layer.secondary_encoder_ccw.press()
                                 self.config.layer.secondary_encoder_ccw.release()
-                        elif message_id == 32:
+                        elif message_id == THUMB_STICK:
                             x = payload_1
                             y = payload_2
                             self._process_thumb_stick(decode_float(x), decode_float(y))
@@ -268,30 +268,30 @@ class Secondary(Roki):
     async def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
         if self.encoder_position.rose:
-            message_id = 30
+            message_id = ENCODER
             payload = self.encoder_position.diff
             await self.send_message(message_id, (payload, 0))
         elif self.encoder_position.fell:
-            message_id = 31
+            message_id = ENCODER
             payload = -self.encoder_position.diff
-            await self.send_message(message_id, (payload, 0))
+            await self.send_message(message_id, (0, payload))
 
     async def process_keys(self):
         if event := self.key_matrix.events.get():
-            message_id = event.key_number
+            message_id = KEY
             payload = int(event.pressed)
-            await self.send_message(message_id, (payload, 0))
+            await self.send_message(message_id, (event.key_number, payload))
 
     async def process_thumb_stick(self):
         x, y = self.calibration.get_normalized(
             self.thumb_stick_x.value, self.thumb_stick_y.value
         )
-        message_id = 32
+        message_id = THUMB_STICK
         if x > 0 or y > 0:
             await self.send_message(message_id, (encode_float(x), encode_float(y)))
             self.send_thumb_stick_message = True
         elif self.send_thumb_stick_message:
-            await self.send_message(message_id, (encode_float(x), encode_float(y)))
+            await self.send_message(message_id, (0, 0))
             self.send_thumb_stick_message = False
 
     async def send_message(self, message_id: int, payload: tuple[int, int]):
