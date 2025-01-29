@@ -10,8 +10,12 @@ def create_tree(path: str):
     run_command(f"sudo mkdir {path} -p", shell=True)
 
 
-def copy_tree(source: str, target: str):
-    run_command(f"sudo cp {source}/* {target} -rpvf", shell=True)
+def copy_tree(source: str, target: str, extensions: list[str] | None = None):
+    if extensions:
+        for extension in extensions:
+            run_command(f"sudo cp {source}/*.{extension} {target} -rpvf", shell=True)
+    else:
+        run_command(f"sudo cp {source}/* {target} -rpvf", shell=True)
 
 
 def copy_file(file: str, location: str):

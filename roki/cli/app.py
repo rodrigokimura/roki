@@ -32,9 +32,10 @@ def upload_code(side: str = typer.Option("r")):
     """Upload code and libs to device"""
 
     side = side.lower()
-    if side.lower() not in "rl":
+    if side not in ("r", "l", "right", "left"):
         print("Invalid option: side must be 'r' or 'l'")
         raise typer.Abort()
+    is_left_side = side in ("l", "left")
 
     devices = get_devices()
     options = {n: dev for n, dev in enumerate(devices, start=1)}
@@ -67,7 +68,7 @@ def upload_code(side: str = typer.Option("r")):
     delete_file(f"{mountpoint_path}/config.json")
 
     create_tree(firmware_location)
-    copy_tree(firmware_relative_tree, firmware_location)
+    copy_tree(firmware_relative_tree, firmware_location, ["py", "json"])
     create_empty_file(f"{mountpoint_path}/roki/__init__.py")
 
     root_files = [
@@ -81,7 +82,7 @@ def upload_code(side: str = typer.Option("r")):
 
     settings = "settings.toml"
     with open(f"{firmware_relative_tree}/{settings}", mode="w") as f:
-        f.write(f"IS_LEFT_SIDE={int(side == 'l')}")
+        f.write(f"IS_LEFT_SIDE={int(is_left_side)}")
     copy_file(f"{firmware_relative_tree}/{settings}", mountpoint_path)
     delete_file(f"{firmware_relative_tree}/{settings}")
 
