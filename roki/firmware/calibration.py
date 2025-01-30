@@ -5,17 +5,18 @@ from adafruit_ticks import ticks_ms
 from analogio import AnalogIn
 from digitalio import DigitalInOut
 
-from roki.firmware.utils import blink_led
+from roki.firmware.utils import Loop, blink_led
 
 
-class Calibration:
+class BaseCalibration:
     def __init__(
         self,
         button: DigitalInOut,
         thumb_stick_x: AnalogIn,
         thumb_stick_y: AnalogIn,
-        release_time: int = 5,
-        mid_time: int = 5,
+        release_time: float = 5.0,
+        mid_time: float = 5.0,
+        max_iterations: int | None = None,
     ):
         self.button = button
         self.thumb_stick_x = thumb_stick_x
@@ -23,6 +24,10 @@ class Calibration:
         self.max_x = -float("inf")
         self.min_x = float("inf")
         self.mid_x = 0.0
+        self.lower_mid_x = 0.0
+        self.upper_mid_x = 0.0
+        self.lower_mid_y = 0.0
+        self.upper_mid_y = 0.0
         self.max_y = -float("inf")
         self.mid_y = 0.0
         self.min_y = float("inf")
@@ -32,6 +37,7 @@ class Calibration:
         self.running = True
         self._read = False
         self._limit = 0.1
+        self.max_iterations = max_iterations
 
     def start(self) -> None:
         print("Starting calibration...")
@@ -47,7 +53,7 @@ class Calibration:
         self._get_mid_values()
         self._notify()
 
-        while self.running:
+        for _ in Loop(self.max_iterations, lambda: not self.running).iterate():
             self.max_x = max(self.max_x, self.thumb_stick_x.value)
             self.min_x = min(self.min_x, self.thumb_stick_x.value)
 
@@ -58,6 +64,55 @@ class Calibration:
 
         self._write_config()
 
+    def _startup_condition(self) -> bool:
+        return False
+
+    def _get_mid_values(self) -> None:
+        pass
+
+    def _notify(self) -> None:
+        pass
+
+    def _check_for_stop_criteria(self) -> None:
+        if self._startup_condition():
+            self.running = False
+
+    def _write_config(self) -> None:
+        pass
+
+    def read(self):
+        pass
+
+    def get_normalized(self, x: int, y: int) -> tuple[float, float]:
+        if self._read is False:
+            self.read()
+
+        return self._get_normalized_x(x), self._get_normalized_y(y)
+
+    def _get_normalized_x(self, x: int) -> float:
+        if x < self.lower_mid_x:
+            return -max(
+                min((self.lower_mid_x - x) / (self.lower_mid_x - self.min_x), 1.0), 0.0
+            )
+        if x > self.upper_mid_x:
+            return max(
+                min((x - self.upper_mid_x) / (self.max_x - self.upper_mid_x), 1.0), 0.0
+            )
+        return 0.0
+
+    def _get_normalized_y(self, y: int) -> float:
+        if y < self.lower_mid_y:
+            return -max(
+                min((self.lower_mid_y - y) / (self.lower_mid_y - self.min_y), 1.0), 0.0
+            )
+        if y > self.upper_mid_y:
+            return max(
+                min((y - self.upper_mid_y) / (self.max_y - self.upper_mid_y), 1.0), 0.0
+            )
+        return 0.0
+
+
+class Calibration(BaseCalibration):
     def _startup_condition(self) -> bool:
         return not self.button.value
 
@@ -131,31 +186,3 @@ class Calibration:
 
         del self.mid_x
         del self.mid_y
-
-    def _get_normalized_x(self, x: int) -> float:
-        if x < self.lower_mid_x:
-            return -max(
-                min((self.lower_mid_x - x) / (self.lower_mid_x - self.min_x), 1.0), 0.0
-            )
-        if x > self.upper_mid_x:
-            return max(
-                min((x - self.upper_mid_x) / (self.max_x - self.upper_mid_x), 1.0), 0.0
-            )
-        return 0.0
-
-    def _get_normalized_y(self, y: int) -> float:
-        if y < self.lower_mid_y:
-            return -max(
-                min((self.lower_mid_y - y) / (self.lower_mid_y - self.min_y), 1.0), 0.0
-            )
-        if y > self.upper_mid_y:
-            return max(
-                min((y - self.upper_mid_y) / (self.max_y - self.upper_mid_y), 1.0), 0.0
-            )
-        return 0.0
-
-    def get_normalized(self, x: int, y: int) -> tuple[float, float]:
-        if self._read is False:
-            self.read()
-
-        return self._get_normalized_x(x), self._get_normalized_y(y)

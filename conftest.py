@@ -4,7 +4,6 @@ from unittest.mock import MagicMock
 MOCK_MODULES = [
     "board",
     "rotaryio",
-    "keypad",
     "digitalio",
     "analogio",
     "usb_hid",

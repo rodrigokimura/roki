@@ -1,6 +1,6 @@
-import adafruit_ble
 import board
 import rotaryio
+from adafruit_ble import BLEConnection, BLERadio
 from adafruit_ble.advertising import Advertisement
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.standard.device_info import DeviceInfoService
@@ -8,7 +8,7 @@ from analogio import AnalogIn
 from digitalio import DigitalInOut, Direction, Pull
 from keypad import KeyMatrix
 
-from roki.firmware.calibration import Calibration
+from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
 from roki.firmware.keys import HID, KeyWrapper
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
@@ -16,6 +16,7 @@ from roki.firmware.service import RokiService
 from roki.firmware.utils import (
     Cycle,
     Debouncer,
+    Loop,
     decode_float,
     encode_float,
     get_coords,
@@ -35,6 +36,9 @@ class Roki:
         interval: float = 0.001,
         max_events: int = 5,
         connection_interval: float = 7.5,
+        calibration_class: type[BaseCalibration] = Calibration,
+        max_iterations_main_loop: int | None = None,
+        max_iterations_ble: int | None = None,
     ):
         config = Config.read()
         return (Primary if config.is_left_side else Secondary)(
@@ -47,6 +51,9 @@ class Roki:
             interval,
             max_events,
             connection_interval,
+            calibration_class,
+            max_iterations_main_loop,
+            max_iterations_ble,
         )
 
     def __init__(
@@ -60,6 +67,9 @@ class Roki:
         interval: float = 0.01,
         max_events: int = 5,
         connection_interval: float = 7.5,
+        calibration_class: type[BaseCalibration] = Calibration,
+        max_iterations_main_loop: int | None = None,
+        max_iterations_ble: int | None = None,
     ):
         self.row_count = len(row_pins)
         self.col_count = len(column_pins)
@@ -77,7 +87,7 @@ class Roki:
         self.thumb_stick_x = AnalogIn(getattr(board, x))
         self.thumb_stick_y = AnalogIn(getattr(board, y))
 
-        self.calibration = Calibration(
+        self.calibration = calibration_class(
             thumb_stick_button, self.thumb_stick_x, self.thumb_stick_y
         )
 
@@ -91,17 +101,19 @@ class Roki:
             max_events=max_events,
         )
         self.config = Config.read()
-        self.ble = adafruit_ble.BLERadio()
+        self.ble = BLERadio()
         self.mouse_speed = 10
+        self.max_iterations_main_loop = max_iterations_main_loop
+        self.max_iterations_ble = max_iterations_ble
 
     async def run(self):
         print("Preparing...")
         self.start_calibration()
 
         print("Running...")
-        await self.main_loop()
+        await self.run_main_loop()
 
-    async def main_loop(self):
+    async def run_main_loop(self):
         pass
 
     def start_calibration(self):
@@ -116,9 +128,9 @@ class Roki:
 
 
 class Primary(Roki):
-    async def main_loop(self):
+    async def run_main_loop(self):
         DeviceInfoService(
-            software_revision=adafruit_ble.__version__,
+            software_revision="0.1.0",
             manufacturer="Adafruit Industries",
         )
         advertisement = ProvideServicesAdvertisement(HID)
@@ -139,11 +151,17 @@ class Primary(Roki):
         self.buffer = bytearray(4)
         self.current_counter = 0
 
-        while True:
-            while not self.ble.connected:
+        for _ in Loop(self.max_iterations_main_loop).iterate():
+            for _ in Loop(
+                self.max_iterations_ble,
+                lambda: self.ble.connected,
+            ).iterate():
                 pass
 
-            while self.ble.connected:
+            for _ in Loop(
+                self.max_iterations_ble,
+                lambda: not self.ble.connected,
+            ).iterate():
                 await self.process_primary_keys()
                 await self.process_primary_encoder()
                 await self.process_primary_thumb_stick()
@@ -219,10 +237,8 @@ class Primary(Roki):
         else:
             key.release()
 
-    def connect_to_peripheral_side(
-        self, connection_interval: float
-    ) -> adafruit_ble.BLEConnection:
-        peripheral_conn: adafruit_ble.BLEConnection | None = None
+    def connect_to_peripheral_side(self, connection_interval: float) -> BLEConnection:
+        peripheral_conn: BLEConnection | None = None
         while peripheral_conn is None:
             print("Scanning for peripheral keyboard side...")
             for adv in self.ble.start_scan(
@@ -239,7 +255,7 @@ class Primary(Roki):
 
 
 class Secondary(Roki):
-    async def main_loop(self):
+    async def run_main_loop(self):
         self.service = RokiService()
         advertisement = ProvideServicesAdvertisement(self.service)
 
@@ -248,16 +264,22 @@ class Secondary(Roki):
         self.counter = Cycle()
         self.send_thumb_stick_message = False
 
-        while True:
+        for _ in Loop(self.max_iterations_main_loop).iterate():
             print("Advertise Roki peripheral...")
             self.ble.stop_advertising()
             self.ble.start_advertising(advertisement)
 
-            while not self.ble.connected:
+            for _ in Loop(
+                self.max_iterations_ble,
+                lambda: self.ble.connected,
+            ).iterate():
                 pass
 
             print("Connected")
-            while self.ble.connected:
+            for _ in Loop(
+                self.max_iterations_ble,
+                lambda: not self.ble.connected,
+            ).iterate():
                 await self.process_encoder()
                 await self.process_keys()
                 await self.process_thumb_stick()
