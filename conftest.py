@@ -6,14 +6,15 @@ MOCK_MODULES = [
     "rotaryio",
     "keypad",
     "digitalio",
+    "analogio",
     "usb_hid",
-    "adafruit_ble.characteristics.Characteristic",
-    "adafruit_ble.characteristics.ComplexCharacteristic",
-    "adafruit_ble.services.standard.hid.HIDService",
-    "adafruit_ble.attributes.Attribute",
-    "adafruit_ble.uuid.VendorUUID",
-    "adafruit_ble.advertising.standard.ProvideServicesAdvertisement",
-    "adafruit_ble.services.standard.device_info.DeviceInfoService",
+    "adafruit_hid",
+    "adafruit_hid.consumer_control",
+    "adafruit_hid.consumer_control_code",
+    "adafruit_hid.keyboard",
+    "adafruit_hid.keycode",
+    "adafruit_hid.mouse",
+    "_bleio",
 ]
 
 
@@ -30,7 +31,5 @@ def mock_imported_modules():
 
 
 def pytest_runtest_setup(item):
+    lambda: item  # HACK: avoid LSP flagging as non-used name
     mock_imported_modules()
-
-
-mock_imported_modules()

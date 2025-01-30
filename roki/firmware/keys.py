@@ -113,7 +113,7 @@ kb: Keyboard
 mouse: Mouse
 media: Media
 
-HID = HIDService()
+HID: HIDService | None = None
 
 
 def init(c: Config):
@@ -121,17 +121,20 @@ def init(c: Config):
     global kb
     global mouse
     global media
+    global HID
 
-    kb = Keyboard(HID.devices)
-    mouse = Mouse(HID.devices)
-    media = Media(HID.devices)
+    if HID is None:
+        HID = HIDService()
+        kb = Keyboard(HID.devices)
+        mouse = Mouse(HID.devices)
+        media = Media(HID.devices)
 
-    sender_map = {
-        kb: KeyboardCode(),
-        mouse: MouseButton(),
-        media: MediaFunction(),
-        Manager(c): Commands(),
-    }
+        sender_map = {
+            kb: KeyboardCode(),
+            mouse: MouseButton(),
+            media: MediaFunction(),
+            Manager(c): Commands(),
+        }
 
 
 class KeyWrapper:

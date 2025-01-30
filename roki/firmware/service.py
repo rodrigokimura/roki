@@ -56,8 +56,8 @@ class RokiService(Service):
 
     packets = PacketBufferCharacteristic(uuid=PacketBufferUUID(0x0101))
 
-    def readinto(self, buf: WriteableBuffer) -> int:
+    def readinto(self, buf: "WriteableBuffer") -> int:
         return self.packets.readinto(buf)  # type: ignore
 
-    def write(self, buf: ReadableBuffer, *, header: bytes | None = None) -> int:
+    def write(self, buf: "ReadableBuffer", *, header: bytes | None = None) -> int:
         return self.packets.write(buf, header=header)  # type: ignore
