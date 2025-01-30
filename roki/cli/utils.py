@@ -43,8 +43,6 @@ def install_circuitpython_libs(path: str, file: str):
 
 
 def create_mount_point(device: str, path: str):
-    # options = "rw,nosuid,nodev,uid=1000,gid=1000,shortname=mixed,dmask=0077,utf8=1,showexec,flush,uhelper=udisks2"
-    # cmd = f"sudo mount -o options={options} /dev/{device} {path}"
     cmd = f"sudo mount -o uid=1000,gid=1000 /dev/{device} {path}"
     run_command(cmd)
 
@@ -65,7 +63,7 @@ def get_serial_device():
                 d.split("@")[-1] for d in r.splitlines() if vendor in d and intf in d
             )
         except StopIteration:
-            ...
+            return ""
 
 
 def debug_code(file: str):

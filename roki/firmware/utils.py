@@ -1,3 +1,27 @@
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Callable
+
+
+class Loop:
+    def __init__(
+        self,
+        max_iterations: int | None = None,
+        stop_when: "Callable[[], bool]" = lambda: False,
+    ) -> None:
+        self.max_iterations = max_iterations
+        self.sentinel = stop_when
+
+    def iterate(self):
+        from adafruit_itertools import count
+
+        for i in count():
+            if i >= self.max_iterations or self.sentinel():
+                break
+            yield i
+
+
 class Cycle:
     def __init__(self, initial_value: int = 0, limit: int = 100) -> None:
         self.value = initial_value

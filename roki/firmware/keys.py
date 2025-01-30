@@ -109,9 +109,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 sender_map: dict[Device, Code] = {}
-kb: Keyboard
-mouse: Mouse
-media: Media
+kb: Keyboard = Keyboard([])
+mouse: Mouse = Mouse([])
+media: Media = Media([])
 
 HID: HIDService | None = None
 
