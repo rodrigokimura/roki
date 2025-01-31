@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import MagicMock, PropertyMock, call, mock_open, patch
 
 import pytest
+
+from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 
 if TYPE_CHECKING:
     from roki.firmware.calibration import BaseCalibration
@@ -57,7 +59,7 @@ def primary(
         *roki_params,
         calibration_class=mocked_calibration,
         max_iterations_main_loop=1,
-        max_iterations_ble=1,
+        max_iterations_ble=2,
     )
 
     assert isinstance(p, Roki)
@@ -106,30 +108,53 @@ def mock_provide_services_advertisement():
 
 
 @pytest.fixture
-def mock_ble_radio_start_scan():
+def mock_received_message():
+    m = MagicMock()
+    m.return_value = (0, KEY, 0, 0)
+    return m
+
+
+@pytest.fixture
+def mocked_roki_service(mock_received_message: MagicMock):
+    m = MagicMock()
+    m.write = lambda _: None
+    m.readinto = mock_received_message
+    return m
+
+
+@pytest.fixture
+def mock_roki_service(mocked_roki_service: MagicMock):
+    with patch("roki.firmware.kb.RokiService") as m:
+        m.return_value = mocked_roki_service
+        yield mocked_roki_service
+
+
+@pytest.fixture
+def mock_ble_radio_start_scan(mocked_roki_service: MagicMock):
     from roki.firmware.kb import BLERadio
     from roki.firmware.service import RokiService
+
+    connection = MagicMock()
+    connection.__getitem__ = lambda *_: mocked_roki_service
 
     with (
         patch.object(BLERadio, "start_scan") as mock_start_scan,
         patch.object(BLERadio, "connect") as mock_connect,
     ):
-        mm = MagicMock()
-        mm.services = [RokiService]
-        mock_start_scan.return_value = [mm]
-        mock_connect.return_value = MagicMock()
+        advertisement = MagicMock()
+        advertisement.services = [RokiService]
+        mock_start_scan.return_value = [advertisement]
+        mock_connect.return_value = connection
         yield mock_connect
 
 
 @pytest.fixture
 def mock_debouncer():
-    from roki.firmware.utils import (
-        Debouncer,
-    )
+    from roki.firmware.kb import Debouncer
 
     with (
-        patch.object(Debouncer, "rose") as mock_rose,
-        patch.object(Debouncer, "fell") as mock_fell,
+        patch.object(Debouncer, "rose", new_callable=PropertyMock) as mock_rose,
+        patch.object(Debouncer, "fell", new_callable=PropertyMock) as mock_fell,
     ):
         mock_rose.return_value = False
         mock_fell.return_value = False
@@ -151,13 +176,29 @@ def mock_key_events():
         yield m
 
 
-@pytest.fixture
-def mock_roki_service():
-    from roki.firmware.service import RokiService
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
+    "mock_ble_radio_start_scan",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+)
+async def test_primary_run_with_remote_key_press(
+    primary: "Primary",
+    mock_received_message: MagicMock,
+):
+    mock_received_message.side_effect = [
+        (1, KEY, 1, 0),
+        (2, KEY, 1, 1),
+    ]
+    with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
+        await primary.run()
 
-    with patch.object(RokiService, "write") as m:
-        m.return_value = ""
-        yield m
+        assert m.call_args_list == [
+            call(KEY, 1, 0),
+            call(KEY, 1, 1),
+        ]
 
 
 @pytest.mark.usefixtures(
@@ -168,7 +209,76 @@ def mock_roki_service():
     "mock_mouse",
     "mock_key_events",
 )
-async def test_primary_run(primary: "Primary"):
+async def test_primary_run_with_remote_thumb_stick_tilt(
+    primary: "Primary",
+    mock_received_message: MagicMock,
+):
+    mock_received_message.side_effect = [
+        (1, THUMB_STICK, 0, 0),
+        (2, THUMB_STICK, 1, 1),
+    ]
+    with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
+        await primary.run()
+
+        assert m.call_args_list == [
+            call(THUMB_STICK, 0, 0),
+            call(THUMB_STICK, 1, 1),
+        ]
+
+
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
+    "mock_ble_radio_start_scan",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+)
+async def test_primary_run_with_remote_encoder(
+    primary: "Primary",
+    mock_received_message: MagicMock,
+):
+    mock_received_message.return_value = (99, ENCODER, 1, 1)
+    with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
+        await primary.run()
+        m.assert_called_with(ENCODER, 1, 1)
+
+
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
+    "mock_ble_radio_start_scan",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+)
+async def test_primary_run_with_local_encoder_fall(
+    primary: "Primary",
+    mock_received_message: MagicMock,
+    mock_debouncer: tuple[MagicMock, MagicMock],
+):
+    rose, fell = mock_debouncer
+    rose.return_value = False
+    fell.return_value = True
+    await primary.run()
+
+
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
+    "mock_ble_radio_start_scan",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+)
+async def test_primary_run_with_local_encoder_raise(
+    primary: "Primary",
+    mock_received_message: MagicMock,
+    mock_debouncer: tuple[MagicMock, MagicMock],
+):
+    rose, fell = mock_debouncer
+    rose.return_value = True
+    fell.return_value = False
     await primary.run()
 
 

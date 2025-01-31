@@ -7,12 +7,6 @@ MOCK_MODULES = [
     "digitalio",
     "analogio",
     "usb_hid",
-    "adafruit_hid",
-    "adafruit_hid.consumer_control",
-    "adafruit_hid.consumer_control_code",
-    "adafruit_hid.keyboard",
-    "adafruit_hid.keycode",
-    "adafruit_hid.mouse",
     "_bleio",
 ]
 

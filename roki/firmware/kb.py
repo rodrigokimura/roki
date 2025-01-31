@@ -171,22 +171,7 @@ class Primary(Roki):
 
                     if self.current_counter != counter:
                         self.current_counter = counter
-                        if message_id == KEY:
-                            row, col = get_coords(payload_1)
-                            key = self.config.layer.secondary_keys[row][col]
-                            self.process_key(key, bool(payload_2))
-                        elif message_id == ENCODER:
-                            for _ in range(payload_1):
-                                self.config.layer.secondary_encoder_cw.press()
-                                self.config.layer.secondary_encoder_cw.release()
-                            for _ in range(payload_2):
-                                self.config.layer.secondary_encoder_ccw.press()
-                                self.config.layer.secondary_encoder_ccw.release()
-                        elif message_id == THUMB_STICK:
-                            self._process_thumb_stick(
-                                decode_float(payload_1), decode_float(payload_2)
-                            )
-
+                        self._handle_message(message_id, payload_1, payload_2)
                 else:
                     self.peripheral_conn = self.connect_to_peripheral_side(
                         self.connection_interval
@@ -196,8 +181,22 @@ class Primary(Roki):
 
     def get_message(self):
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
-        service.readinto(self.buffer)
-        return self.buffer[0], self.buffer[1], self.buffer[2], self.buffer[3]
+        return service.readinto(self.buffer)
+
+    def _handle_message(self, message_id: int, payload_1: int, payload_2: int):
+        if message_id == KEY:
+            row, col = get_coords(payload_1)
+            key = self.config.layer.secondary_keys[row][col]
+            self._process_key_wrapper(key, bool(payload_2))
+        elif message_id == ENCODER:
+            for _ in range(payload_1):
+                self.config.layer.secondary_encoder_cw.press()
+                self.config.layer.secondary_encoder_cw.release()
+            for _ in range(payload_2):
+                self.config.layer.secondary_encoder_ccw.press()
+                self.config.layer.secondary_encoder_ccw.release()
+        elif message_id == THUMB_STICK:
+            self._process_thumb_stick(decode_float(payload_1), decode_float(payload_2))
 
     async def process_primary_thumb_stick(self):
         x, y = self.calibration.get_normalized(
@@ -207,6 +206,9 @@ class Primary(Roki):
 
     def _process_thumb_stick(self, x: float, y: float):
         from .keys import mouse
+
+        if mouse is None:
+            return
 
         if x != 0 or y != 0:
             mouse.move(int(x * self.mouse_speed), int(y * self.mouse_speed))
@@ -229,9 +231,9 @@ class Primary(Roki):
             row, col = get_coords(event.key_number, self.col_count)
 
             key = self.config.layer.primary_keys[row][col]
-            self.process_key(key, event.pressed)
+            self._process_key_wrapper(key, event.pressed)
 
-    def process_key(self, key: KeyWrapper, pressed: bool):
+    def _process_key_wrapper(self, key: KeyWrapper, pressed: bool):
         if pressed:
             key.press()
         else:

@@ -1,4 +1,9 @@
-from typing import TYPE_CHECKING
+try:
+    from typing import TYPE_CHECKING as __t
+
+    TYPE_CHECKING = __t
+except ImportError:  # pragma: no cover
+    TYPE_CHECKING = False
 
 if TYPE_CHECKING:
     from typing import Callable

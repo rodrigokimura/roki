@@ -9,13 +9,7 @@ from adafruit_hid.keycode import Keycode
 from adafruit_hid.mouse import Mouse as _Mouse
 
 from roki.firmware.manager import Commands, Manager
-
-try:
-    from typing import TYPE_CHECKING as __t
-
-    TYPE_CHECKING = __t
-except ImportError:  # pragma: no cover
-    TYPE_CHECKING = False
+from roki.firmware.utils import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Literal, Sequence, TypeAlias
@@ -109,9 +103,9 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 sender_map: dict[Device, Code] = {}
-kb: Keyboard = Keyboard([])
-mouse: Mouse = Mouse([])
-media: Media = Media([])
+kb: Keyboard | None = None
+mouse: Mouse | None = None
+media: Media | None = None
 
 HID: HIDService | None = None
 
@@ -185,9 +179,12 @@ class KeyWrapper:
             self.release_all()
 
     def release_all(self) -> None:
-        kb.release_all()
-        mouse.release_all()
-        media.release()
+        if kb:
+            kb.release_all()
+        if mouse:
+            mouse.release_all()
+        if media:
+            media.release()
 
     def press_and_release(self) -> None:
         self.press()

@@ -19,14 +19,14 @@ python-dotenv = "*"
 
 [[package]]
 name = "adafruit-blinka"
-version = "8.51.0"
+version = "8.52.0"
 description = "CircuitPython APIs for non-CircuitPython versions of Python such as CPython on Linux and MicroPython."
 optional = false
 python-versions = ">=3.7.0"
 groups = ["main"]
 files = [
-    {file = "Adafruit_Blinka-8.51.0-py3-none-any.whl", hash = "sha256:f01635f4fb5c5255167dea5c0b8feb20cc162f8e8d0140696e236796f897a834"},
-    {file = "adafruit_blinka-8.51.0.tar.gz", hash = "sha256:844f15be775ee5c418446969a427c5a3847928e644f2b1a35542acff5b208f3a"},
+    {file = "Adafruit_Blinka-8.52.0-py3-none-any.whl", hash = "sha256:178d96810c129f99514d77d0b6c524e405b7da81afaa8a61a2146545c1203915"},
+    {file = "adafruit_blinka-8.52.0.tar.gz", hash = "sha256:49b06653ca68261633dce55665e86c521025ede2b38891174206f53dc7f08cbf"},
 ]
 
 [package.dependencies]
@@ -94,6 +94,21 @@ groups = ["main"]
 files = [
     {file = "adafruit_circuitpython_connectionmanager-3.1.3-py3-none-any.whl", hash = "sha256:9df3a4c617dae27bad1ac8607f1a084312c8498d831ebe1c6a2c8d5cb309daea"},
     {file = "adafruit_circuitpython_connectionmanager-3.1.3.tar.gz", hash = "sha256:0f133bdedf454ede0c0a866ed605fe166cc85f75cfcea74758e3622ae403e5f9"},
+]
+
+[package.dependencies]
+Adafruit-Blinka = "*"
+
+[[package]]
+name = "adafruit-circuitpython-hid"
+version = "6.1.5"
+description = "CircuitPython helper library for simulating HID devices."
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "adafruit_circuitpython_hid-6.1.5-py3-none-any.whl", hash = "sha256:dacec8e7ff3c44c43d791a0bf15939727a94a0cf68b2e32c7dde5d55c3416b2d"},
+    {file = "adafruit_circuitpython_hid-6.1.5.tar.gz", hash = "sha256:3b9f1f9495439dbdb3f875396ffd7d4cea8ebfd4cf0e9688921bb4718031f2e9"},
 ]
 
 [package.dependencies]
@@ -587,14 +602,14 @@ files = [
 
 [[package]]
 name = "circuitpython-stubs"
-version = "9.2.3"
+version = "9.2.4"
 description = "PEP 561 type stubs for CircuitPython"
 optional = false
 python-versions = "*"
 groups = ["main"]
 files = [
-    {file = "circuitpython_stubs-9.2.3-py3-none-any.whl", hash = "sha256:d07343751a3163d53d5df1b7e17303e51f22046fe22dea08ea8bda38cb8365ff"},
-    {file = "circuitpython_stubs-9.2.3.tar.gz", hash = "sha256:c7c12a34cab124f121b7d3ae7ccd1ab2d7766e5d0ef9c728951b9472d5f66a81"},
+    {file = "circuitpython_stubs-9.2.4-py3-none-any.whl", hash = "sha256:03c466650e19c22b4d6c13a6e83b8a2d48031a9500c0bebadb7593c389270ed2"},
+    {file = "circuitpython_stubs-9.2.4.tar.gz", hash = "sha256:3e8c0ffc364686dd1102b6c6c41c4326e58cf50adc75432d43baaba5a8bb2af3"},
 ]
 
 [[package]]
@@ -807,14 +822,14 @@ files = [
 
 [[package]]
 name = "fastapi"
-version = "0.115.7"
+version = "0.115.8"
 description = "FastAPI framework, high performance, easy to learn, fast to code, ready for production"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "fastapi-0.115.7-py3-none-any.whl", hash = "sha256:eb6a8c8bf7f26009e8147111ff15b5177a0e19bb4a45bc3486ab14804539d21e"},
-    {file = "fastapi-0.115.7.tar.gz", hash = "sha256:0f106da6c01d88a6786b3248fb4d7a940d071f6f488488898ad5d354b25ed015"},
+    {file = "fastapi-0.115.8-py3-none-any.whl", hash = "sha256:753a96dd7e036b34eeef8babdfcfe3f28ff79648f86551eb36bfc1b0bf4a8cbf"},
+    {file = "fastapi-0.115.8.tar.gz", hash = "sha256:0ce9111231720190473e222cdf0f07f7206ad7e53ea02beb1d2dc36e2f0741e9"},
 ]
 
 [package.dependencies]
@@ -2416,4 +2431,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "8d9991ffe143cb88da639814b80f91504816b22c25694259e0382a1e6e58b784"
+content-hash = "9a66066781128a4362bb7546b1588d76a6aa1ff26697e9c8520ac7b176fe03ce"
