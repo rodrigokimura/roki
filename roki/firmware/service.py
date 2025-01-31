@@ -4,11 +4,6 @@ from adafruit_ble.characteristics import Characteristic, ComplexCharacteristic
 from adafruit_ble.services import Service
 from adafruit_ble.uuid import VendorUUID
 
-from roki.firmware.keys import TYPE_CHECKING
-
-if TYPE_CHECKING:  # pragma: no cover
-    from circuitpython_typing import ReadableBuffer, WriteableBuffer
-
 BUFFER_SIZE = 4
 
 
@@ -56,8 +51,9 @@ class RokiService(Service):
 
     packets = PacketBufferCharacteristic(uuid=PacketBufferUUID(0x0101))
 
-    def readinto(self, buf: "WriteableBuffer") -> int:
-        return self.packets.readinto(buf)  # type: ignore
+    def readinto(self, buf: bytearray) -> tuple[int, int, int, int]:
+        self.packets.readinto(buf)  # type: ignore
+        return buf[0], buf[1], buf[3], buf[4]
 
-    def write(self, buf: "ReadableBuffer", *, header: bytes | None = None) -> int:
+    def write(self, buf: bytes, *, header: bytes | None = None) -> int:
         return self.packets.write(buf, header=header)  # type: ignore

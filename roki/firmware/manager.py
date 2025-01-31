@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-try:
-    from typing import TYPE_CHECKING as __t
-
-    TYPE_CHECKING = __t
-except ImportError:  # pragma: no cover
-    TYPE_CHECKING = False
+from roki.firmware.utils import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from .config import Config

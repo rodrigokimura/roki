@@ -62,13 +62,15 @@ def mock_calibration_json():
         yield mock_file
 
 
-def test_calibration(
-    calibration: "Calibration",
-    mock_blink_led: MagicMock,
-):
+def test_calibration(calibration: "Calibration", mock_blink_led: MagicMock):
     calibration.start()
     mock_blink_led.assert_called()
 
 
 def test_calibration_read(calibration: "Calibration"):
     calibration.read()
+
+    assert calibration.min_x != float("inf")
+    assert calibration.max_x != -float("inf")
+    assert calibration.min_y != float("inf")
+    assert calibration.max_y != -float("inf")
