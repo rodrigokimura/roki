@@ -57,19 +57,40 @@ def test_mouse(mouse: "Mouse", wrap_mouse_move: MagicMock):
     wrap_mouse_move.assert_called_with(wheel=2)
     mouse.press("sd")
     wrap_mouse_move.assert_called_with(wheel=-2)
+    mouse.press(1)
+    mouse.release(1)
 
 
 def test_mouse_button():
     from roki.firmware.keys import MouseButton
 
+    assert "MOUSE_MOVE_UP" in MouseButton()
+    assert "LEFT_BUTTON" in MouseButton()
     assert MouseButton().get("MOUSE_MOVE_UP") == "u"
     assert MouseButton().get("LEFT_BUTTON") == 1
 
 
-def test_init(mock_hid_service: MagicMock):
+def test_keyboard_code():
+    from roki.firmware.keys import KeyboardCode
+
+    assert "A" in KeyboardCode()
+    assert KeyboardCode().get("A") == 0x04
+
+
+def test_media_function():
+    from roki.firmware.keys import MediaFunction
+
+    assert "MUTE" in MediaFunction()
+    assert MediaFunction().get("MUTE") == 0xE2
+
+
+def test_key_wrapper(mock_hid_service: MagicMock):
     from roki.firmware.config import Config
-    from roki.firmware.keys import init
+    from roki.firmware.keys import KeyWrapper, init
 
     init(Config())
+
+    kw = KeyWrapper(["Z", "MUTE", "LEFT_BUTTON", "LAYER_0_PRESS"])
+    kw.press_and_release()
 
     mock_hid_service.assert_called()

@@ -8,20 +8,13 @@ from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 from adafruit_hid.mouse import Mouse as _Mouse
 
-from roki.firmware.manager import Commands, Manager
+from roki.firmware.layer_handler import Commands, LayerHandler
 from roki.firmware.utils import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Literal, Sequence, TypeAlias
 
-    DPad = (
-        Literal["u"]
-        | Literal["d"]
-        | Literal["l"]
-        | Literal["r"]
-        | Literal["su"]
-        | Literal["sd"]
-    )
+    DPad = Literal["u", "d", "l", "r", "su", "sd"]
 
 
 class Mouse(_Mouse):
@@ -98,7 +91,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
     from .config import Config
 
-    Device: TypeAlias = Keyboard | Mouse | Media | Manager
+    Device: TypeAlias = Keyboard | Mouse | Media | LayerHandler
     Code: TypeAlias = KeyboardCode | MouseButton | MediaFunction | Commands
 
 
@@ -127,7 +120,7 @@ def init(c: Config):
             kb: KeyboardCode(),
             mouse: MouseButton(),
             media: MediaFunction(),
-            Manager(c): Commands(),
+            LayerHandler(c): Commands(),
         }
 
 
@@ -146,7 +139,7 @@ class KeyWrapper:
             for key in keys
             if key in key_container
         )
-        self.management_key = any(isinstance(s, Manager) for s, _ in self.params)
+        self.is_layer_handler = any(isinstance(s, LayerHandler) for s, _ in self.params)
 
     def _press(self, sender: Device, key_code: Any) -> None:
         if isinstance(sender, Media):
@@ -155,7 +148,7 @@ class KeyWrapper:
             sender.press(key_code)
         elif isinstance(sender, Mouse):
             sender.press(key_code)
-        elif isinstance(sender, Manager):
+        elif isinstance(sender, LayerHandler):
             sender.on_press(key_code)
 
     def _release(self, sender: Device, key_code: Any) -> None:
@@ -165,7 +158,7 @@ class KeyWrapper:
             sender.release(key_code)
         elif isinstance(sender, Mouse):
             sender.release(key_code)
-        elif isinstance(sender, Manager):
+        elif isinstance(sender, LayerHandler):
             sender.on_release(key_code)
 
     def press(self) -> None:
@@ -175,7 +168,7 @@ class KeyWrapper:
     def release(self) -> None:
         for sender, key_code in self.params:
             self._release(sender, key_code)
-        if self.management_key:
+        if self.is_layer_handler:
             self.release_all()
 
     def release_all(self) -> None:
