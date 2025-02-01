@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, PropertyMock, call, mock_open, patch
 
 import pytest
+from itertools import cycle
 
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 
@@ -39,11 +40,12 @@ def mocked_calibration():
     from roki.firmware.calibration import BaseCalibration
 
     class MockedCalibration(BaseCalibration):
-        def _get_normalized_x(self, x: int) -> float:
-            return 0.0
+        pass
 
-        def _get_normalized_y(self, y: int) -> float:
-            return 0.0
+    MockedCalibration._get_normalized_x = MagicMock()
+    MockedCalibration._get_normalized_x.side_effect = cycle([0.0, 1.0])
+    MockedCalibration._get_normalized_y = MagicMock()
+    MockedCalibration._get_normalized_y.side_effect = cycle([0.0, 1.0])
 
     return MockedCalibration
 
@@ -58,8 +60,8 @@ def primary(
     p = Primary(
         *roki_params,
         calibration_class=mocked_calibration,
-        max_iterations_main_loop=1,
-        max_iterations_ble=2,
+        max_iterations_main_loop=2,
+        max_iterations_ble=4,
     )
 
     assert isinstance(p, Roki)
@@ -77,8 +79,8 @@ def secondary(
     s = Secondary(
         *roki_params,
         calibration_class=mocked_calibration,
-        max_iterations_main_loop=1,
-        max_iterations_ble=1,
+        max_iterations_main_loop=2,
+        max_iterations_ble=4,
     )
 
     assert isinstance(s, Roki)
@@ -130,22 +132,50 @@ def mock_roki_service(mocked_roki_service: MagicMock):
 
 
 @pytest.fixture
-def mock_ble_radio_start_scan(mocked_roki_service: MagicMock):
+def mock_ble_radio_connected():
     from roki.firmware.kb import BLERadio
-    from roki.firmware.service import RokiService
 
+    with patch.object(
+        BLERadio, "connected", new_callable=PropertyMock
+    ) as mock_connected:
+        mock_connected.return_value = True
+        yield mock_connected
+
+
+@pytest.fixture
+def ble_connection(
+    mocked_roki_service: MagicMock,
+):
     connection = MagicMock()
     connection.__getitem__ = lambda *_: mocked_roki_service
+    connection.connected = True
+    return connection
+
+
+@pytest.fixture
+def mock_ble_radio_start_scan(
+    ble_connection: MagicMock,
+):
+    from roki.firmware.kb import BLERadio
+    from roki.firmware.service import RokiService
 
     with (
         patch.object(BLERadio, "start_scan") as mock_start_scan,
         patch.object(BLERadio, "connect") as mock_connect,
+        patch.object(
+            BLERadio, "connections", new_callable=PropertyMock
+        ) as mock_connections,
+        patch.object(
+            BLERadio, "connected", new_callable=PropertyMock
+        ) as mock_connected,
     ):
         advertisement = MagicMock()
         advertisement.services = [RokiService]
         mock_start_scan.return_value = [advertisement]
-        mock_connect.return_value = connection
-        yield mock_connect
+        mock_connect.return_value = ble_connection
+        mock_connected.return_value = True
+        mock_connections.return_value = [MagicMock()]
+        yield mock_connect, mock_connected
 
 
 @pytest.fixture
@@ -179,6 +209,53 @@ def mock_key_events():
 @pytest.mark.usefixtures(
     "mock_device_info_service",
     "mock_provide_services_advertisement",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+)
+async def test_primary_run_with_disconnection(
+    mock_ble_radio_start_scan: tuple[MagicMock, MagicMock],
+    ble_connection: MagicMock,
+    primary: "Primary",
+):
+    _, connected = mock_ble_radio_start_scan
+    ble_connection.connected = False
+    connected.side_effect = cycle(
+        [
+            False,
+            False,
+            True,
+            True,
+        ]
+    )
+    await primary.run()
+
+
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
+    "mock_ble_radio_start_scan",
+    "mock_debouncer",
+    "mock_mouse",
+)
+async def test_primary_run_with_local_key_press(
+    primary: "Primary",
+    mock_key_events: MagicMock,
+):
+    event = MagicMock()
+    event.key_number = 1
+    event.pressed.side_effect = [False, True]
+    mock_key_events.return_value = event
+    with patch.object(
+        primary, "_process_key_wrapper", wraps=primary._process_key_wrapper
+    ) as m:
+        await primary.run()
+        m.assert_called()
+
+
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
     "mock_ble_radio_start_scan",
     "mock_debouncer",
     "mock_mouse",
@@ -188,17 +265,17 @@ async def test_primary_run_with_remote_key_press(
     primary: "Primary",
     mock_received_message: MagicMock,
 ):
-    mock_received_message.side_effect = [
-        (1, KEY, 1, 0),
-        (2, KEY, 1, 1),
-    ]
+    mock_received_message.side_effect = cycle(
+        [
+            (1, KEY, 1, 0),
+            (2, KEY, 1, 1),
+        ]
+    )
     with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
         await primary.run()
 
-        assert m.call_args_list == [
-            call(KEY, 1, 0),
-            call(KEY, 1, 1),
-        ]
+        assert call(KEY, 1, 0) in m.call_args_list
+        assert call(KEY, 1, 1) in m.call_args_list
 
 
 @pytest.mark.usefixtures(
@@ -213,17 +290,17 @@ async def test_primary_run_with_remote_thumb_stick_tilt(
     primary: "Primary",
     mock_received_message: MagicMock,
 ):
-    mock_received_message.side_effect = [
-        (1, THUMB_STICK, 0, 0),
-        (2, THUMB_STICK, 1, 1),
-    ]
+    mock_received_message.side_effect = cycle(
+        [
+            (1, THUMB_STICK, 0, 0),
+            (2, THUMB_STICK, 1, 1),
+        ]
+    )
     with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
         await primary.run()
 
-        assert m.call_args_list == [
-            call(THUMB_STICK, 0, 0),
-            call(THUMB_STICK, 1, 1),
-        ]
+        assert call(THUMB_STICK, 0, 0) in m.call_args_list
+        assert call(THUMB_STICK, 1, 1) in m.call_args_list
 
 
 @pytest.mark.usefixtures(
@@ -261,6 +338,7 @@ async def test_primary_run_with_local_encoder_fall(
     rose.return_value = False
     fell.return_value = True
     await primary.run()
+    mock_received_message.assert_called()
 
 
 @pytest.mark.usefixtures(
@@ -280,6 +358,7 @@ async def test_primary_run_with_local_encoder_raise(
     rose.return_value = True
     fell.return_value = False
     await primary.run()
+    mock_received_message.assert_called()
 
 
 @pytest.mark.usefixtures(
@@ -289,3 +368,66 @@ async def test_primary_run_with_local_encoder_raise(
 )
 async def test_secondary_run(secondary: "Secondary"):
     await secondary.run()
+
+
+@pytest.mark.usefixtures(
+    "mock_provide_services_advertisement",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+    "mock_roki_service",
+)
+async def test_secondary_run_with_disconnection(
+    mock_ble_radio_start_scan: tuple[MagicMock, MagicMock],
+    ble_connection: MagicMock,
+    secondary: "Secondary",
+):
+    _, connected = mock_ble_radio_start_scan
+    ble_connection.connected = False
+    connected.side_effect = cycle(
+        [
+            False,
+            False,
+            True,
+            True,
+        ]
+    )
+    await secondary.run()
+
+
+@pytest.mark.usefixtures(
+    "mock_provide_services_advertisement",
+    "mock_mouse",
+    "mock_key_events",
+    "mock_roki_service",
+)
+async def test_secondary_run_with_encoder(
+    secondary: "Secondary", mock_debouncer: tuple[MagicMock, MagicMock]
+):
+    rose, fell = mock_debouncer
+    rose.side_effect = cycle([True, False])
+    fell.side_effect = cycle([False, True])
+    await secondary.run()
+
+
+@pytest.mark.usefixtures(
+    "mock_provide_services_advertisement",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_roki_service",
+)
+async def test_secondary_run_with_key_press(
+    secondary: "Secondary",
+    mock_key_events: MagicMock,
+):
+    event_pressed = MagicMock()
+    event_pressed.key_number = 1
+    event_pressed.pressed = True
+    event_released = MagicMock()
+    event_released.key_number = 1
+    event_released.pressed = False
+    mock_key_events.side_effect = cycle([event_pressed, event_released])
+    with patch.object(secondary, "send_message", wraps=secondary.send_message) as m:
+        await secondary.run()
+        assert call(KEY, (1, 1)) in m.call_args_list
+        assert call(KEY, (1, 0)) in m.call_args_list

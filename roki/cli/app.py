@@ -44,10 +44,18 @@ def upload_code(side: str = typer.Option("r")):
 
     if len(options) > 1:
         index = typer.prompt("Select a number")
-        chosen = options.get(index)
+        try:
+            chosen = options[int(index)]
+        except ValueError:
+            print("Not a number!")
+            raise typer.Abort()
+        except KeyError:
+            print("Not an option!")
+            raise typer.Abort()
     elif len(options) == 1:
         chosen = devices[0]
     else:
+        print("No devices found.")
         chosen = None
     if not chosen:
         raise typer.Abort()

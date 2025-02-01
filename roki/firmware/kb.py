@@ -113,15 +113,14 @@ class Roki:
         print("Running...")
         await self.run_main_loop()
 
-    async def run_main_loop(self):
-        pass
+    async def run_main_loop(self): ...
 
     def start_calibration(self):
         self.calibration.start()
 
     def disconnect(self):
         if self.ble.connected:
-            print("already connected")
+            print("Already connected. Disconnecting...")
             for conn in self.ble.connections:
                 if conn:
                     conn.disconnect()
@@ -207,7 +206,7 @@ class Primary(Roki):
     def _process_thumb_stick(self, x: float, y: float):
         from .keys import mouse
 
-        if mouse is None:
+        if mouse is None:  # pragma: no cover
             return
 
         if x != 0 or y != 0:
