@@ -3,7 +3,7 @@ from unittest.mock import patch
 
 import pytest
 
-from roki.firmware.manager import Command, Manager, Commands
+from roki.firmware.layer_handler import Command, Commands, LayerHandler
 
 if TYPE_CHECKING:
     from roki.firmware.config import Config
@@ -24,8 +24,8 @@ def config():
 
 
 @pytest.fixture
-def manager(config: "Config"):
-    return Manager(config)
+def layer_handler(config: "Config"):
+    return LayerHandler(config)
 
 
 @pytest.fixture
@@ -49,5 +49,5 @@ def test_commands_get(commands: Commands):
     assert result.type_ == "hold"
 
 
-def test_manager(manager: Manager, command: Command):
-    manager.on_press(command)
+def test_layer_handler(layer_handler: LayerHandler, command: Command):
+    layer_handler.on_press(command)

@@ -6,7 +6,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from .config import Config
 
 
-class Manager:
+class LayerHandler:
     def __init__(self, config: Config) -> None:
         self._prev = 0
         self.config = config
