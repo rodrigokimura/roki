@@ -67,21 +67,17 @@ class BaseCalibration:
     def _startup_condition(self) -> bool:
         return False
 
-    def _get_mid_values(self) -> None:
-        pass
+    def _get_mid_values(self) -> None: ...
 
-    def _notify(self) -> None:
-        pass
+    def _notify(self) -> None: ...
 
     def _check_for_stop_criteria(self) -> None:
         if self._startup_condition():
             self.running = False
 
-    def _write_config(self) -> None:
-        pass
+    def _write_config(self) -> None: ...
 
-    def read(self):
-        pass
+    def read(self): ...
 
     def get_normalized(self, x: int, y: int) -> tuple[float, float]:
         if self._read is False:
