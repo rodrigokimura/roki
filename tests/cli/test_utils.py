@@ -5,13 +5,14 @@ import pytest
 
 from roki.cli.utils import (
     create_mount_point,
-    get_serial_device,
+    debug_code,
+    debug_codes,
     install_circuitpython_libs,
     unmount,
 )
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_subprocess():
     with patch("subprocess.check_output") as m:
         output = {
@@ -19,12 +20,7 @@ def mock_subprocess():
                 {
                     "model": "nice!nano",
                     "vendor": "Nice Key",
-                    "children": [
-                        {
-                            "label": "CIRCUITPY",
-                            "name": "sda1",
-                        }
-                    ],
+                    "children": [{"label": "CIRCUITPY", "name": "sda1"}],
                 },
             ]
         }
@@ -32,7 +28,7 @@ def mock_subprocess():
         yield m
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_subprocess_call():
     with patch("subprocess.call") as m:
         m.return_value = None
@@ -93,6 +89,8 @@ def test_unmount(mock_run_command: MagicMock):
 
 
 def test_get_serial_device(mock_subprocess: MagicMock):
+    from roki.cli.utils import get_serial_device
+
     mock_subprocess.return_value = b"Nice Keyboards, CircuitPython CDC control@sda1"
     result = get_serial_device()
 
@@ -100,7 +98,25 @@ def test_get_serial_device(mock_subprocess: MagicMock):
 
 
 def test_get_serial_device_not_found(mock_subprocess: MagicMock):
+    from roki.cli.utils import get_serial_device
+
     mock_subprocess.return_value = b"Asdf, CircuitPython CDC control@sda1"
     result = get_serial_device()
 
     assert result == ""
+
+
+def test_debug_code(mock_subprocess: MagicMock):
+    mock_subprocess.return_value = None
+    with patch("roki.cli.utils.get_serial_device") as m:
+        debug_code("dummy/file.py")
+
+        m.assert_called_once()
+
+
+def test_debug_codes(mock_subprocess: MagicMock):
+    mock_subprocess.return_value = None
+    with patch("roki.cli.utils.get_serial_device") as m:
+        debug_codes(["dummy/file.py"])
+
+        m.assert_called()
