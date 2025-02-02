@@ -51,49 +51,51 @@ def mocked_calibration():
 
 
 @pytest.fixture
+def main_loop_max_iter(request):
+    return int(getattr(request, "param", 1))
+
+
+@pytest.fixture
+def ble_max_iter(request):
+    return int(getattr(request, "param", 1))
+
+
+@pytest.fixture
 def primary(
     roki_params,
     mocked_calibration: type["BaseCalibration"],
+    main_loop_max_iter: int,
+    ble_max_iter: int,
 ):
     from roki.firmware.kb import Primary, Roki
 
-    p = Primary(
+    primary = Primary(
         *roki_params,
         calibration_class=mocked_calibration,
-        max_iterations_main_loop=2,
-        max_iterations_ble=4,
+        max_iterations_main_loop=main_loop_max_iter,
+        max_iterations_ble=ble_max_iter,
     )
-
-    assert isinstance(p, Roki)
-
-    return p
+    assert isinstance(primary, Roki)
+    return primary
 
 
 @pytest.fixture
 def secondary(
     roki_params,
     mocked_calibration: type["BaseCalibration"],
+    main_loop_max_iter: int,
+    ble_max_iter: int,
 ):
     from roki.firmware.kb import Roki, Secondary
 
-    s = Secondary(
+    secondary = Secondary(
         *roki_params,
         calibration_class=mocked_calibration,
-        max_iterations_main_loop=2,
-        max_iterations_ble=4,
+        max_iterations_main_loop=main_loop_max_iter,
+        max_iterations_ble=ble_max_iter,
     )
-
-    assert isinstance(s, Roki)
-
-    return s
-
-
-def test_factory_method(roki_params):
-    from roki.firmware.kb import Roki
-
-    r = Roki.build(*roki_params)
-
-    assert isinstance(r, Roki)
+    assert isinstance(secondary, Roki)
+    return secondary
 
 
 @pytest.fixture
@@ -185,10 +187,12 @@ def mock_debouncer():
     with (
         patch.object(Debouncer, "rose", new_callable=PropertyMock) as mock_rose,
         patch.object(Debouncer, "fell", new_callable=PropertyMock) as mock_fell,
+        patch.object(Debouncer, "diff", new_callable=PropertyMock) as mock_diff,
     ):
         mock_rose.return_value = False
         mock_fell.return_value = False
-        yield (mock_rose, mock_fell)
+        mock_diff.return_value = 0
+        yield (mock_rose, mock_fell, mock_diff)
 
 
 @pytest.fixture
@@ -204,6 +208,13 @@ def mock_key_events():
     with patch.object(EventQueue, "get") as m:
         m.return_value = None
         yield m
+
+
+def test_factory_method(roki_params):
+    from roki.firmware.kb import Roki
+
+    roki = Roki.build(*roki_params)
+    assert isinstance(roki, Roki)
 
 
 @pytest.mark.usefixtures(
@@ -244,7 +255,7 @@ async def test_primary_run_with_local_key_press(
 ):
     event = MagicMock()
     event.key_number = 1
-    event.pressed.side_effect = [False, True]
+    event.pressed.side_effect = cycle([False, True])
     mock_key_events.return_value = event
     with patch.object(
         primary, "_process_key_wrapper", wraps=primary._process_key_wrapper
@@ -253,6 +264,37 @@ async def test_primary_run_with_local_key_press(
         m.assert_called()
 
 
+@pytest.mark.parametrize("ble_max_iter", [2], indirect=True)
+@pytest.mark.usefixtures(
+    "mock_device_info_service",
+    "mock_provide_services_advertisement",
+    "mock_ble_radio_start_scan",
+    "mock_debouncer",
+    "mock_mouse",
+    "mock_key_events",
+)
+async def test_primary_run_with_local_encoder(
+    primary: "Primary",
+    mock_debouncer: tuple[MagicMock, MagicMock, MagicMock],
+):
+    rose, fell, diff = mock_debouncer
+    rose.side_effect = cycle([False, True])
+    fell.side_effect = cycle([True, False])
+    diff.side_effect = cycle([-1, 1])
+    with (
+        patch.object(
+            primary, "_process_encoder_cw", wraps=primary._process_encoder_cw
+        ) as m_cw,
+        patch.object(
+            primary, "_process_encoder_ccw", wraps=primary._process_encoder_ccw
+        ) as m_ccw,
+    ):
+        await primary.run()
+        m_cw.assert_called()
+        m_ccw.assert_called()
+
+
+@pytest.mark.parametrize("ble_max_iter", [2], indirect=True)
 @pytest.mark.usefixtures(
     "mock_device_info_service",
     "mock_provide_services_advertisement",
@@ -278,6 +320,7 @@ async def test_primary_run_with_remote_key_press(
         assert call(KEY, 1, 1) in m.call_args_list
 
 
+@pytest.mark.parametrize("ble_max_iter", [2], indirect=True)
 @pytest.mark.usefixtures(
     "mock_device_info_service",
     "mock_provide_services_advertisement",
@@ -322,46 +365,6 @@ async def test_primary_run_with_remote_encoder(
 
 
 @pytest.mark.usefixtures(
-    "mock_device_info_service",
-    "mock_provide_services_advertisement",
-    "mock_ble_radio_start_scan",
-    "mock_debouncer",
-    "mock_mouse",
-    "mock_key_events",
-)
-async def test_primary_run_with_local_encoder_fall(
-    primary: "Primary",
-    mock_received_message: MagicMock,
-    mock_debouncer: tuple[MagicMock, MagicMock],
-):
-    rose, fell = mock_debouncer
-    rose.return_value = False
-    fell.return_value = True
-    await primary.run()
-    mock_received_message.assert_called()
-
-
-@pytest.mark.usefixtures(
-    "mock_device_info_service",
-    "mock_provide_services_advertisement",
-    "mock_ble_radio_start_scan",
-    "mock_debouncer",
-    "mock_mouse",
-    "mock_key_events",
-)
-async def test_primary_run_with_local_encoder_raise(
-    primary: "Primary",
-    mock_received_message: MagicMock,
-    mock_debouncer: tuple[MagicMock, MagicMock],
-):
-    rose, fell = mock_debouncer
-    rose.return_value = True
-    fell.return_value = False
-    await primary.run()
-    mock_received_message.assert_called()
-
-
-@pytest.mark.usefixtures(
     "mock_provide_services_advertisement",
     "mock_debouncer",
     "mock_roki_service",
@@ -395,6 +398,8 @@ async def test_secondary_run_with_disconnection(
     await secondary.run()
 
 
+@pytest.mark.parametrize("ble_max_iter", [2], indirect=True)
+@pytest.mark.parametrize("main_loop_max_iter", [2], indirect=True)
 @pytest.mark.usefixtures(
     "mock_provide_services_advertisement",
     "mock_mouse",
@@ -402,14 +407,20 @@ async def test_secondary_run_with_disconnection(
     "mock_roki_service",
 )
 async def test_secondary_run_with_encoder(
-    secondary: "Secondary", mock_debouncer: tuple[MagicMock, MagicMock]
+    secondary: "Secondary", mock_debouncer: tuple[MagicMock, MagicMock, MagicMock]
 ):
-    rose, fell = mock_debouncer
+    rose, fell, diff = mock_debouncer
     rose.side_effect = cycle([True, False])
     fell.side_effect = cycle([False, True])
-    await secondary.run()
+    diff.side_effect = cycle([1, -1])
+    with patch.object(secondary, "send_message", wraps=secondary.send_message) as m:
+        await secondary.run()
+        assert call(2, (1, 0)) in m.call_args_list
+        assert call(3, (127, 127)) in m.call_args_list
+        assert call(3, (0, 0)) in m.call_args_list
 
 
+@pytest.mark.parametrize("ble_max_iter", [2], indirect=True)
 @pytest.mark.usefixtures(
     "mock_provide_services_advertisement",
     "mock_debouncer",

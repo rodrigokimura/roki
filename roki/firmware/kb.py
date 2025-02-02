@@ -216,12 +216,18 @@ class Primary(Roki):
         self.encoder_position.update(self.encoder.position)
         if self.encoder_position.rose:
             for _ in range(self.encoder_position.diff):
-                self.config.layer.primary_encoder_cw.press()
-                self.config.layer.primary_encoder_cw.release()
+                await self._process_encoder_cw()
         elif self.encoder_position.fell:
             for _ in range(-self.encoder_position.diff):
-                self.config.layer.primary_encoder_ccw.press()
-                self.config.layer.primary_encoder_ccw.release()
+                await self._process_encoder_ccw()
+
+    async def _process_encoder_cw(self):
+        self.config.layer.primary_encoder_cw.press()
+        self.config.layer.primary_encoder_cw.release()
+
+    async def _process_encoder_ccw(self):
+        self.config.layer.primary_encoder_ccw.press()
+        self.config.layer.primary_encoder_ccw.release()
 
     async def process_primary_keys(self):
         if event := self.key_matrix.events.get():

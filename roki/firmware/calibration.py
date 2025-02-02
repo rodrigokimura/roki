@@ -36,7 +36,7 @@ class BaseCalibration:
 
         self.running = True
         self._read = False
-        self._limit = 0.1
+        self._limit = 0.05
         self.max_iterations = max_iterations
 
     def start(self) -> None:
@@ -64,16 +64,13 @@ class BaseCalibration:
 
         self._write_config()
 
-    def _startup_condition(self) -> bool:
-        return False
+    def _startup_condition(self) -> bool: ...
 
     def _get_mid_values(self) -> None: ...
 
     def _notify(self) -> None: ...
 
-    def _check_for_stop_criteria(self) -> None:
-        if self._startup_condition():
-            self.running = False
+    def _check_for_stop_criteria(self) -> None: ...
 
     def _write_config(self) -> None: ...
 
@@ -128,18 +125,7 @@ class Calibration(BaseCalibration):
         if self._startup_condition():
             self.running = False
 
-    def _check_data(self):
-        return (
-            self.max_x != -float("inf")
-            and self.max_y != -float("inf")
-            and self.min_x != float("inf")
-            and self.min_y != float("inf")
-        )
-
     def _write_config(self) -> None:
-        if not self._check_data():
-            return
-
         data = {
             "min_x": self.min_x,
             "mid_x": self.mid_x,
