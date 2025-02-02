@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from unittest.mock import MagicMock, PropertyMock, call, mock_open, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 
 import pytest
 from itertools import cycle
@@ -9,14 +9,6 @@ from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 if TYPE_CHECKING:
     from roki.firmware.calibration import BaseCalibration
     from roki.firmware.kb import Primary, Secondary
-
-
-@pytest.fixture(autouse=True)
-def mock_config_json():
-    with open("roki/firmware/config.json") as f:
-        config = f.read()
-    with patch("builtins.open", mock_open(read_data=config)) as mock_file:
-        yield mock_file
 
 
 @pytest.fixture(autouse=True)
