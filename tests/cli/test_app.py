@@ -1,9 +1,8 @@
 from unittest.mock import MagicMock, patch
-import typer
-from typer.testing import CliRunner
-
 
 import pytest
+import typer
+from typer.testing import CliRunner
 
 
 @pytest.fixture
@@ -16,6 +15,15 @@ def app():
 @pytest.fixture
 def runner():
     return CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def mock_run_command():
+    with (
+        patch("roki.cli.utils.run_command"),
+        patch("roki.cli.file_management.run_command"),
+    ):
+        yield
 
 
 @pytest.fixture(autouse=True)
