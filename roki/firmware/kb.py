@@ -10,7 +10,7 @@ from keypad import KeyMatrix
 
 from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
-from roki.firmware.keys import HID, KeyWrapper
+from roki.firmware.keys import KeyWrapper
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 from roki.firmware.service import RokiService
 from roki.firmware.utils import (
@@ -128,11 +128,12 @@ class Roki:
 
 class Primary(Roki):
     async def run_main_loop(self):
+        from roki.firmware.keys import hid
         DeviceInfoService(
             software_revision="0.1.0",
             manufacturer="Adafruit Industries",
         )
-        advertisement = ProvideServicesAdvertisement(HID)
+        advertisement = ProvideServicesAdvertisement(hid)
         # Advertise as "Keyboard" (0x03C1) icon when pairing
         # https://www.bluetooth.com/specifications/assigned-numbers/
         advertisement.appearance = 961

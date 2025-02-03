@@ -100,7 +100,7 @@ kb: Keyboard | None = None
 mouse: Mouse | None = None
 media: Media | None = None
 
-HID: HIDService | None = None
+hid: HIDService | None = None
 
 
 def init(c: Config):
@@ -108,13 +108,13 @@ def init(c: Config):
     global kb
     global mouse
     global media
-    global HID
+    global hid
 
-    if HID is None:
-        HID = HIDService()
-        kb = Keyboard(HID.devices)
-        mouse = Mouse(HID.devices)
-        media = Media(HID.devices)
+    if hid is None:
+        hid = HIDService()
+        kb = Keyboard(hid.devices)
+        mouse = Mouse(hid.devices)
+        media = Media(hid.devices)
 
         sender_map = {
             kb: KeyboardCode(),
