@@ -1,3 +1,4 @@
+from adafruit_itertools import count
 try:
     from typing import TYPE_CHECKING as __t
 
@@ -19,8 +20,6 @@ class Loop:
         self.sentinel = stop_when
 
     def iterate(self):
-        from adafruit_itertools import count
-
         for i in count():
             if i >= self.max_iterations or self.sentinel():
                 break
