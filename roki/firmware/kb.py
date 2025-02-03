@@ -129,6 +129,7 @@ class Roki:
 class Primary(Roki):
     async def run_main_loop(self):
         from roki.firmware.keys import hid
+
         DeviceInfoService(
             software_revision="0.1.0",
             manufacturer="Adafruit Industries",
@@ -169,7 +170,7 @@ class Primary(Roki):
                 if self.peripheral_conn.connected:
                     counter, message_id, payload_1, payload_2 = self.get_message()
 
-                    if self.current_counter != counter:
+                    if counter and self.current_counter != counter:
                         self.current_counter = counter
                         self._handle_message(message_id, payload_1, payload_2)
                 else:
