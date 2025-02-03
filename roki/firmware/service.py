@@ -52,8 +52,9 @@ class RokiService(Service):
     packets = PacketBufferCharacteristic(uuid=PacketBufferUUID(0x0101))
 
     def readinto(self, buf: bytearray) -> tuple[int, int, int, int]:
-        self.packets.readinto(buf)  # type: ignore
-        return buf[0], buf[1], buf[3], buf[4]
+        if self.packets.readinto(buf):  # type: ignore
+            return buf[0], buf[1], buf[2], buf[3]
+        return (0, 0, 0, 0)
 
     def write(self, buf: bytes, *, header: bytes | None = None) -> int:
         return self.packets.write(buf, header=header)  # type: ignore
