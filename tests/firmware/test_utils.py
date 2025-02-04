@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock, patch
+
 import pytest
 
 from roki.firmware.utils import (
@@ -10,6 +12,22 @@ from roki.firmware.utils import (
     encode_vector,
     get_coords,
 )
+
+
+@pytest.fixture
+def cycle():
+    return Cycle()
+
+
+@pytest.fixture
+def debouncer():
+    return Debouncer(0)
+
+
+@pytest.fixture
+def mock_sleep():
+    with patch("time.sleep") as m:
+        yield m
 
 
 def test_encode_vector():
@@ -43,16 +61,6 @@ def test_loop():
     assert i == 5
 
 
-@pytest.fixture
-def cycle():
-    return Cycle()
-
-
-@pytest.fixture
-def debouncer():
-    return Debouncer(0)
-
-
 def test_cycle(cycle: Cycle):
     assert cycle.value == 0
     cycle.increment()
@@ -74,3 +82,11 @@ def test_get_coords():
     row, col = get_coords(18)
     assert row == 3
     assert col == 0
+
+
+def test_blink_led(mock_sleep: MagicMock):
+    from roki.firmware.utils import blink_led
+
+    blink_led()
+
+    mock_sleep.assert_called()

@@ -7,7 +7,7 @@ try:
 except ImportError:  # pragma: no cover
     TYPE_CHECKING = False
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from typing import Callable
 
 
