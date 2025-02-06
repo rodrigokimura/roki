@@ -1,10 +1,11 @@
 from textual import on
-from roki.cli.config.keys import KEYS
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
 from textual.suggester import SuggestFromList
 from textual.widgets import Button, Input, OptionList, Select
+
+from roki.cli.config.keys import KEYS
 
 
 class KeyEditor(ModalScreen):
