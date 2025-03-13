@@ -72,6 +72,9 @@ def upload_code(side: str = typer.Option("r")):
     print("Copying files...")
     firmware_location = f"{mountpoint_path}/{firmware_relative_tree}"
 
+    # TODO: remove installed libs
+    # delete_files_by_extension(["*"], f"{mountpoint_path}/lib")
+
     delete_files_by_extension(["py", "toml"], mountpoint_path)
     delete_file(f"{mountpoint_path}/config.json")
 
@@ -98,6 +101,8 @@ def upload_code(side: str = typer.Option("r")):
     python_firmware_files = [
         "keys.py",
         "kb.py",
+        "calibration.py",
+        "utils.py",
     ]
     for file in python_firmware_files:
         install_circuitpython_libs(mountpoint_path, f"{firmware_location}/{file}")

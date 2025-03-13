@@ -19,6 +19,7 @@ adafruit-circuitpython-ble = "*"
 adafruit-circuitpython-ticks = "*"
 adafruit-circuitpython-itertools = "*"
 adafruit-circuitpython-hid = "*"
+adafruit-circuitpython-sharpmemorydisplay = "^1.4.14"
 
 [tool.poetry.group.manager.dependencies]
 circup = "*"
