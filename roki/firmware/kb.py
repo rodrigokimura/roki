@@ -130,6 +130,12 @@ class Primary(Roki):
     def run_main_loop(self):
         from roki.firmware.keys import hid
 
+        # buzzer_pin = "P0_06"
+        # buzzer = pwmio.PWMOut(
+        #     getattr(board, buzzer_pin),
+        #     variable_frequency=True,
+        # )
+
         DeviceInfoService(
             software_revision="0.1.0",
             manufacturer="Adafruit Industries",
