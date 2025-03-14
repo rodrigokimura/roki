@@ -216,7 +216,7 @@ def test_factory_method(roki_params):
     "mock_mouse",
     "mock_key_events",
 )
-async def test_primary_run_with_disconnection(
+def test_primary_run_with_disconnection(
     mock_ble_radio_start_scan: tuple[MagicMock, MagicMock],
     ble_connection: MagicMock,
     primary: "Primary",
@@ -231,7 +231,7 @@ async def test_primary_run_with_disconnection(
             True,
         ]
     )
-    await primary.run()
+    primary.run()
 
 
 @pytest.mark.usefixtures(
@@ -241,7 +241,7 @@ async def test_primary_run_with_disconnection(
     "mock_debouncer",
     "mock_mouse",
 )
-async def test_primary_run_with_local_key_press(
+def test_primary_run_with_local_key_press(
     primary: "Primary",
     mock_key_events: MagicMock,
 ):
@@ -252,7 +252,7 @@ async def test_primary_run_with_local_key_press(
     with patch.object(
         primary, "_process_key_wrapper", wraps=primary._process_key_wrapper
     ) as m:
-        await primary.run()
+        primary.run()
         m.assert_called()
 
 
@@ -265,7 +265,7 @@ async def test_primary_run_with_local_key_press(
     "mock_mouse",
     "mock_key_events",
 )
-async def test_primary_run_with_local_encoder(
+def test_primary_run_with_local_encoder(
     primary: "Primary",
     mock_debouncer: tuple[MagicMock, MagicMock, MagicMock],
 ):
@@ -281,7 +281,7 @@ async def test_primary_run_with_local_encoder(
             primary, "_process_encoder_ccw", wraps=primary._process_encoder_ccw
         ) as m_ccw,
     ):
-        await primary.run()
+        primary.run()
         m_cw.assert_called()
         m_ccw.assert_called()
 
@@ -295,7 +295,7 @@ async def test_primary_run_with_local_encoder(
     "mock_mouse",
     "mock_key_events",
 )
-async def test_primary_run_with_remote_key_press(
+def test_primary_run_with_remote_key_press(
     primary: "Primary",
     mock_received_message: MagicMock,
 ):
@@ -306,7 +306,7 @@ async def test_primary_run_with_remote_key_press(
         ]
     )
     with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
-        await primary.run()
+        primary.run()
 
         assert call(KEY, 1, 0) in m.call_args_list
         assert call(KEY, 1, 1) in m.call_args_list
@@ -321,7 +321,7 @@ async def test_primary_run_with_remote_key_press(
     "mock_mouse",
     "mock_key_events",
 )
-async def test_primary_run_with_remote_thumb_stick_tilt(
+def test_primary_run_with_remote_thumb_stick_tilt(
     primary: "Primary",
     mock_received_message: MagicMock,
 ):
@@ -332,7 +332,7 @@ async def test_primary_run_with_remote_thumb_stick_tilt(
         ]
     )
     with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
-        await primary.run()
+        primary.run()
 
         assert call(THUMB_STICK, 0, 0) in m.call_args_list
         assert call(THUMB_STICK, 1, 1) in m.call_args_list
@@ -346,13 +346,13 @@ async def test_primary_run_with_remote_thumb_stick_tilt(
     "mock_mouse",
     "mock_key_events",
 )
-async def test_primary_run_with_remote_encoder(
+def test_primary_run_with_remote_encoder(
     primary: "Primary",
     mock_received_message: MagicMock,
 ):
     mock_received_message.return_value = (99, ENCODER, 1, 1)
     with patch.object(primary, "_handle_message", wraps=primary._handle_message) as m:
-        await primary.run()
+        primary.run()
         m.assert_called_with(ENCODER, 1, 1)
 
 
@@ -361,8 +361,8 @@ async def test_primary_run_with_remote_encoder(
     "mock_debouncer",
     "mock_roki_service",
 )
-async def test_secondary_run(secondary: "Secondary"):
-    await secondary.run()
+def test_secondary_run(secondary: "Secondary"):
+    secondary.run()
 
 
 @pytest.mark.usefixtures(
@@ -372,7 +372,7 @@ async def test_secondary_run(secondary: "Secondary"):
     "mock_key_events",
     "mock_roki_service",
 )
-async def test_secondary_run_with_disconnection(
+def test_secondary_run_with_disconnection(
     mock_ble_radio_start_scan: tuple[MagicMock, MagicMock],
     ble_connection: MagicMock,
     secondary: "Secondary",
@@ -387,7 +387,7 @@ async def test_secondary_run_with_disconnection(
             True,
         ]
     )
-    await secondary.run()
+    secondary.run()
 
 
 @pytest.mark.parametrize("ble_max_iter", [2], indirect=True)
@@ -398,7 +398,7 @@ async def test_secondary_run_with_disconnection(
     "mock_key_events",
     "mock_roki_service",
 )
-async def test_secondary_run_with_encoder(
+def test_secondary_run_with_encoder(
     secondary: "Secondary", mock_debouncer: tuple[MagicMock, MagicMock, MagicMock]
 ):
     rose, fell, diff = mock_debouncer
@@ -406,7 +406,7 @@ async def test_secondary_run_with_encoder(
     fell.side_effect = cycle([False, True])
     diff.side_effect = cycle([1, -1])
     with patch.object(secondary, "send_message", wraps=secondary.send_message) as m:
-        await secondary.run()
+        secondary.run()
         assert call(2, (1, 0)) in m.call_args_list
         assert call(3, (127, 127)) in m.call_args_list
         assert call(3, (0, 0)) in m.call_args_list
@@ -419,7 +419,7 @@ async def test_secondary_run_with_encoder(
     "mock_mouse",
     "mock_roki_service",
 )
-async def test_secondary_run_with_key_press(
+def test_secondary_run_with_key_press(
     secondary: "Secondary",
     mock_key_events: MagicMock,
 ):
@@ -431,6 +431,6 @@ async def test_secondary_run_with_key_press(
     event_released.pressed = False
     mock_key_events.side_effect = cycle([event_pressed, event_released])
     with patch.object(secondary, "send_message", wraps=secondary.send_message) as m:
-        await secondary.run()
+        secondary.run()
         assert call(KEY, (1, 1)) in m.call_args_list
         assert call(KEY, (1, 0)) in m.call_args_list
