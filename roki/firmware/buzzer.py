@@ -3,10 +3,18 @@ import time
 import pwmio
 
 
-def play(buzzer: pwmio.PWMOut):
+class Buzzer:
+    def __init__(self, pwm_pin: pwmio.PWMOut):
+        self.pwm_pin = pwm_pin
 
-    OFF = 0
-    ON = 2**15
+    def play(self, frequency: int, duration: float):
+        self.pwm_pin.duty_cycle = 0
+        self.pwm_pin.frequency = frequency
+        time.sleep(duration)
+        self.pwm_pin.duty_cycle = 2**15
+
+
+def play(buzzer: pwmio.PWMOut):
     buzzer.duty_cycle = ON
     buzzer.frequency = 262  # C4
     time.sleep(0.5)
