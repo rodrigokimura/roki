@@ -36,9 +36,16 @@ def mock_thumb_sticks():
 
 
 @pytest.fixture
+def mock_buzzer():
+    b = MagicMock()
+    return b
+
+
+@pytest.fixture
 def calibration(
     mock_button: MagicMock,
     mock_thumb_sticks: tuple[MagicMock, MagicMock],
+    mock_buzzer,
     max_iter: int,
 ):
     mock_thumb_stick_x, mock_thumb_stick_y = mock_thumb_sticks
@@ -48,6 +55,7 @@ def calibration(
         mock_button,
         mock_thumb_stick_x,
         mock_thumb_stick_y,
+        mock_buzzer,
         0.1,
         0.1,
         max_iterations=max_iter,

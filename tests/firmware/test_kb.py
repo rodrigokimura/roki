@@ -22,9 +22,10 @@ def mock_init():
 def roki_params():
     rows = ("P0_24", "P1_00", "P0_11", "P1_04", "P1_06")
     cols = ("P0_09", "P0_10", "P1_11", "P1_13", "P1_15", "P0_02")
+    buzzer_pin = "P0_06"
     encoder_pins = ("P0_17", "P0_20")
     thumb_stick_pins = ("P0_22", "AIN7", "AIN5")
-    return rows, cols, thumb_stick_pins, encoder_pins
+    return rows, cols, buzzer_pin, thumb_stick_pins, encoder_pins
 
 
 @pytest.fixture
