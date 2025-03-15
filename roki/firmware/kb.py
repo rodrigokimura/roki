@@ -7,7 +7,9 @@ from adafruit_ble.services.standard.device_info import DeviceInfoService
 from analogio import AnalogIn
 from digitalio import DigitalInOut, Direction, Pull
 from keypad import KeyMatrix
+from pwmio import PWMOut
 
+from roki.firmware.buzzer import Buzzer
 from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
 from roki.firmware.keys import KeyWrapper
@@ -29,6 +31,7 @@ class Roki:
         cls,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
+        buzzer_pin: str,
         thumb_stick_pins: tuple[str, str, str],
         encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
@@ -44,6 +47,7 @@ class Roki:
         return (Primary if config.is_left_side else Secondary)(
             row_pins,
             column_pins,
+            buzzer_pin,
             thumb_stick_pins,
             encoder_pins,
             encoder_divisor,
@@ -60,6 +64,7 @@ class Roki:
         self,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
+        buzzer_pin: str,
         thumb_stick_pins: tuple[str, str, str],
         encoder_pins: tuple[str, str],
         encoder_divisor: int = 4,
@@ -71,6 +76,9 @@ class Roki:
         max_iterations_main_loop: int | None = None,
         max_iterations_ble: int | None = None,
     ):
+        self.buzzer = Buzzer(
+            PWMOut(getattr(board, buzzer_pin), variable_frequency=True)
+        )
         self.row_count = len(row_pins)
         self.col_count = len(column_pins)
         a, b = encoder_pins
@@ -88,7 +96,10 @@ class Roki:
         self.thumb_stick_y = AnalogIn(getattr(board, y))
 
         self.calibration = calibration_class(
-            thumb_stick_button, self.thumb_stick_x, self.thumb_stick_y
+            thumb_stick_button,
+            self.thumb_stick_x,
+            self.thumb_stick_y,
+            self.buzzer,
         )
 
         self.encoder_position = Debouncer(self.encoder.position)
@@ -111,7 +122,28 @@ class Roki:
         self.start_calibration()
 
         print("Running...")
+        self.notify_main_loop_start()
         self.run_main_loop()
+
+    def notify_main_loop_start(self):
+        self.buzzer.play_notes(
+            (
+                ("C3", 1),
+                ("D3", 1),
+                ("E3", 2),
+            ),
+            0.15,
+        )
+
+    def notify_error(self):
+        self.buzzer.play_notes(
+            (
+                ("C1", 2),
+                ("", 1),
+                ("C1", 4),
+            ),
+            0.05,
+        )
 
     def run_main_loop(self): ...
 
@@ -129,12 +161,6 @@ class Roki:
 class Primary(Roki):
     def run_main_loop(self):
         from roki.firmware.keys import hid
-
-        # buzzer_pin = "P0_06"
-        # buzzer = pwmio.PWMOut(
-        #     getattr(board, buzzer_pin),
-        #     variable_frequency=True,
-        # )
 
         DeviceInfoService(
             software_revision="0.1.0",
@@ -184,6 +210,8 @@ class Primary(Roki):
                         self.connection_interval
                     )
 
+            # disconnected
+            self.notify_error()
             self.ble.start_advertising(advertisement)
 
     def get_message(self):

@@ -5,6 +5,7 @@ from adafruit_ticks import ticks_ms
 from analogio import AnalogIn
 from digitalio import DigitalInOut
 
+from roki.firmware.buzzer import Buzzer
 from roki.firmware.utils import Loop, blink_led
 
 
@@ -14,6 +15,7 @@ class BaseCalibration:
         button: DigitalInOut,
         thumb_stick_x: AnalogIn,
         thumb_stick_y: AnalogIn,
+        buzzer: Buzzer,
         release_time: float = 5.0,
         mid_time: float = 5.0,
         max_iterations: int | None = None,
@@ -21,6 +23,7 @@ class BaseCalibration:
         self.button = button
         self.thumb_stick_x = thumb_stick_x
         self.thumb_stick_y = thumb_stick_y
+        self.buzzer = buzzer
         self.max_x = -float("inf")
         self.min_x = float("inf")
         self.mid_x = 0.0
@@ -45,13 +48,13 @@ class BaseCalibration:
         if not self._startup_condition():
             return
 
-        self._notify()
+        self._notify_start()
 
         # allow user to release the button
         time.sleep(self.release_time)
 
         self._get_mid_values()
-        self._notify()
+        self._notify_rotation()
 
         for _ in Loop(self.max_iterations, lambda: not self.running).iterate():
             self.max_x = max(self.max_x, self.thumb_stick_x.value)
@@ -63,12 +66,15 @@ class BaseCalibration:
             self._check_for_stop_criteria()
 
         self._write_config()
+        self._notify_end()
 
     def _startup_condition(self) -> bool: ...
 
     def _get_mid_values(self) -> None: ...
 
-    def _notify(self) -> None: ...
+    def _notify_start(self) -> None: ...
+    def _notify_rotation(self) -> None: ...
+    def _notify_end(self) -> None: ...
 
     def _check_for_stop_criteria(self) -> None: ...
 
@@ -109,8 +115,23 @@ class Calibration(BaseCalibration):
     def _startup_condition(self) -> bool:
         return not self.button.value
 
-    def _notify(self) -> None:
+    def _notify_start(self) -> None:
         blink_led()
+        self.buzzer.play_notes(
+            (
+                ("C4", 1),
+                ("D4", 1),
+            ),
+            0.5,
+        )
+
+    def _notify_rotation(self) -> None:
+        blink_led()
+        self.buzzer.play_by_note("C4", 0.5)
+
+    def _notify_end(self) -> None:
+        blink_led()
+        self.buzzer.play_by_note("C4", 0.5)
 
     def _get_mid_values(self):
         start = ticks_ms()
@@ -136,10 +157,8 @@ class Calibration(BaseCalibration):
         }
 
         try:
-            self._notify()
             with open("calibration.json", mode="w") as file:
                 json.dump(data, file)
-            self._notify()
         except OSError:
             pass
 

@@ -5,6 +5,7 @@ MOCK_MODULES = [
     "board",
     "rotaryio",
     "digitalio",
+    "pwmio",
     "analogio",
     "usb_hid",
     "_bleio",
