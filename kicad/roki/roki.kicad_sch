@@ -5744,7 +5744,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "016cd370-5881-4a4e-9627-f64c375b9f76")
-		(property "Reference" "S51"
+		(property "Reference" "S40"
 			(at 99.06 153.67 0)
 			(effects
 				(font
@@ -5796,7 +5796,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S51")
+					(reference "S40")
 					(unit 1)
 				)
 			)
@@ -5812,7 +5812,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "02beff51-fa6f-4704-ae35-1fe9fdec8eb4")
-		(property "Reference" "S42"
+		(property "Reference" "S44"
 			(at 68.58 166.37 0)
 			(effects
 				(font
@@ -5864,7 +5864,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S42")
+					(reference "S44")
 					(unit 1)
 				)
 			)
@@ -6034,7 +6034,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "066d61d2-587b-4d85-bebb-e5611fb8a468")
-		(property "Reference" "S49"
+		(property "Reference" "S57"
 			(at 83.82 191.77 0)
 			(effects
 				(font
@@ -6086,7 +6086,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S49")
+					(reference "S57")
 					(unit 1)
 				)
 			)
@@ -6102,7 +6102,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "06df5a43-0e59-4dca-b24e-af6d8902b46c")
-		(property "Reference" "D42"
+		(property "Reference" "D39"
 			(at 74.93 157.48 0)
 			(effects
 				(font
@@ -6172,7 +6172,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D42")
+					(reference "D39")
 					(unit 1)
 				)
 			)
@@ -6446,7 +6446,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0f16b8a9-ecda-4dba-8d09-aba5a2c00975")
-		(property "Reference" "D56"
+		(property "Reference" "D36"
 			(at 120.65 144.78 0)
 			(effects
 				(font
@@ -6516,7 +6516,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D56")
+					(reference "D36")
 					(unit 1)
 				)
 			)
@@ -6602,7 +6602,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "16700320-f492-48fa-a55e-1b1342f0cc04")
-		(property "Reference" "D55"
+		(property "Reference" "D59"
 			(at 105.41 195.58 0)
 			(effects
 				(font
@@ -6672,7 +6672,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D55")
+					(reference "D59")
 					(unit 1)
 				)
 			)
@@ -6997,7 +6997,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1d558a9e-85d8-44f4-ac89-dd53830a3360")
-		(property "Reference" "S48"
+		(property "Reference" "S51"
 			(at 83.82 179.07 0)
 			(effects
 				(font
@@ -7049,7 +7049,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S48")
+					(reference "S51")
 					(unit 1)
 				)
 			)
@@ -7065,7 +7065,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "1e4d5fd5-2f66-4167-93cc-f39aa1ab4cb8")
-		(property "Reference" "S55"
+		(property "Reference" "S35"
 			(at 114.3 140.97 0)
 			(effects
 				(font
@@ -7117,7 +7117,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S55")
+					(reference "S35")
 					(unit 1)
 				)
 			)
@@ -7133,7 +7133,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2122dce9-798a-4741-b517-8978c7f07656")
-		(property "Reference" "D50"
+		(property "Reference" "D58"
 			(at 90.17 195.58 0)
 			(effects
 				(font
@@ -7203,7 +7203,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D50")
+					(reference "D58")
 					(unit 1)
 				)
 			)
@@ -7219,7 +7219,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "21303c8e-6769-4f06-b715-87f8c183ebf7")
-		(property "Reference" "D41"
+		(property "Reference" "D33"
 			(at 74.93 144.78 0)
 			(effects
 				(font
@@ -7289,7 +7289,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D41")
+					(reference "D33")
 					(unit 1)
 				)
 			)
@@ -7305,7 +7305,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "24fce165-1f4c-4200-a3dd-11875758397e")
-		(property "Reference" "S54"
+		(property "Reference" "S58"
 			(at 99.06 191.77 0)
 			(effects
 				(font
@@ -7357,7 +7357,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S54")
+					(reference "S58")
 					(unit 1)
 				)
 			)
@@ -7373,7 +7373,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "25071a32-1ba8-4dbf-a724-e4f80bcd4632")
-		(property "Reference" "D33"
+		(property "Reference" "D43"
 			(at 44.45 170.18 0)
 			(effects
 				(font
@@ -7443,7 +7443,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D33")
+					(reference "D43")
 					(unit 1)
 				)
 			)
@@ -7459,7 +7459,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2b68d939-2b51-4f07-ad11-6101ba669d73")
-		(property "Reference" "S43"
+		(property "Reference" "S50"
 			(at 68.58 179.07 0)
 			(effects
 				(font
@@ -7511,7 +7511,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S43")
+					(reference "S50")
 					(unit 1)
 				)
 			)
@@ -7527,7 +7527,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2d2bbeec-9fa8-47d6-a49b-df3201288c09")
-		(property "Reference" "S33"
+		(property "Reference" "S48"
 			(at 38.1 179.07 0)
 			(effects
 				(font
@@ -7579,7 +7579,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S33")
+					(reference "S48")
 					(unit 1)
 				)
 			)
@@ -7817,7 +7817,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "333dc9d6-a848-4513-ab11-95264525276a")
-		(property "Reference" "S47"
+		(property "Reference" "S45"
 			(at 83.82 166.37 0)
 			(effects
 				(font
@@ -7869,7 +7869,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S47")
+					(reference "S45")
 					(unit 1)
 				)
 			)
@@ -7885,7 +7885,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "35f2c080-8179-46e7-96d4-93f54af54d0d")
-		(property "Reference" "S32"
+		(property "Reference" "S42"
 			(at 38.1 166.37 0)
 			(effects
 				(font
@@ -7937,7 +7937,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S32")
+					(reference "S42")
 					(unit 1)
 				)
 			)
@@ -7953,7 +7953,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "38126c69-8b88-4b64-ba03-728ceeef0345")
-		(property "Reference" "S36"
+		(property "Reference" "S37"
 			(at 53.34 153.67 0)
 			(effects
 				(font
@@ -8005,7 +8005,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S36")
+					(reference "S37")
 					(unit 1)
 				)
 			)
@@ -8021,7 +8021,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "390b3f06-c3d4-47b9-92e8-b8ba1c0b8cfb")
-		(property "Reference" "S40"
+		(property "Reference" "S32"
 			(at 68.58 140.97 0)
 			(effects
 				(font
@@ -8073,7 +8073,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S40")
+					(reference "S32")
 					(unit 1)
 				)
 			)
@@ -8089,7 +8089,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3c2fb614-5df7-4b70-a580-571c117631ca")
-		(property "Reference" "S58"
+		(property "Reference" "S53"
 			(at 114.3 179.07 0)
 			(effects
 				(font
@@ -8141,7 +8141,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S58")
+					(reference "S53")
 					(unit 1)
 				)
 			)
@@ -8157,7 +8157,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3c36981a-de8b-48c0-aba6-430364891813")
-		(property "Reference" "S57"
+		(property "Reference" "S47"
 			(at 114.3 166.37 0)
 			(effects
 				(font
@@ -8209,7 +8209,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S57")
+					(reference "S47")
 					(unit 1)
 				)
 			)
@@ -8313,7 +8313,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "42dbb4d1-e499-4c92-9b2f-687259d38b24")
-		(property "Reference" "D46"
+		(property "Reference" "D34"
 			(at 90.17 144.78 0)
 			(effects
 				(font
@@ -8383,7 +8383,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D46")
+					(reference "D34")
 					(unit 1)
 				)
 			)
@@ -8399,7 +8399,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "46780d07-da4a-4db7-a4b3-1ee160baf689")
-		(property "Reference" "D58"
+		(property "Reference" "D48"
 			(at 120.65 170.18 0)
 			(effects
 				(font
@@ -8469,7 +8469,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D58")
+					(reference "D48")
 					(unit 1)
 				)
 			)
@@ -8639,7 +8639,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4b38114a-3e9a-44e4-9da0-0005444f27a3")
-		(property "Reference" "D48"
+		(property "Reference" "D46"
 			(at 90.17 170.18 0)
 			(effects
 				(font
@@ -8709,7 +8709,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D48")
+					(reference "D46")
 					(unit 1)
 				)
 			)
@@ -8793,7 +8793,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "50422b89-3a49-451b-81ca-cd4a8b227843")
-		(property "Reference" "D49"
+		(property "Reference" "D52"
 			(at 90.17 182.88 0)
 			(effects
 				(font
@@ -8863,7 +8863,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D49")
+					(reference "D52")
 					(unit 1)
 				)
 			)
@@ -8879,7 +8879,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "521ff9ad-3c1d-4a9a-8ba9-317818b65e07")
-		(property "Reference" "D45"
+		(property "Reference" "D57"
 			(at 74.93 195.58 0)
 			(effects
 				(font
@@ -8949,7 +8949,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D45")
+					(reference "D57")
 					(unit 1)
 				)
 			)
@@ -9033,7 +9033,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "54809ecf-3fda-4960-aef6-3e2942a8a791")
-		(property "Reference" "D34"
+		(property "Reference" "D49"
 			(at 44.45 182.88 0)
 			(effects
 				(font
@@ -9103,7 +9103,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D34")
+					(reference "D49")
 					(unit 1)
 				)
 			)
@@ -9119,7 +9119,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "58b43fc7-b038-465d-acec-d7b198cd8514")
-		(property "Reference" "S44"
+		(property "Reference" "S56"
 			(at 68.58 191.77 0)
 			(effects
 				(font
@@ -9171,7 +9171,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S44")
+					(reference "S56")
 					(unit 1)
 				)
 			)
@@ -9275,7 +9275,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "59783244-1718-47a7-9db8-84e14867a3ed")
-		(property "Reference" "S46"
+		(property "Reference" "S39"
 			(at 83.82 153.67 0)
 			(effects
 				(font
@@ -9327,7 +9327,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S46")
+					(reference "S39")
 					(unit 1)
 				)
 			)
@@ -9343,7 +9343,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "59c89f4e-e0a4-42de-87f4-538bbc1fa2ee")
-		(property "Reference" "S37"
+		(property "Reference" "S43"
 			(at 53.34 166.37 0)
 			(effects
 				(font
@@ -9395,7 +9395,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S37")
+					(reference "S43")
 					(unit 1)
 				)
 			)
@@ -9683,7 +9683,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "67587654-e4c4-43d3-a169-eb3375d9cdd0")
-		(property "Reference" "D57"
+		(property "Reference" "D42"
 			(at 120.65 157.48 0)
 			(effects
 				(font
@@ -9753,7 +9753,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D57")
+					(reference "D42")
 					(unit 1)
 				)
 			)
@@ -10048,7 +10048,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6da6324e-e891-4597-ae13-b601381356d9")
-		(property "Reference" "D59"
+		(property "Reference" "D54"
 			(at 120.65 182.88 0)
 			(effects
 				(font
@@ -10118,7 +10118,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D59")
+					(reference "D54")
 					(unit 1)
 				)
 			)
@@ -10134,7 +10134,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "6ddfcc2e-b0ca-4531-9c16-23f8624d481b")
-		(property "Reference" "S38"
+		(property "Reference" "S49"
 			(at 53.34 179.07 0)
 			(effects
 				(font
@@ -10186,7 +10186,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S38")
+					(reference "S49")
 					(unit 1)
 				)
 			)
@@ -10202,7 +10202,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "714c7235-384a-4f7a-80ed-57998f69ea50")
-		(property "Reference" "S56"
+		(property "Reference" "S41"
 			(at 114.3 153.67 0)
 			(effects
 				(font
@@ -10254,7 +10254,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S56")
+					(reference "S41")
 					(unit 1)
 				)
 			)
@@ -10442,7 +10442,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7493510f-58c7-43a8-a662-eca383a7b9bf")
-		(property "Reference" "D37"
+		(property "Reference" "D38"
 			(at 59.69 157.48 0)
 			(effects
 				(font
@@ -10512,7 +10512,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D37")
+					(reference "D38")
 					(unit 1)
 				)
 			)
@@ -10664,7 +10664,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "7c229485-a53c-4ab9-9d9f-1388eaf85b35")
-		(property "Reference" "S41"
+		(property "Reference" "S38"
 			(at 68.58 153.67 0)
 			(effects
 				(font
@@ -10716,7 +10716,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S41")
+					(reference "S38")
 					(unit 1)
 				)
 			)
@@ -11058,7 +11058,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "85b2eb71-ba80-4b9c-8a9e-a0ca61227804")
-		(property "Reference" "D38"
+		(property "Reference" "D44"
 			(at 59.69 170.18 0)
 			(effects
 				(font
@@ -11128,7 +11128,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D38")
+					(reference "D44")
 					(unit 1)
 				)
 			)
@@ -11384,7 +11384,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "8de35e9f-8c55-447b-aecc-98553d6b99af")
-		(property "Reference" "S31"
+		(property "Reference" "S36"
 			(at 38.1 153.67 0)
 			(effects
 				(font
@@ -11436,7 +11436,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S31")
+					(reference "S36")
 					(unit 1)
 				)
 			)
@@ -11520,7 +11520,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "91aefe69-cc19-4a19-8b5e-6379da9bd172")
-		(property "Reference" "S50"
+		(property "Reference" "S34"
 			(at 99.06 140.97 0)
 			(effects
 				(font
@@ -11572,7 +11572,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S50")
+					(reference "S34")
 					(unit 1)
 				)
 			)
@@ -11588,7 +11588,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "920b3e5c-ebec-480d-9019-5c55f06610b7")
-		(property "Reference" "D35"
+		(property "Reference" "D55"
 			(at 44.45 195.58 0)
 			(effects
 				(font
@@ -11658,7 +11658,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D35")
+					(reference "D55")
 					(unit 1)
 				)
 			)
@@ -11674,7 +11674,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "954756af-aac3-419a-9036-b2f6f1d3bc6c")
-		(property "Reference" "S45"
+		(property "Reference" "S33"
 			(at 83.82 140.97 0)
 			(effects
 				(font
@@ -11726,7 +11726,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S45")
+					(reference "S33")
 					(unit 1)
 				)
 			)
@@ -11810,7 +11810,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "97df2c03-0b2b-4635-93c4-0d0552c2834c")
-		(property "Reference" "D53"
+		(property "Reference" "D47"
 			(at 105.41 170.18 0)
 			(effects
 				(font
@@ -11880,7 +11880,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D53")
+					(reference "D47")
 					(unit 1)
 				)
 			)
@@ -12053,7 +12053,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9abf9e7a-e067-499e-baf8-2310fe172681")
-		(property "Reference" "D51"
+		(property "Reference" "D35"
 			(at 105.41 144.78 0)
 			(effects
 				(font
@@ -12123,7 +12123,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D51")
+					(reference "D35")
 					(unit 1)
 				)
 			)
@@ -12139,7 +12139,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "9d1ff148-a15c-4433-99bc-f4fd057afd44")
-		(property "Reference" "D39"
+		(property "Reference" "D50"
 			(at 59.69 182.88 0)
 			(effects
 				(font
@@ -12209,7 +12209,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D39")
+					(reference "D50")
 					(unit 1)
 				)
 			)
@@ -12397,7 +12397,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a3a49aa9-000c-48a2-8332-b631c9f835b8")
-		(property "Reference" "S35"
+		(property "Reference" "S31"
 			(at 53.34 140.97 0)
 			(effects
 				(font
@@ -12449,7 +12449,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S35")
+					(reference "S31")
 					(unit 1)
 				)
 			)
@@ -12930,7 +12930,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b3637728-9e6c-441f-a788-ff542ae52db2")
-		(property "Reference" "S53"
+		(property "Reference" "S52"
 			(at 99.06 179.07 0)
 			(effects
 				(font
@@ -12982,7 +12982,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S53")
+					(reference "S52")
 					(unit 1)
 				)
 			)
@@ -12998,7 +12998,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "b3a3d5c0-2c7d-409c-bd76-9dbb4d670935")
-		(property "Reference" "D52"
+		(property "Reference" "D41"
 			(at 105.41 157.48 0)
 			(effects
 				(font
@@ -13068,7 +13068,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D52")
+					(reference "D41")
 					(unit 1)
 				)
 			)
@@ -13496,7 +13496,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c37c1774-1fa1-416e-9e85-3212617b10c1")
-		(property "Reference" "D36"
+		(property "Reference" "D32"
 			(at 59.69 144.78 0)
 			(effects
 				(font
@@ -13566,7 +13566,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D36")
+					(reference "D32")
 					(unit 1)
 				)
 			)
@@ -13582,7 +13582,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "c57e5cbe-3abf-4667-bf49-d556afdb5264")
-		(property "Reference" "D44"
+		(property "Reference" "D51"
 			(at 74.93 182.88 0)
 			(effects
 				(font
@@ -13652,7 +13652,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D44")
+					(reference "D51")
 					(unit 1)
 				)
 			)
@@ -13976,7 +13976,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d4d529c3-b404-4d24-9e88-1e1dc65a92c1")
-		(property "Reference" "D32"
+		(property "Reference" "D37"
 			(at 44.45 157.48 0)
 			(effects
 				(font
@@ -14046,7 +14046,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D32")
+					(reference "D37")
 					(unit 1)
 				)
 			)
@@ -14273,7 +14273,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e3bdf3c6-94ad-4ad1-9400-1ce90a5e5fe6")
-		(property "Reference" "D40"
+		(property "Reference" "D56"
 			(at 59.69 195.58 0)
 			(effects
 				(font
@@ -14343,7 +14343,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D40")
+					(reference "D56")
 					(unit 1)
 				)
 			)
@@ -14359,7 +14359,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e3ffd148-5ba6-42a7-8e04-165c980ce4bf")
-		(property "Reference" "D54"
+		(property "Reference" "D53"
 			(at 105.41 182.88 0)
 			(effects
 				(font
@@ -14429,7 +14429,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D54")
+					(reference "D53")
 					(unit 1)
 				)
 			)
@@ -14662,7 +14662,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e918228c-7920-48cc-8dde-c8db03f0aa72")
-		(property "Reference" "S39"
+		(property "Reference" "S55"
 			(at 53.34 191.77 0)
 			(effects
 				(font
@@ -14714,7 +14714,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S39")
+					(reference "S55")
 					(unit 1)
 				)
 			)
@@ -14809,7 +14809,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "e987cf53-039c-4a58-b296-ac75e3dad3a0")
-		(property "Reference" "D43"
+		(property "Reference" "D45"
 			(at 74.93 170.18 0)
 			(effects
 				(font
@@ -14879,7 +14879,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D43")
+					(reference "D45")
 					(unit 1)
 				)
 			)
@@ -15203,7 +15203,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f2807121-b237-4d03-af5b-006771b74a16")
-		(property "Reference" "S34"
+		(property "Reference" "S54"
 			(at 38.1 191.77 0)
 			(effects
 				(font
@@ -15255,7 +15255,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S34")
+					(reference "S54")
 					(unit 1)
 				)
 			)
@@ -15408,7 +15408,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "f7054141-c003-42a5-8431-d437c312e8dc")
-		(property "Reference" "D47"
+		(property "Reference" "D40"
 			(at 90.17 157.48 0)
 			(effects
 				(font
@@ -15478,7 +15478,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "D47")
+					(reference "D40")
 					(unit 1)
 				)
 			)
@@ -15734,7 +15734,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "fff3aa24-44d8-4271-8786-161a45dca2c9")
-		(property "Reference" "S52"
+		(property "Reference" "S46"
 			(at 99.06 166.37 0)
 			(effects
 				(font
@@ -15786,7 +15786,7 @@
 		(instances
 			(project "roki"
 				(path "/0fdfdd7a-cf43-4c59-8f14-6d50863fbb9f"
-					(reference "S52")
+					(reference "S46")
 					(unit 1)
 				)
 			)
