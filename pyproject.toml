@@ -12,12 +12,6 @@ dependencies = [
     "uvicorn",
     "minify-html",
     "jinja2",
-    "circuitpython-stubs",
-    "types-circuitpython",
-    "adafruit-circuitpython-ble",
-    "adafruit-circuitpython-ticks",
-    "adafruit-circuitpython-itertools",
-    "adafruit-circuitpython-hid",
 ]
 
 [project.scripts]
@@ -33,6 +27,12 @@ dev = [
     "commitizen",
     "pytest",
     "pytest-cov",
+    "circuitpython-stubs",
+    "types-circuitpython",
+    "adafruit-circuitpython-ble",
+    "adafruit-circuitpython-ticks",
+    "adafruit-circuitpython-itertools",
+    "adafruit-circuitpython-hid",
 ]
 
 [tool.uv]
