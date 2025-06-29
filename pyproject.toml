@@ -10,8 +10,6 @@ dependencies = [
     "textual-dev",
     "fastapi",
     "uvicorn",
-    "minify-html",
-    "jinja2",
 ]
 
 [project.scripts]
@@ -33,6 +31,8 @@ dev = [
     "adafruit-circuitpython-ticks",
     "adafruit-circuitpython-itertools",
     "adafruit-circuitpython-hid",
+    "minify-html",
+    "jinja2",
 ]
 
 [tool.uv]
