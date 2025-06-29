@@ -45,6 +45,7 @@ class Roki:
     ):
         config = Config.read()
         return (Primary if config.is_left_side else Secondary)(
+            config,
             row_pins,
             column_pins,
             buzzer_pin,
@@ -62,6 +63,7 @@ class Roki:
 
     def __init__(
         self,
+        config: Config,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
         buzzer_pin: str,
@@ -111,7 +113,7 @@ class Roki:
             interval=interval,
             max_events=max_events,
         )
-        self.config = Config.read()
+        self.config = config
         self.ble = BLERadio()
         self.mouse_speed = 10
         self.max_iterations_main_loop = max_iterations_main_loop
