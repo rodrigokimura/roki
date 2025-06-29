@@ -15,7 +15,10 @@ class Generator:
         )
 
     def get_html(self):
-        import minify_html
+        try:
+            import minify_html
+        except ImportError:
+            self.minify = False
 
         keys = json.dumps([k.model_dump() for k in KEYS], separators=(",", ":"))
         template = self.env.get_template("base.html")
