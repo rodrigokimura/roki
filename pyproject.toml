@@ -10,13 +10,12 @@ dependencies = [
     "textual-dev",
     "fastapi",
     "uvicorn",
-]
-[project.optional-dependencies]
-manager = [
     "circup",
     "rshell",
     "adafruit-ampy",
 ]
+[project.optional-dependencies]
+
 [dependency-groups]
 dev = [
     "commitizen",
@@ -36,9 +35,7 @@ dev = [
 roki = "roki.cli.app:app"
 
 [tool.uv]
-default-groups = [
-    "dev",
-]
+default-groups = []
 
 [build-system]
 requires = ["hatchling"]
