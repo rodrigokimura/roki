@@ -11,16 +11,13 @@ dependencies = [
     "fastapi",
     "uvicorn",
 ]
-
-[project.scripts]
-roki = "roki.cli.app:app"
-
-[dependency-groups]
+[project.optional-dependencies]
 manager = [
     "circup",
     "rshell",
     "adafruit-ampy",
 ]
+[dependency-groups]
 dev = [
     "commitizen",
     "pytest",
@@ -35,9 +32,11 @@ dev = [
     "jinja2",
 ]
 
+[project.scripts]
+roki = "roki.cli.app:app"
+
 [tool.uv]
 default-groups = [
-    "manager",
     "dev",
 ]
 
