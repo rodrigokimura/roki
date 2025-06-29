@@ -1286,7 +1286,10 @@ name = "roki"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "adafruit-ampy" },
+    { name = "circup" },
     { name = "fastapi" },
+    { name = "rshell" },
     { name = "textual-dev" },
     { name = "typer" },
     { name = "uvicorn" },
@@ -1306,15 +1309,13 @@ dev = [
     { name = "pytest-cov" },
     { name = "types-circuitpython" },
 ]
-manager = [
-    { name = "adafruit-ampy" },
-    { name = "circup" },
-    { name = "rshell" },
-]
 
 [package.metadata]
 requires-dist = [
+    { name = "adafruit-ampy" },
+    { name = "circup" },
     { name = "fastapi" },
+    { name = "rshell" },
     { name = "textual-dev" },
     { name = "typer" },
     { name = "uvicorn" },
@@ -1333,11 +1334,6 @@ dev = [
     { name = "pytest" },
     { name = "pytest-cov" },
     { name = "types-circuitpython" },
-]
-manager = [
-    { name = "adafruit-ampy" },
-    { name = "circup" },
-    { name = "rshell" },
 ]
 
 [[package]]
