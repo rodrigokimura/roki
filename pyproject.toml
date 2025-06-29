@@ -1,34 +1,49 @@
-[tool.poetry]
+[project]
 name = "roki"
 version = "0.1.0"
 description = ""
-authors = ["Rodrigo Eiti Kimura <rodrigoeitikimura@gmail.com>"]
+authors = [{ name = "Rodrigo Eiti Kimura", email = "rodrigoeitikimura@gmail.com" }]
+requires-python = "~=3.11"
 readme = "README.md"
+dependencies = [
+    "typer",
+    "textual-dev",
+    "fastapi",
+    "uvicorn",
+    "minify-html",
+    "jinja2",
+    "circuitpython-stubs",
+    "types-circuitpython",
+    "adafruit-circuitpython-ble",
+    "adafruit-circuitpython-ticks",
+    "adafruit-circuitpython-itertools",
+    "adafruit-circuitpython-hid",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-typer = "*"
-textual-dev = "*"
-fastapi = "*"
-uvicorn = "*"
-minify-html = "*"
-jinja2 = "*"
-circuitpython-stubs = "*"
-types-circuitpython = "*"
-adafruit-circuitpython-ble = "*"
-adafruit-circuitpython-ticks = "*"
-adafruit-circuitpython-itertools = "*"
-adafruit-circuitpython-hid = "*"
+[project.scripts]
+roki = "roki.cli.app:app"
 
-[tool.poetry.group.manager.dependencies]
-circup = "*"
-rshell = "*"
-adafruit-ampy = "*"
+[dependency-groups]
+manager = [
+    "circup",
+    "rshell",
+    "adafruit-ampy",
+]
+dev = [
+    "commitizen",
+    "pytest",
+    "pytest-cov",
+]
 
-[tool.poetry.group.dev.dependencies]
-commitizen = "*"
-pytest = "*"
-pytest-cov = "*"
+[tool.uv]
+default-groups = [
+    "manager",
+    "dev",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
@@ -37,13 +52,6 @@ version_scheme = "pep440"
 version_provider = "poetry"
 update_changelog_on_bump = true
 major_version_zero = true
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.poetry.scripts]
-roki = "roki.cli.app:app"
 
 [tool.pytest.ini_options]
 addopts = ["--cov=roki", "--cov-report=html", "--cov-report=term"]
