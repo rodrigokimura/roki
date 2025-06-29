@@ -1286,25 +1286,25 @@ name = "roki"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
-    { name = "adafruit-circuitpython-ble" },
-    { name = "adafruit-circuitpython-hid" },
-    { name = "adafruit-circuitpython-itertools" },
-    { name = "adafruit-circuitpython-ticks" },
-    { name = "circuitpython-stubs" },
     { name = "fastapi" },
     { name = "jinja2" },
     { name = "minify-html" },
     { name = "textual-dev" },
     { name = "typer" },
-    { name = "types-circuitpython" },
     { name = "uvicorn" },
 ]
 
 [package.dev-dependencies]
 dev = [
+    { name = "adafruit-circuitpython-ble" },
+    { name = "adafruit-circuitpython-hid" },
+    { name = "adafruit-circuitpython-itertools" },
+    { name = "adafruit-circuitpython-ticks" },
+    { name = "circuitpython-stubs" },
     { name = "commitizen" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "types-circuitpython" },
 ]
 manager = [
     { name = "adafruit-ampy" },
@@ -1314,25 +1314,25 @@ manager = [
 
 [package.metadata]
 requires-dist = [
-    { name = "adafruit-circuitpython-ble" },
-    { name = "adafruit-circuitpython-hid" },
-    { name = "adafruit-circuitpython-itertools" },
-    { name = "adafruit-circuitpython-ticks" },
-    { name = "circuitpython-stubs" },
     { name = "fastapi" },
     { name = "jinja2" },
     { name = "minify-html" },
     { name = "textual-dev" },
     { name = "typer" },
-    { name = "types-circuitpython" },
     { name = "uvicorn" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "adafruit-circuitpython-ble" },
+    { name = "adafruit-circuitpython-hid" },
+    { name = "adafruit-circuitpython-itertools" },
+    { name = "adafruit-circuitpython-ticks" },
+    { name = "circuitpython-stubs" },
     { name = "commitizen" },
     { name = "pytest" },
     { name = "pytest-cov" },
+    { name = "types-circuitpython" },
 ]
 manager = [
     { name = "adafruit-ampy" },
