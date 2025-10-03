@@ -1,13 +1,13 @@
 import json
 
+import minify_html
+from jinja2 import Environment, PackageLoader
 
 from roki.cli.config.keys import KEYS
 
 
 class Generator:
     def __init__(self, minify=True) -> None:
-        from jinja2 import Environment, PackageLoader
-
         self.minify = minify
         self.env = Environment(
             loader=PackageLoader("roki"),
@@ -15,11 +15,6 @@ class Generator:
         )
 
     def get_html(self):
-        try:
-            import minify_html
-        except ImportError:
-            self.minify = False
-
         keys = json.dumps([k.model_dump() for k in KEYS], separators=(",", ":"))
         template = self.env.get_template("base.html")
         html = template.render(keys=keys)

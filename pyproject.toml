@@ -10,13 +10,19 @@ dependencies = [
     "textual-dev",
     "fastapi",
     "uvicorn",
+    "minify-html",
+    "jinja2",
+]
+
+[project.scripts]
+roki = "roki.cli.app:app"
+
+[dependency-groups]
+manager = [
     "circup",
     "rshell",
     "adafruit-ampy",
 ]
-[project.optional-dependencies]
-
-[dependency-groups]
 dev = [
     "commitizen",
     "pytest",
@@ -27,15 +33,13 @@ dev = [
     "adafruit-circuitpython-ticks",
     "adafruit-circuitpython-itertools",
     "adafruit-circuitpython-hid",
-    "minify-html",
-    "jinja2",
 ]
 
-[project.scripts]
-roki = "roki.cli.app:app"
-
 [tool.uv]
-default-groups = []
+default-groups = [
+    "manager",
+    "dev",
+]
 
 [build-system]
 requires = ["hatchling"]
