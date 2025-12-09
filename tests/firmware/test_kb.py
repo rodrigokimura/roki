@@ -92,6 +92,16 @@ def secondary(
 
 
 @pytest.fixture
+def mock_config():
+    from roki.firmware.config import Config
+
+    config = Config.read()
+    config.extras = True
+    with patch("roki.firmware.config._config", config) as m:
+        yield m
+
+
+@pytest.fixture
 def mock_device_info_service():
     with patch("roki.firmware.kb.DeviceInfoService") as m:
         m.return_value = None
@@ -265,6 +275,7 @@ def test_primary_run_with_local_key_press(
     "mock_debouncer",
     "mock_mouse",
     "mock_key_events",
+    "mock_config",
 )
 def test_primary_run_with_local_encoder(
     primary: "Primary",

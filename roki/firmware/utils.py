@@ -12,6 +12,11 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class Loop:
+    __slots__ = (
+        "max_iterations",
+        "sentinel",
+    )
+
     def __init__(
         self,
         max_iterations: int | None = None,
@@ -41,6 +46,11 @@ class Cycle:
 
 
 class Debouncer:
+    __slots__ = (
+        "value",
+        "last_value",
+    )
+
     def __init__(self, initial_value: int):
         self.value = initial_value
         self.last_value = initial_value
