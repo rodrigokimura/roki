@@ -51,7 +51,7 @@ class Layer:
         i.primary_encoder_ccw = KeyWrapper(ccw)
 
         i.secondary_keys = tuple(
-            tuple(reversed([KeyWrapper(k) for k in row]))
+            tuple(KeyWrapper(k) for k in row)
             for row in data.get(
                 "secondary_keys" if is_left_side else "primary_keys", (("",),)
             )
@@ -63,12 +63,20 @@ class Layer:
 
 
 class Config:
+    __slots__ = (
+        "layers",
+        "is_left_side",
+        "layer_index",
+        "extras",
+    )
     layers: tuple[Layer, ...]
     is_left_side: bool
+    extras: bool
 
     def __init__(self, layers: list[dict] | None = None) -> None:
         init(self)
         self.layer_index = 0
+        self.extras = False
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
         self.is_left_side = bool(os.getenv("IS_LEFT_SIDE", False))
 
@@ -78,8 +86,14 @@ class Config:
 
     @classmethod
     def read(cls):
-        with open("config.json") as file:
-            config: dict = json.load(file)
-        return cls(
-            layers=config.get("layers", []),
-        )
+        global _config
+        if _config is None:
+            with open("config.json") as file:
+                config: dict = json.load(file)
+            _config = cls(
+                layers=config.get("layers", []),
+            )
+        return _config
+
+
+_config: Config | None = None

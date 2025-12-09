@@ -7,6 +7,11 @@ if TYPE_CHECKING:  # pragma: no cover
 
 
 class LayerHandler:
+    __slots__ = (
+        "_prev",
+        "config",
+    )
+
     def __init__(self, config: Config) -> None:
         self._prev = 0
         self.config = config
@@ -16,14 +21,15 @@ class LayerHandler:
             if command.index != self.config.layer_index:
                 self._prev = self.config.layer_index
                 self.config.layer_index = command.index
+        elif command.type_ == "inc":
+            index = self.config.layer_index + 1
+            max_layer = len(self.config.layers) - 1
+            self.config.layer_index = min(index, max_layer)
+        elif command.type_ == "dec":
+            index = self.config.layer_index - 1
+            self.config.layer_index = max(index, 0)
         else:
-            if command.type_ == "inc":
-                index = self.config.layer_index + 1
-                max_layer = len(self.config.layers) - 1
-                self.config.layer_index = min(index, max_layer)
-            elif command.type_ == "dec":
-                index = self.config.layer_index - 1
-                self.config.layer_index = max(index, 0)
+            self.config.extras = not self.config.extras
 
     def on_release(self, command: Command) -> None:
         if command.type_ == "hold":
@@ -31,6 +37,8 @@ class LayerHandler:
 
 
 class Commands:
+    __slots__ = tuple()
+
     def get(self, __name: str) -> Command:
         if __name.lower().startswith("layer_"):
             segments = __name.split("_")
@@ -50,11 +58,22 @@ class Commands:
 
 
 class Command:
+    __slots__ = (
+        "index",
+        "type_",
+    )
+
     def __init__(self, index: int = 0, type_: str | None = None) -> None:
         self.index = index
         if not type_:
             self.type_ = None
-        elif type_.lower() not in ("press", "hold", "inc", "dec"):
+        elif type_.lower() not in (
+            "press",
+            "hold",
+            "inc",
+            "dec",
+            "extras",
+        ):
             self.type_ = None
         else:
             self.type_ = type_.lower()

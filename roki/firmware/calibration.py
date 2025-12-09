@@ -46,6 +46,7 @@ class BaseCalibration:
         print("Starting calibration...")
 
         if not self._startup_condition():
+            self.button.deinit()
             return
 
         self._notify_start()
@@ -67,6 +68,7 @@ class BaseCalibration:
 
         self._write_config()
         self._notify_end()
+        self.button.deinit()
 
     def _startup_condition(self) -> bool: ...
 

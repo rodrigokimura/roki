@@ -178,6 +178,7 @@ class Primary(Roki):
         self.disconnect()
 
         self.peripheral_conn = self.connect_to_peripheral_side(self.connection_interval)
+        self._notify_peripheral_connection()
 
         print("advertising")
         self.ble.start_advertising(advertisement, scan_response)
@@ -196,8 +197,9 @@ class Primary(Roki):
                 lambda: not self.ble.connected,
             ).iterate():
                 self.process_primary_keys()
-                self.process_primary_encoder()
-                self.process_primary_thumb_stick()
+                if self.config.extras:
+                    self.process_primary_encoder()
+                    self.process_primary_thumb_stick()
 
                 if self.peripheral_conn.connected:
                     counter, message_id, payload_1, payload_2 = self.get_message()
@@ -214,6 +216,16 @@ class Primary(Roki):
             self.notify_error()
             self.ble.start_advertising(advertisement)
 
+    def _notify_peripheral_connection(self):
+        self.buzzer.play_notes(
+            (
+                ("C3", 2),
+                ("", 1),
+                ("D3", 4),
+            ),
+            0.05,
+        )
+
     def get_message(self):
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
         return service.readinto(self.buffer)
@@ -223,15 +235,18 @@ class Primary(Roki):
             row, col = get_coords(payload_1)
             key = self.config.layer.secondary_keys[row][col]
             self._process_key_wrapper(key, bool(payload_2))
-        elif message_id == ENCODER:
-            for _ in range(payload_1):
-                self.config.layer.secondary_encoder_cw.press()
-                self.config.layer.secondary_encoder_cw.release()
-            for _ in range(payload_2):
-                self.config.layer.secondary_encoder_ccw.press()
-                self.config.layer.secondary_encoder_ccw.release()
-        elif message_id == THUMB_STICK:
-            self._process_thumb_stick(decode_float(payload_1), decode_float(payload_2))
+        elif self.config.extras:
+            if message_id == ENCODER:
+                for _ in range(payload_1):
+                    self.config.layer.secondary_encoder_cw.press()
+                    self.config.layer.secondary_encoder_cw.release()
+                for _ in range(payload_2):
+                    self.config.layer.secondary_encoder_ccw.press()
+                    self.config.layer.secondary_encoder_ccw.release()
+            elif message_id == THUMB_STICK:
+                self._process_thumb_stick(
+                    decode_float(payload_1), decode_float(payload_2)
+                )
 
     def process_primary_thumb_stick(self):
         x, y = self.calibration.get_normalized(
@@ -267,7 +282,7 @@ class Primary(Roki):
 
     def process_primary_keys(self):
         if event := self.key_matrix.events.get():
-            print(event.key_number)
+            # print(event.key_number)
 
             row, col = get_coords(event.key_number, self.col_count)
 
@@ -277,6 +292,7 @@ class Primary(Roki):
     def _process_key_wrapper(self, key: KeyWrapper, pressed: bool):
         if pressed:
             key.press()
+            # self.buzzer.play_notes((("C3", 1),), 0.05)
         else:
             key.release()
 

@@ -3,7 +3,7 @@ name = "roki"
 version = "0.1.0"
 description = ""
 authors = [{ name = "Rodrigo Eiti Kimura", email = "rodrigoeitikimura@gmail.com" }]
-requires-python = "~=3.11"
+requires-python = "~=3.11.0"
 readme = "README.md"
 dependencies = [
     "typer",
