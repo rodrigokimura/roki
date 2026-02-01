@@ -2,44 +2,41 @@
 name = "roki"
 version = "0.1.0"
 description = ""
-authors = [{ name = "Rodrigo Eiti Kimura", email = "rodrigoeitikimura@gmail.com" }]
-requires-python = "~=3.11.0"
+authors = [
+  { name = "Rodrigo Eiti Kimura", email = "rodrigoeitikimura@gmail.com" },
+]
+requires-python = "~=3.12.0"
 readme = "README.md"
 dependencies = [
-    "typer",
-    "textual-dev",
-    "fastapi",
-    "uvicorn",
-    "minify-html",
-    "jinja2",
+  "typer",
+  "textual-dev",
+  "fastapi",
+  "uvicorn",
+  "minify-html",
+  "jinja2",
+  "pyreadline3>=3.5.4",
+  "adafruit-board-toolkit>=1.1.2",
 ]
 
 [project.scripts]
 roki = "roki.cli.app:app"
 
 [dependency-groups]
-manager = [
-    "circup",
-    "rshell",
-    "adafruit-ampy",
-]
+manager = ["circup", "rshell", "adafruit-ampy"]
 dev = [
-    "commitizen",
-    "pytest",
-    "pytest-cov",
-    "circuitpython-stubs",
-    "types-circuitpython",
-    "adafruit-circuitpython-ble",
-    "adafruit-circuitpython-ticks",
-    "adafruit-circuitpython-itertools",
-    "adafruit-circuitpython-hid",
+  "commitizen",
+  "pytest",
+  "pytest-cov",
+  "circuitpython-stubs",
+  "types-circuitpython",
+  "adafruit-circuitpython-ble",
+  "adafruit-circuitpython-ticks",
+  "adafruit-circuitpython-itertools",
+  "adafruit-circuitpython-hid",
 ]
 
 [tool.uv]
-default-groups = [
-    "manager",
-    "dev",
-]
+default-groups = ["manager", "dev"]
 
 [build-system]
 requires = ["hatchling"]

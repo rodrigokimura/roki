@@ -1,8 +1,8 @@
+from itertools import cycle
 from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, PropertyMock, call, patch
 
 import pytest
-from itertools import cycle
 
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 
@@ -33,11 +33,10 @@ def mocked_calibration():
     from roki.firmware.calibration import BaseCalibration
 
     class MockedCalibration(BaseCalibration):
-        pass
+        _get_normalized_x = MagicMock()
+        _get_normalized_y = MagicMock()
 
-    MockedCalibration._get_normalized_x = MagicMock()
     MockedCalibration._get_normalized_x.side_effect = cycle([0.0, 1.0])
-    MockedCalibration._get_normalized_y = MagicMock()
     MockedCalibration._get_normalized_y.side_effect = cycle([0.0, 1.0])
 
     return MockedCalibration

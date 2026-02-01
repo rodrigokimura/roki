@@ -166,6 +166,9 @@ class Primary(Roki):
             software_revision="0.1.0",
             manufacturer="Adafruit Industries",
         )
+        if hid is None:
+            raise RuntimeError("HID Service not started")
+
         advertisement = ProvideServicesAdvertisement(hid)
         # Advertise as "Keyboard" (0x03C1) icon when pairing
         # https://www.bluetooth.com/specifications/assigned-numbers/
