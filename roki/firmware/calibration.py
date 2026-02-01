@@ -1,4 +1,5 @@
 import json
+from abc import ABC, abstractmethod
 import time
 
 from adafruit_ticks import ticks_ms
@@ -9,7 +10,7 @@ from roki.firmware.buzzer import Buzzer
 from roki.firmware.utils import Loop, blink_led
 
 
-class BaseCalibration:
+class BaseCalibration(ABC):
     def __init__(
         self,
         button: DigitalInOut,
@@ -70,19 +71,37 @@ class BaseCalibration:
         self._notify_end()
         self.button.deinit()
 
-    def _startup_condition(self) -> bool: ...
+    @abstractmethod
+    def _startup_condition(self) -> bool:
+        pass
 
-    def _get_mid_values(self) -> None: ...
+    @abstractmethod
+    def _get_mid_values(self) -> None:
+        pass
 
-    def _notify_start(self) -> None: ...
-    def _notify_rotation(self) -> None: ...
-    def _notify_end(self) -> None: ...
+    @abstractmethod
+    def _notify_start(self) -> None:
+        pass
 
-    def _check_for_stop_criteria(self) -> None: ...
+    @abstractmethod
+    def _notify_rotation(self) -> None:
+        pass
 
-    def _write_config(self) -> None: ...
+    @abstractmethod
+    def _notify_end(self) -> None:
+        pass
 
-    def read(self): ...
+    @abstractmethod
+    def _check_for_stop_criteria(self) -> None:
+        pass
+
+    @abstractmethod
+    def _write_config(self) -> None:
+        pass
+
+    @abstractmethod
+    def read(self):
+        pass
 
     def get_normalized(self, x: int, y: int) -> tuple[float, float]:
         if self._read is False:

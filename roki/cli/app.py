@@ -1,3 +1,5 @@
+import os
+
 import typer
 import uvicorn
 from fastapi import FastAPI
@@ -21,7 +23,9 @@ from roki.cli.utils import (
 )
 from roki.tui.app import Configurator
 
-firmware_relative_tree = "roki/firmware"
+_WINDOWS = os.name == "nt"
+
+firmware_relative_tree = os.path.join("roki", "firmware")
 
 app = typer.Typer(name="roki")
 
@@ -60,24 +64,27 @@ def upload_code(side: str = typer.Option("r")):
     if not chosen:
         raise typer.Abort()
 
-    print(f"Mounting device {chosen}")
+    print(f"Preparing device {chosen}")
 
-    mountpoint_path = "/run/media/roki"
+    if _WINDOWS:
+        dst = chosen
+    else:
+        dst = "/run/media/roki"
 
-    print(f"Creating directory for mountpoint: {mountpoint_path}")
-    create_tree(mountpoint_path)
+        print(f"Creating directory for mountpoint: {dst}")
+        create_tree(dst)
 
-    create_mount_point(chosen, mountpoint_path)
+        create_mount_point(chosen, dst)
 
     print("Copying files...")
-    firmware_location = f"{mountpoint_path}/{firmware_relative_tree}"
+    firmware_location = os.path.join(dst, firmware_relative_tree)
 
-    delete_files_by_extension(["py", "toml"], mountpoint_path)
-    delete_file(f"{mountpoint_path}/config.json")
+    delete_files_by_extension(["py", "toml"], dst)
+    delete_file(os.path.join(dst, "config.json"))
 
     create_tree(firmware_location)
     copy_tree(firmware_relative_tree, firmware_location, ["py", "json"])
-    create_empty_file(f"{mountpoint_path}/roki/__init__.py")
+    create_empty_file(os.path.join(dst, "roki", "__init__.py"))
 
     root_files = [
         "boot.py",
@@ -85,34 +92,39 @@ def upload_code(side: str = typer.Option("r")):
         "config.json",
     ]
     for file in root_files:
-        delete_file(f"{firmware_location}/{file}")
-        copy_file(f"{firmware_relative_tree}/{file}", mountpoint_path)
+        delete_file(os.path.join(firmware_location, file))
+        copy_file(os.path.join(firmware_relative_tree, file), dst)
 
     settings = "settings.toml"
-    with open(f"{firmware_relative_tree}/{settings}", mode="w") as f:
+    with open(os.path.join(firmware_relative_tree, settings), mode="w") as f:
         f.write(f"IS_LEFT_SIDE={int(is_left_side)}")
-    copy_file(f"{firmware_relative_tree}/{settings}", mountpoint_path)
-    delete_file(f"{firmware_relative_tree}/{settings}")
+    copy_file(os.path.join(firmware_relative_tree, settings), dst)
+    delete_file(os.path.join(firmware_relative_tree, settings))
 
     print("Installing libs...")
-    python_firmware_files = [
+    python_firmware_files: list[str] = [
         "keys.py",
         "kb.py",
     ]
     for file in python_firmware_files:
-        install_circuitpython_libs(mountpoint_path, f"{firmware_location}/{file}")
+        install_circuitpython_libs(dst, os.path.join(firmware_location, file))
 
-    install_circuitpython_libs(mountpoint_path, "boot.py")
-    install_circuitpython_libs(mountpoint_path, "code.py")
+    install_circuitpython_libs(dst, "boot.py")
+    install_circuitpython_libs(dst, "code.py")
 
-    print("Unmounting...")
-    unmount(mountpoint_path)
+    if not _WINDOWS:
+        print("Unmounting...")
+        unmount(dst)
 
 
 @app.command()
 def run():
     """Run code.py"""
-    files = [f"{firmware_relative_tree}/boot.py", f"{firmware_relative_tree}/code.py"]
+
+    files = [
+        os.path.join(firmware_relative_tree, "boot.py"),
+        os.path.join(firmware_relative_tree, "code.py"),
+    ]
     debug_codes(files)
 
 
