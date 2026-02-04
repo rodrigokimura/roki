@@ -16,6 +16,7 @@ dependencies = [
   "jinja2",
   "pyreadline3>=3.5.4",
   "adafruit-board-toolkit>=1.1.2",
+  "adafruit-circuitpython-logging>=5.6.0",
 ]
 
 [project.scripts]

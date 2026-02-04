@@ -1,3 +1,5 @@
+from typing import Literal
+import logging
 import os
 
 import typer
@@ -27,17 +29,107 @@ _WINDOWS = os.name == "nt"
 
 firmware_relative_tree = os.path.join("roki", "firmware")
 
-app = typer.Typer(name="roki")
+logger = logging.getLogger(__name__)
+
+
+def format_by_level(level: int):
+    LEVELS = {
+        logging.DEBUG: "debug",
+        logging.INFO: "info",
+        logging.WARNING: "warning",
+        logging.ERROR: "error",
+        logging.CRITICAL: "critical",
+    }
+    COLORS = {
+        logging.DEBUG: typer.colors.MAGENTA,
+        logging.INFO: typer.colors.CYAN,
+        logging.WARNING: typer.colors.YELLOW,
+        logging.ERROR: typer.colors.RED,
+        logging.CRITICAL: typer.colors.BRIGHT_RED,
+    }
+    level_part = f"[{LEVELS.get(level, LEVELS[logging.INFO]).upper():^10}]"
+    level_part = typer.style(
+        level_part,
+        fg=COLORS.get(level),
+        bold=True,
+    )
+
+    message_part = typer.style(
+        "%(message)s",
+        fg=COLORS.get(level),
+        bold=True,
+    )
+    time_part = typer.style(
+        "%(asctime)s",
+        dim=True,
+    )
+    # return f"{level_part} {time_part} %(name)s {message_part} - %(pathname)s:%(lineno)d"
+    return f"{level_part} [%(process)d] {time_part} %(name)s {message_part}"
+
+
+class LevelBasedFormatter(logging.Formatter):
+    def format(self, record: logging.LogRecord):
+        log_fmt = format_by_level(record.levelno)
+        formatter = logging.Formatter(log_fmt, datefmt="%Y-%m-%d %H:%M:%S")
+        return formatter.format(record)
+
+
+def main_callback():
+    handler = logging.StreamHandler()
+    handler.setFormatter(LevelBasedFormatter())
+    handler.setLevel(logging.DEBUG)
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        handlers=[handler],
+    )
+
+
+app = typer.Typer(
+    name="roki",
+    callback=main_callback,
+    pretty_exceptions_short=False,
+)
+
+
+@app.command(name="t")
+def asdf():
+    """test log messages"""
+    logger.debug("This is an informational message.")
+    logger.info("This is an informational message.")
+    logger.warning("This is a warning message.")
+    logger.error("This is a warning message.")
+    logger.critical("This is a warning message.")
 
 
 @app.command(name="u")
 @app.command(name="upload")
-def upload_code(side: str = typer.Option("r")):
+def upload_code(
+    side: Literal["r", "l", "right", "left"] = typer.Option(
+        "left",
+        help="Keyboard side destination",
+    ),
+    libs: bool = typer.Option(
+        True,
+        help="Install CircuitPython libs",
+    ),
+    root: bool = typer.Option(
+        True,
+        help="Update root files",
+    ),
+    default_config: bool = typer.Option(
+        True,
+        help="Replace with default config file ('config.json')",
+    ),
+    default_settings: bool = typer.Option(
+        True,
+        help="Replace with default settings file ('settings.toml')",
+    ),
+):
     """Upload code and libs to device"""
 
-    side = side.lower()
     if side not in ("r", "l", "right", "left"):
-        print("Invalid option: side must be 'r' or 'l'")
+        logger.error("Invalid option: side must be 'r' or 'l'")
         raise typer.Abort()
     is_left_side = side in ("l", "left")
 
@@ -64,56 +156,79 @@ def upload_code(side: str = typer.Option("r")):
     if not chosen:
         raise typer.Abort()
 
-    print(f"Preparing device {chosen}")
+    logger.info(f"Preparing device {chosen}")
 
     if _WINDOWS:
         dst = chosen
     else:
         dst = "/run/media/roki"
 
-        print(f"Creating directory for mountpoint: {dst}")
+        logger.info(f"Creating directory for mountpoint: {dst}")
         create_tree(dst)
 
         create_mount_point(chosen, dst)
 
-    print("Copying files...")
+    logger.info("Copying files...")
     firmware_location = os.path.join(dst, firmware_relative_tree)
 
-    delete_files_by_extension(["py", "toml"], dst)
-    delete_file(os.path.join(dst, "config.json"))
+    extensions_to_delete: list[str] = ["py"]
+    if default_settings:
+        extensions_to_delete.append("toml")
+    delete_files_by_extension(extensions_to_delete, dst)
+
+    if default_config:
+        delete_file(os.path.join(dst, "config.json"))
+        copy_file(os.path.join(firmware_relative_tree, "config.json"), dst)
+    else:
+        logger.warning("Skipping config reset (config.json)")
 
     create_tree(firmware_location)
     copy_tree(firmware_relative_tree, firmware_location, ["py", "json"])
     create_empty_file(os.path.join(dst, "roki", "__init__.py"))
 
-    root_files = [
-        "boot.py",
-        "code.py",
-        "config.json",
-    ]
-    for file in root_files:
-        delete_file(os.path.join(firmware_location, file))
-        copy_file(os.path.join(firmware_relative_tree, file), dst)
+    if root:
+        root_files: list[str] = [
+            "boot.py",
+            "code.py",
+        ]
+        for file in root_files:
+            delete_file(os.path.join(firmware_location, file))
+            copy_file(os.path.join(firmware_relative_tree, file), dst)
+    else:
+        logger.warning("Skipping root files update")
 
-    settings = "settings.toml"
-    with open(os.path.join(firmware_relative_tree, settings), mode="w") as f:
-        f.write(f"IS_LEFT_SIDE={int(is_left_side)}")
-    copy_file(os.path.join(firmware_relative_tree, settings), dst)
-    delete_file(os.path.join(firmware_relative_tree, settings))
+    if default_settings:
+        settings = "settings.toml"
+        with open(os.path.join(firmware_relative_tree, settings), mode="w") as f:
+            f.write(
+                "\n".join(
+                    [
+                        f"IS_LEFT_SIDE={int(is_left_side)}",
+                        "DEBUG=0",
+                    ]
+                )
+            )
+        copy_file(os.path.join(firmware_relative_tree, settings), dst)
+        delete_file(os.path.join(firmware_relative_tree, settings))
+    else:
+        logger.warning("Skipping settings reset (settings.toml)")
 
-    print("Installing libs...")
-    python_firmware_files: list[str] = [
-        "keys.py",
-        "kb.py",
-    ]
-    for file in python_firmware_files:
-        install_circuitpython_libs(dst, os.path.join(firmware_location, file))
+    if libs:
+        logger.info("Installing libs...")
+        python_firmware_files: list[str] = [
+            "keys.py",
+            "kb.py",
+        ]
+        for file in python_firmware_files:
+            install_circuitpython_libs(dst, os.path.join(firmware_location, file))
 
-    install_circuitpython_libs(dst, "boot.py")
-    install_circuitpython_libs(dst, "code.py")
+        install_circuitpython_libs(dst, "boot.py")
+        install_circuitpython_libs(dst, "code.py")
+    else:
+        logger.warning("Skipping installation of CircuitPython libs")
 
     if not _WINDOWS:
-        print("Unmounting...")
+        logger.info("Unmounting...")
         unmount(dst)
 
 
@@ -123,7 +238,8 @@ def run():
 
     files = [
         os.path.join(firmware_relative_tree, "boot.py"),
-        os.path.join(firmware_relative_tree, "code.py"),
+        # os.path.join(firmware_relative_tree, "code.py"),
+        os.path.join(firmware_relative_tree, "local_code.py"),
     ]
     debug_codes(files)
 
@@ -159,6 +275,6 @@ def generate():
 def config():
     """Open configurator TUI"""
 
-    print("Opening configurator TUI")
+    logger.info("Opening configurator TUI")
     app = Configurator()
     app.run()

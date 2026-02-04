@@ -1,16 +1,18 @@
 import json
-from abc import ABC, abstractmethod
 import time
 
 from adafruit_ticks import ticks_ms
 from analogio import AnalogIn
 from digitalio import DigitalInOut
 
+from roki.firmware import logging
 from roki.firmware.buzzer import Buzzer
 from roki.firmware.utils import Loop, blink_led
 
+logger = logging.getLogger(__name__)
 
-class BaseCalibration(ABC):
+
+class BaseCalibration:
     def __init__(
         self,
         button: DigitalInOut,
@@ -44,7 +46,7 @@ class BaseCalibration(ABC):
         self.max_iterations = max_iterations
 
     def start(self) -> None:
-        print("Starting calibration...")
+        logger.info("Starting calibration...")
 
         if not self._startup_condition():
             self.button.deinit()
@@ -71,37 +73,29 @@ class BaseCalibration(ABC):
         self._notify_end()
         self.button.deinit()
 
-    @abstractmethod
     def _startup_condition(self) -> bool:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _get_mid_values(self) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _notify_start(self) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _notify_rotation(self) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _notify_end(self) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _check_for_stop_criteria(self) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
     def _write_config(self) -> None:
-        pass
+        raise NotImplementedError
 
-    @abstractmethod
-    def read(self):
-        pass
+    def read(self) -> None:
+        raise NotImplementedError
 
     def get_normalized(self, x: int, y: int) -> tuple[float, float]:
         if self._read is False:

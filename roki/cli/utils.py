@@ -1,15 +1,20 @@
 import json
 import os
 import subprocess
+import logging
 
 DEVICE_NAME = "CIRCUITPY"
 
 _WINDOWS = os.name == "nt"
 
+logger = logging.getLogger(__name__)
+
 
 def get_devices() -> list[str]:
     if _WINDOWS:
+        logger.debug("Get devices for Windows")
         return get_devices_in_windows()
+    logger.debug("Get devices for Linux")
     return get_devices_in_linux()
 
 
@@ -89,9 +94,9 @@ def get_serial_device():
 
     if _WINDOWS:
         for port in cps.comports():
-            print(port.manufacturer)
-            print(port.description)
-            print(port.device)
+            logger.debug(port.manufacturer)
+            logger.debug(port.description)
+            logger.debug(port.device)
             return str(port.device)
     else:
         vendor = "Nice Keyboards"
@@ -99,7 +104,7 @@ def get_serial_device():
 
         if r := subprocess.check_output("rshell -l".split()):
             r = r.decode()
-            print(r)
+            logger.debug(r)
             try:
                 return next(
                     d.split("@")[-1]
@@ -118,4 +123,48 @@ def debug_code(file: str):
 def debug_codes(files: list[str]):
     if SERIAL_DEVICE := get_serial_device():
         for file in files:
-            run_command(f"ampy -p {SERIAL_DEVICE} run {file}")
+            # run_command(f"ampy -p {SERIAL_DEVICE} run {file}")
+            run_code(file, SERIAL_DEVICE)
+
+
+def run_code(
+    local_file: str,
+    port: str,
+    timeout: int | None = None,
+    no_output: bool = False,
+):
+    from ampy import files, pyboard
+
+    class CustomPyboard(pyboard.Pyboard):
+        def exec_(self, command, stream_output=False):
+            data_consumer = None
+            if stream_output:
+                data_consumer = pyboard.stdout_write_bytes
+            ret, ret_err = self.exec_raw(
+                command,
+                timeout=timeout,
+                data_consumer=data_consumer,
+            )
+            if ret_err:
+                raise pyboard.PyboardError("exception", ret, ret_err)
+            return ret
+
+    baud = 115200
+    _board = CustomPyboard(port, baudrate=baud, rawdelay=0)
+    board_files = files.Files(_board)
+    try:
+        output = board_files.run(
+            local_file,
+            not no_output,
+            not no_output,
+        )
+        if output is not None:
+            print(output.decode("utf-8"), end="")
+    except IOError:
+        logger.error("IO Error")
+    except pyboard.PyboardError as e:
+        logger.error("Pyboard Error")
+        logger.error(e)
+    except KeyboardInterrupt as e:
+        logger.info("Exiting...")
+        raise e from e

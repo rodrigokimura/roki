@@ -1,14 +1,16 @@
 from adafruit_itertools import count
 
-try:
-    from typing import TYPE_CHECKING as __t
+from roki.firmware import logging
 
-    TYPE_CHECKING = __t
+try:
+    from typing import TYPE_CHECKING
 except ImportError:  # pragma: no cover
     TYPE_CHECKING = False
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Callable
+
+logger = logging.getLogger(__name__)
 
 
 class Loop:
@@ -110,12 +112,12 @@ def decode_float(value: int):
 
 
 def blink_led(led_pin: str = "LED", delay: float = 0.3, times: int = 10):
-    print("Blinking LED")
     import time
 
     import board
     from digitalio import DigitalInOut, Direction
 
+    logger.debug("Blinking LED")
     led = DigitalInOut(getattr(board, led_pin))
     led.direction = Direction.OUTPUT
     led.switch_to_output(value=False)
