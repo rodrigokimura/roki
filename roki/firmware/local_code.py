@@ -1,16 +1,13 @@
-import os
-
 import board
 
 from roki.firmware import logging
+
 from roki.firmware.params import Params
 
 logger = logging.getLogger(__name__)
 
-Params(
-    is_left_side=bool(int(os.getenv("IS_LEFT_SIDE", 1))),
-    debug=bool(int(os.getenv("DEBUG", 0))),
-)
+params = Params(is_left_side=True)
+# params = Params(is_left_side=False)
 
 
 def main():

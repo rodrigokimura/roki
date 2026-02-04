@@ -118,6 +118,19 @@ wheels = [
 ]
 
 [[package]]
+name = "adafruit-circuitpython-logging"
+version = "5.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "adafruit-blinka" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f4/71/052e213e3101d1aa5c80fb5b209897dad14ea90c593e11140375d011bf29/adafruit_circuitpython_logging-5.6.0.tar.gz", hash = "sha256:b6327b43c60057e07fb9994e8dde0c5e2592958a41db71870b677283baed0390", size = 28704, upload-time = "2025-11-12T22:26:26.704Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/f3/caff7e46241ac647d2072be48bbc1db0c72ea22dccf183395dcd98022f96/adafruit_circuitpython_logging-5.6.0-py3-none-any.whl", hash = "sha256:a759dedc8ebd398990098a5e71fda00fc05647309cad3b4b53bc84d28e7abfc7", size = 9222, upload-time = "2025-11-12T22:26:25.247Z" },
+]
+
+[[package]]
 name = "adafruit-circuitpython-requests"
 version = "4.1.15"
 source = { registry = "https://pypi.org/simple" }
@@ -1024,6 +1037,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "adafruit-board-toolkit" },
+    { name = "adafruit-circuitpython-logging" },
     { name = "fastapi" },
     { name = "jinja2" },
     { name = "minify-html" },
@@ -1054,6 +1068,7 @@ manager = [
 [package.metadata]
 requires-dist = [
     { name = "adafruit-board-toolkit", specifier = ">=1.1.2" },
+    { name = "adafruit-circuitpython-logging", specifier = ">=5.6.0" },
     { name = "fastapi" },
     { name = "jinja2" },
     { name = "minify-html" },

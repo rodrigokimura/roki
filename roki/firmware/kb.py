@@ -9,6 +9,7 @@ from digitalio import DigitalInOut, Direction, Pull
 from keypad import KeyMatrix
 from pwmio import PWMOut
 
+from roki.firmware import logging
 from roki.firmware.buzzer import Buzzer
 from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
@@ -23,6 +24,8 @@ from roki.firmware.utils import (
     encode_float,
     get_coords,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class Roki:
@@ -118,10 +121,15 @@ class Roki:
         self.max_iterations_ble = max_iterations_ble
 
     def run(self):
-        print("Preparing...")
+        logger.debug("Preparing...")
+        logger.info("Preparing...")
+        logger.warning("Preparing...")
+        logger.error("Preparing...")
+        logger.critical("Preparing...")
+
         self.start_calibration()
 
-        print("Running...")
+        logger.info("Running...")
         self.notify_main_loop_start()
         self.run_main_loop()
 
@@ -152,7 +160,7 @@ class Roki:
 
     def disconnect(self):
         if self.ble.connected:
-            print("Already connected. Disconnecting...")
+            logger.info("Already connected. Disconnecting...")
             for conn in self.ble.connections:
                 if conn:
                     conn.disconnect()
@@ -183,7 +191,7 @@ class Primary(Roki):
         self.peripheral_conn = self.connect_to_peripheral_side(self.connection_interval)
         self._notify_peripheral_connection()
 
-        print("advertising")
+        logger.info("Advertising...")
         self.ble.start_advertising(advertisement, scan_response)
         self.buffer = bytearray(4)
         self.current_counter = 0
@@ -285,7 +293,7 @@ class Primary(Roki):
 
     def process_primary_keys(self):
         if event := self.key_matrix.events.get():
-            # print(event.key_number)
+            logger.debug(str(event.key_number))
 
             row, col = get_coords(event.key_number, self.col_count)
 
@@ -302,7 +310,7 @@ class Primary(Roki):
     def connect_to_peripheral_side(self, connection_interval: float) -> BLEConnection:
         peripheral_conn: BLEConnection | None = None
         while peripheral_conn is None:
-            print("Scanning for peripheral keyboard side...")
+            logger.info("Scanning for peripheral keyboard side...")
             for adv in self.ble.start_scan(
                 ProvideServicesAdvertisement,  # type: ignore
                 buffer_size=256,
@@ -310,7 +318,7 @@ class Primary(Roki):
                 if RokiService in adv.services:  # type: ignore
                     peripheral_conn = self.ble.connect(adv)
                     peripheral_conn.connection_interval = connection_interval
-                    print("Connected")
+                    logger.info("Connected")
                     break
             self.ble.stop_scan()
         return peripheral_conn
@@ -327,7 +335,7 @@ class Secondary(Roki):
         self.send_thumb_stick_message = False
 
         for _ in Loop(self.max_iterations_main_loop).iterate():
-            print("Advertise Roki peripheral...")
+            logger.info("Advertise Roki peripheral...")
             self.ble.stop_advertising()
             self.ble.start_advertising(advertisement)
 
@@ -337,7 +345,7 @@ class Secondary(Roki):
             ).iterate():
                 pass
 
-            print("Connected")
+            logger.info("Connected")
             for _ in Loop(
                 self.max_iterations_ble,
                 lambda: not self.ble.connected,

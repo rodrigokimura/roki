@@ -1,9 +1,12 @@
 from __future__ import annotations
+from roki.firmware.params import Params
 
 import json
-import os
 
+from roki.firmware import logging
 from roki.firmware.keys import KeyWrapper, init
+
+logger = logging.getLogger(__name__)
 
 
 def parse_color(
@@ -22,6 +25,8 @@ def parse_color(
     if isinstance(color, (list, tuple)):
         return int(color[0]), int(color[1]), int(color[2])
 
+    raise NotImplementedError
+
 
 class Layer:
     name: str
@@ -35,7 +40,7 @@ class Layer:
 
     @classmethod
     def from_dict(cls, data: dict) -> Layer:
-        is_left_side = bool(os.getenv("IS_LEFT_SIDE", True))
+        is_left_side = Params().IS_LEFT_SIDE
         i = cls()
         i.name = data.get("name", "no name")
         c = data.get("color", "#000000")
@@ -78,7 +83,10 @@ class Config:
         self.layer_index = 0
         self.extras = False
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
-        self.is_left_side = bool(os.getenv("IS_LEFT_SIDE", False))
+
+        is_left_side = Params().IS_LEFT_SIDE
+        logger.debug(f"Left side: {is_left_side}")
+        self.is_left_side = is_left_side
 
     @property
     def layer(self):

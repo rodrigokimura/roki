@@ -1,4 +1,5 @@
 import glob
+import logging
 import os
 import shutil
 from pathlib import Path
@@ -6,6 +7,8 @@ from pathlib import Path
 from roki.cli.utils import run_command
 
 _WINDOWS = os.name == "nt"
+
+logger = logging.getLogger(__name__)
 
 
 def delete_files_by_extension(extensions: list[str], location: str):
@@ -34,6 +37,8 @@ def copy_tree(
                 shutil.copy2(src, dst, **kw)
 
         os.makedirs(target, exist_ok=True)
+
+        logger.debug("Executting copytree...")
         shutil.copytree(
             source,
             target,
