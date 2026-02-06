@@ -115,20 +115,50 @@ def get_serial_device():
                 return ""
 
 
-def debug_code(file: str):
-    if SERIAL_DEVICE := get_serial_device():
-        run_command(f"ampy -p {SERIAL_DEVICE} run {file}")
+def replace_params(code: str, params: dict[str, bool | int]) -> str:
+    # identify pattern
+    lines = code.splitlines()
+    new_code_lines: list[str] = []
+    for line_no, line in enumerate(lines):
+        for param_name, param_value in params.items():
+            if param_name in line and "=" in line and "," in line:
+                logger.debug("Line with param found: ")
+                logger.debug(line)
+
+                param_position = line.find(param_name)
+                equals_position = line.find("=", param_position)
+                end_position = line.find(",", equals_position)
+                if end_position == -1:
+                    end_position = line.find(")", equals_position)
+
+                logger.info(f"Replacing param {param_name} to {param_value}")
+
+                line = (
+                    line[: equals_position + 1] + str(param_value) + line[end_position:]
+                )
+        new_code_lines.append(line)
+    new_code = "\n".join(new_code_lines)
+
+    logger.debug(new_code)
+
+    return new_code
 
 
-def debug_codes(files: list[str]):
+def debug_codes(files: list[str], prepend_code: str = ""):
     if SERIAL_DEVICE := get_serial_device():
         for file in files:
-            # run_command(f"ampy -p {SERIAL_DEVICE} run {file}")
-            run_code(file, SERIAL_DEVICE)
+            with open(file) as f:
+                content = f.read()
+                if prepend_code:
+                    content = prepend_code + "\n" + content
+
+            run_code(content, SERIAL_DEVICE)
+    else:
+        logger.error("No device found!")
 
 
 def run_code(
-    local_file: str,
+    code: str,
     port: str,
     timeout: int | None = None,
     no_output: bool = False,
@@ -149,12 +179,19 @@ def run_code(
                 raise pyboard.PyboardError("exception", ret, ret_err)
             return ret
 
+        def execfile(self, filename, stream_output=False):
+            import io
+
+            with io.StringIO(filename) as f:
+                pyfile = f.read()
+            return self.exec_(pyfile, stream_output=stream_output)
+
     baud = 115200
     _board = CustomPyboard(port, baudrate=baud, rawdelay=0)
     board_files = files.Files(_board)
     try:
         output = board_files.run(
-            local_file,
+            code,
             not no_output,
             not no_output,
         )

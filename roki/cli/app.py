@@ -1,4 +1,5 @@
 from typing import Literal
+from enum import Enum
 import logging
 import os
 
@@ -22,6 +23,7 @@ from roki.cli.utils import (
     get_devices,
     install_circuitpython_libs,
     unmount,
+    replace_params,
 )
 from roki.tui.app import Configurator
 
@@ -30,6 +32,14 @@ _WINDOWS = os.name == "nt"
 firmware_relative_tree = os.path.join("roki", "firmware")
 
 logger = logging.getLogger(__name__)
+
+
+class LogLevel(int, Enum):
+    DEBUG = logging.DEBUG
+    INFO = logging.INFO
+    WARNING = logging.WARNING
+    ERROR = logging.ERROR
+    CRITICAL = logging.CRITICAL
 
 
 def format_by_level(level: int):
@@ -92,21 +102,12 @@ app = typer.Typer(
 )
 
 
-@app.command(name="t")
-def asdf():
-    """test log messages"""
-    logger.debug("This is an informational message.")
-    logger.info("This is an informational message.")
-    logger.warning("This is a warning message.")
-    logger.error("This is a warning message.")
-    logger.critical("This is a warning message.")
-
-
 @app.command(name="u")
 @app.command(name="upload")
 def upload_code(
     side: Literal["r", "l", "right", "left"] = typer.Option(
         "left",
+        case_sensitive=False,
         help="Keyboard side destination",
     ),
     libs: bool = typer.Option(
@@ -128,9 +129,6 @@ def upload_code(
 ):
     """Upload code and libs to device"""
 
-    if side not in ("r", "l", "right", "left"):
-        logger.error("Invalid option: side must be 'r' or 'l'")
-        raise typer.Abort()
     is_left_side = side in ("l", "left")
 
     devices = get_devices()
@@ -205,6 +203,7 @@ def upload_code(
                     [
                         f"IS_LEFT_SIDE={int(is_left_side)}",
                         "DEBUG=0",
+                        "LOG_LEVEL=0",
                     ]
                 )
             )
@@ -232,16 +231,47 @@ def upload_code(
         unmount(dst)
 
 
-@app.command()
-def run():
+@app.command(name="run")
+def run(
+    side: Literal["r", "l", "right", "left"] = typer.Option(
+        "left",
+        case_sensitive=False,
+        help="Keyboard side destination",
+    ),
+    preprend_params: bool = typer.Option(
+        True,
+        help="Prepend local params",
+    ),
+    log_level: LogLevel = typer.Option(
+        LogLevel.DEBUG,
+        help="Device's log level",
+    ),
+):
     """Run code.py"""
+
+    # Local code to inject
+    if preprend_params:
+        with open(os.path.join("roki", "cli", "local_params.py")) as f:
+            preprend_code = f.read()
+            preprend_code = replace_params(
+                preprend_code,
+                {
+                    "debug": True,
+                    "log_level": log_level.value,
+                    "is_left_side": side.startswith("l"),
+                },
+            )
+            logger.debug("Prepending code: ")
+            logger.debug(preprend_code)
+    else:
+        logger.info("No params override")
+        preprend_code = ""
 
     files = [
         os.path.join(firmware_relative_tree, "boot.py"),
-        # os.path.join(firmware_relative_tree, "code.py"),
-        os.path.join(firmware_relative_tree, "local_code.py"),
+        os.path.join(firmware_relative_tree, "code.py"),
     ]
-    debug_codes(files)
+    debug_codes(files, preprend_code)
 
 
 @app.command()

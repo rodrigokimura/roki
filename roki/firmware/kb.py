@@ -121,11 +121,7 @@ class Roki:
         self.max_iterations_ble = max_iterations_ble
 
     def run(self):
-        logger.debug("Preparing...")
         logger.info("Preparing...")
-        logger.warning("Preparing...")
-        logger.error("Preparing...")
-        logger.critical("Preparing...")
 
         self.start_calibration()
 
@@ -293,8 +289,6 @@ class Primary(Roki):
 
     def process_primary_keys(self):
         if event := self.key_matrix.events.get():
-            logger.debug(str(event.key_number))
-
             row, col = get_coords(event.key_number, self.col_count)
 
             key = self.config.layer.primary_keys[row][col]

@@ -8,13 +8,17 @@ from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keycode import Keycode
 from adafruit_hid.mouse import Mouse as _Mouse
 
+from roki.firmware import logging
 from roki.firmware.layer_handler import Commands, LayerHandler
+from roki.firmware.params import Params
 from roki.firmware.utils import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover
     from typing import Literal, Sequence, TypeAlias
 
     DPad = Literal["u", "d", "l", "r", "su", "sd"]
+
+logger = logging.getLogger(__name__)
 
 
 class Mouse(_Mouse):
@@ -125,6 +129,12 @@ def init(c: Config):
 
 
 class KeyWrapper:
+    __slots__ = (
+        "params",
+        "is_layer_handler",
+        "name",
+    )
+
     def __init__(self, keys: str | list[str] | None = None) -> None:
         global sender_map
         keys = keys or "noop"
@@ -132,6 +142,10 @@ class KeyWrapper:
             keys = [keys.upper()]
         else:
             keys = [key.upper() for key in keys]
+        from roki.firmware.params import Params
+
+        if Params().DEBUG:
+            self.name = keys
 
         self.params = tuple(
             (sender, key_container.get(key))
@@ -182,3 +196,15 @@ class KeyWrapper:
     def press_and_release(self) -> None:
         self.press()
         self.release()
+
+
+if Params().DEBUG:
+
+    class KeyWrapper(KeyWrapper):
+        def press(self):
+            logger.debug("Keys: " + str(self.name) + " Event: PRESS")
+            super().press()
+
+        def release(self):
+            logger.debug("Keys: " + str(self.name) + " Event: RELEASE")
+            super().release()

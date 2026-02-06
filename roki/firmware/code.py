@@ -1,16 +1,12 @@
-import os
-
 import board
 
 from roki.firmware import logging
 from roki.firmware.params import Params
 
-logger = logging.getLogger(__name__)
 
-Params(
-    is_left_side=bool(int(os.getenv("IS_LEFT_SIDE", 1))),
-    debug=bool(int(os.getenv("DEBUG", 0))),
-)
+Params.from_env()
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -28,6 +24,9 @@ def main():
 
 
 if __name__ == "__main__":
+    logger.debug("Available attrs for board: ")
     logger.debug(str(dir(board)))
+
+    logger.info("Board ID: " + board.board_id)
 
     main()

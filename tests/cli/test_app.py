@@ -180,7 +180,7 @@ def test_app_upload_invalid_side(
     side = "invalid-value"
     result = runner.invoke(app, ["upload", "--side", side])
 
-    assert result.exit_code == 1
+    assert result.exit_code == 2
 
 
 def test_app_upload_multiple_devices_invalid_value(

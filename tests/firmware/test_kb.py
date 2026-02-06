@@ -13,9 +13,12 @@ if TYPE_CHECKING:
 
 @pytest.fixture(autouse=True)
 def mock_init():
-    with patch("roki.firmware.keys.init") as m:
-        m.return_value = None
-        yield m
+    with (
+        patch("roki.firmware.keys.init") as m_init,
+        patch("roki.firmware.keys.hid"),
+    ):
+        m_init.return_value = None
+        yield m_init
 
 
 @pytest.fixture
@@ -35,6 +38,30 @@ def mocked_calibration():
     class MockedCalibration(BaseCalibration):
         _get_normalized_x = MagicMock()
         _get_normalized_y = MagicMock()
+
+        def _startup_condition(self) -> bool:
+            return False
+
+        def _get_mid_values(self) -> None:
+            return
+
+        def _notify_start(self) -> None:
+            return
+
+        def _notify_rotation(self) -> None:
+            return
+
+        def _notify_end(self) -> None:
+            return
+
+        def _check_for_stop_criteria(self) -> None:
+            return
+
+        def _write_config(self) -> None:
+            return
+
+        def read(self) -> None:
+            return
 
     MockedCalibration._get_normalized_x.side_effect = cycle([0.0, 1.0])
     MockedCalibration._get_normalized_y.side_effect = cycle([0.0, 1.0])

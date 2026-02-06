@@ -40,13 +40,22 @@ class LevelBasedFormatter(logging.Formatter):
 
 
 def getLogger(logger_name: str | None = None) -> logging.Logger:
+    from roki.firmware.params import Params
+
     logger = logging.getLogger(logger_name)
 
-    handler = logging.StreamHandler()
-    handler.setFormatter(LevelBasedFormatter())
-    handler.setLevel(10)
+    params = Params()
+
+    if params.DEBUG:
+        handler = logging.StreamHandler()
+        handler.setLevel(params.LOG_LEVEL)
+        logger.setLevel(params.LOG_LEVEL)
+        handler.setFormatter(LevelBasedFormatter())
+    else:
+        handler = logging.NullHandler()
+        handler.setLevel(0)
+        logger.setLevel(0)
 
     logger.addHandler(handler)
-    logger.setLevel(10)
 
     return logger

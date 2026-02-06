@@ -2,10 +2,23 @@ import board
 import digitalio
 import storage
 
-switch = digitalio.DigitalInOut(getattr(board, "P0_22"))
+from roki.firmware import logging
+from roki.firmware.params import Params
+
+Params.from_env()
+
+logger = logging.getLogger(__name__)
+
+pin = "P0_22"
+switch = digitalio.DigitalInOut(getattr(board, pin))
 switch.direction = digitalio.Direction.INPUT
 switch.pull = digitalio.Pull.UP
 
-print(switch.value)
-storage.remount("/", readonly=switch.value)
+logger.debug(f"Switch state ({pin}): {switch.value}")
+
+try:
+    storage.remount("/", readonly=switch.value)
+except RuntimeError as e:
+    logger.error(str(e))
+
 switch.deinit()
