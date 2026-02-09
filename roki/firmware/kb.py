@@ -1,3 +1,4 @@
+import _bleio
 import board
 import rotaryio
 from adafruit_ble import BLEConnection, BLERadio
@@ -29,42 +30,9 @@ logger = logging.getLogger(__name__)
 
 
 class Roki:
-    @classmethod
-    def build(
-        cls,
-        row_pins: tuple[str, ...],
-        column_pins: tuple[str, ...],
-        buzzer_pin: str,
-        thumb_stick_pins: tuple[str, str, str],
-        encoder_pins: tuple[str, str],
-        encoder_divisor: int = 4,
-        columns_to_anodes: bool = False,
-        interval: float = 0.001,
-        max_events: int = 5,
-        connection_interval: float = 7.5,
-        calibration_class: type[BaseCalibration] = Calibration,
-        max_iterations_main_loop: int | None = None,
-        max_iterations_ble: int | None = None,
-    ):
-        config = Config.read()
-        return (Primary if config.is_left_side else Secondary)(
-            row_pins,
-            column_pins,
-            buzzer_pin,
-            thumb_stick_pins,
-            encoder_pins,
-            encoder_divisor,
-            columns_to_anodes,
-            interval,
-            max_events,
-            connection_interval,
-            calibration_class,
-            max_iterations_main_loop,
-            max_iterations_ble,
-        )
-
     def __init__(
         self,
+        config: Config,
         row_pins: tuple[str, ...],
         column_pins: tuple[str, ...],
         buzzer_pin: str,
@@ -76,8 +44,8 @@ class Roki:
         max_events: int = 5,
         connection_interval: float = 7.5,
         calibration_class: type[BaseCalibration] = Calibration,
-        max_iterations_main_loop: int | None = None,
-        max_iterations_ble: int | None = None,
+        max_iterations_main_loop: int = 0,
+        max_iterations_ble: int = 0,
     ):
         self.buzzer = Buzzer(
             PWMOut(getattr(board, buzzer_pin), variable_frequency=True)
@@ -114,7 +82,7 @@ class Roki:
             interval=interval,
             max_events=max_events,
         )
-        self.config = Config.read()
+        self.config = config
         self.ble = BLERadio()
         self.mouse_speed = 10
         self.max_iterations_main_loop = max_iterations_main_loop
@@ -330,8 +298,12 @@ class Secondary(Roki):
 
         for _ in Loop(self.max_iterations_main_loop).iterate():
             logger.info("Advertise Roki peripheral...")
-            self.ble.stop_advertising()
-            self.ble.start_advertising(advertisement)
+            try:
+                self.ble.stop_advertising()
+                self.ble.start_advertising(advertisement)
+            except _bleio.BluetoothError as e:
+                logger.error(str(e))
+                continue
 
             for _ in Loop(
                 self.max_iterations_ble,

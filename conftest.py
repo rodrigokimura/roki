@@ -1,19 +1,20 @@
 import sys
 from unittest.mock import MagicMock
 
-MOCK_MODULES = [
+MOCK_MODULES: list[str] = [
     "board",
     "rotaryio",
     "digitalio",
     "pwmio",
     "analogio",
     "usb_hid",
+    "storage",
     "_bleio",
 ]
 
 
 def mock_imported_modules():
-    module_paths = set()
+    module_paths: set[str] = set()
     for m in MOCK_MODULES:
         namespaces = m.split(".")
         ns = []
@@ -25,5 +26,4 @@ def mock_imported_modules():
 
 
 def pytest_runtest_setup(item):
-    lambda: item  # HACK: avoid LSP flagging as non-used name
     mock_imported_modules()

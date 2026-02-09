@@ -1,7 +1,7 @@
-from typing import Literal
-from enum import Enum
 import logging
 import os
+from enum import Enum
+from typing import Literal
 
 import typer
 import uvicorn
@@ -22,8 +22,8 @@ from roki.cli.utils import (
     debug_codes,
     get_devices,
     install_circuitpython_libs,
-    unmount,
     replace_params,
+    unmount,
 )
 from roki.tui.app import Configurator
 
@@ -107,6 +107,8 @@ app = typer.Typer(
 def upload_code(
     side: Literal["r", "l", "right", "left"] = typer.Option(
         "left",
+        "--side",
+        "-s",
         case_sensitive=False,
         help="Keyboard side destination",
     ),
@@ -235,6 +237,8 @@ def upload_code(
 def run(
     side: Literal["r", "l", "right", "left"] = typer.Option(
         "left",
+        "--side",
+        "-s",
         case_sensitive=False,
         help="Keyboard side destination",
     ),

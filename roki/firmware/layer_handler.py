@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from roki.firmware.utils import TYPE_CHECKING
-
-if TYPE_CHECKING:  # pragma: no cover
+try:
     from .config import Config
+except ImportError:
+    pass
 
 
 class LayerHandler:

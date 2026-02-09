@@ -11,12 +11,13 @@ from adafruit_hid.mouse import Mouse as _Mouse
 from roki.firmware import logging
 from roki.firmware.layer_handler import Commands, LayerHandler
 from roki.firmware.params import Params
-from roki.firmware.utils import TYPE_CHECKING
 
-if TYPE_CHECKING:  # pragma: no cover
+try:
     from typing import Literal, Sequence, TypeAlias
 
     DPad = Literal["u", "d", "l", "r", "su", "sd"]
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -90,13 +91,15 @@ class MediaFunction:
         return hasattr(MediaKey, n)
 
 
-if TYPE_CHECKING:  # pragma: no cover
+try:
     from typing import Any
 
     from .config import Config
 
     Device: TypeAlias = Keyboard | Mouse | Media | LayerHandler
     Code: TypeAlias = KeyboardCode | MouseButton | MediaFunction | Commands
+except ImportError:
+    pass
 
 
 sender_map: dict[Device, Code] = {}

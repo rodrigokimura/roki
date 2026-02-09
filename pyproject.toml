@@ -25,6 +25,7 @@ roki = "roki.cli.app:app"
 [dependency-groups]
 manager = ["circup", "rshell", "adafruit-ampy"]
 dev = [
+  "ty",
   "commitizen",
   "pytest",
   "pytest-cov",

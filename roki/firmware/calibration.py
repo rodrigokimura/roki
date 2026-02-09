@@ -21,7 +21,7 @@ class BaseCalibration:
         buzzer: Buzzer,
         release_time: float = 5.0,
         mid_time: float = 5.0,
-        max_iterations: int | None = None,
+        max_iterations: int = 0,
     ):
         self.button = button
         self.thumb_stick_x = thumb_stick_x

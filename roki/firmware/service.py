@@ -37,7 +37,7 @@ class PacketBufferCharacteristic(ComplexCharacteristic):
             fixed_length=False,
         )
 
-    def bind(self, service: Service):  # type: ignore
+    def bind(self, service: Service):
         bound_characteristic = super().bind(service)
         return _bleio.PacketBuffer(
             bound_characteristic,

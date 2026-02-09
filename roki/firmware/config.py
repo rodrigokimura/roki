@@ -1,10 +1,10 @@
 from __future__ import annotations
-from roki.firmware.params import Params
 
 import json
 
 from roki.firmware import logging
 from roki.firmware.keys import KeyWrapper, init
+from roki.firmware.params import Params
 
 logger = logging.getLogger(__name__)
 
@@ -93,7 +93,7 @@ class Config:
         return self.layers[self.layer_index]
 
     @classmethod
-    def read(cls):
+    def read(cls) -> Config:
         global _config
         if _config is None:
             with open("config.json") as file:

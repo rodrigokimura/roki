@@ -2,7 +2,6 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import HorizontalGroup, VerticalGroup
 from textual.screen import ModalScreen
-from textual.suggester import SuggestFromList
 from textual.widgets import Button, Input, OptionList, Select
 
 from roki.cli.config.keys import KEYS
@@ -60,4 +59,5 @@ class KeyEditor(ModalScreen):
         if event.control.id == "cancel":
             self.app.pop_screen()
         if event.control.id == "confirm":
-            self.keys.value = self.input.value
+            pass
+            # self.keys.value = self.input.value

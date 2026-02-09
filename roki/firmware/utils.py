@@ -1,16 +1,18 @@
-from adafruit_itertools import count
-
 from roki.firmware import logging
 
 try:
-    from typing import TYPE_CHECKING
-except ImportError:  # pragma: no cover
-    TYPE_CHECKING = False
-
-if TYPE_CHECKING:  # pragma: no cover
     from typing import Callable
+except ImportError:
+    pass
 
 logger = logging.getLogger(__name__)
+
+
+def count():
+    i = 0
+    while True:
+        yield i
+        i += 1
 
 
 class Loop:
@@ -21,7 +23,7 @@ class Loop:
 
     def __init__(
         self,
-        max_iterations: int | None = None,
+        max_iterations: int = 0,
         stop_when: "Callable[[], bool]" = lambda: False,
     ) -> None:
         self.max_iterations = max_iterations
@@ -29,10 +31,11 @@ class Loop:
 
     def iterate(self):
         for i in count():
-            if ((self.max_iterations is not None) and (i >= self.max_iterations)) or (
-                self.sentinel()
-            ):
+            logger.debug(f"Iteration: {i}")
+
+            if (0 < self.max_iterations <= i) or self.sentinel():
                 break
+
             yield i
 
 

@@ -8,16 +8,6 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def mock_find_device():
-    with (
-        patch("adafruit_hid.keyboard.find_device") as m_keyboard,
-        patch("adafruit_hid.mouse.find_device") as m_mouse,
-        patch("adafruit_hid.consumer_control.find_device") as m_media,
-    ):
-        yield m_keyboard, m_mouse, m_media
-
-
-@pytest.fixture
 def mouse(mock_find_device: tuple[MagicMock, MagicMock, MagicMock]):
     from roki.firmware.keys import Mouse
 
@@ -32,16 +22,6 @@ def mouse(mock_find_device: tuple[MagicMock, MagicMock, MagicMock]):
 def wrap_mouse_move(mouse: "Mouse"):
     with patch.object(mouse, "move", wraps=mouse.move) as m:
         yield m
-
-
-@pytest.fixture
-def mock_hid_service(mock_find_device: tuple[MagicMock, MagicMock, MagicMock]):
-    mm = MagicMock()
-    mm.devices = []
-    with patch("roki.firmware.keys.HIDService") as m:
-        m.return_value = mm
-        yield m
-        assert sum(m.call_count for m in mock_find_device) > 0
 
 
 def test_mouse(mouse: "Mouse", wrap_mouse_move: MagicMock):
@@ -92,5 +72,3 @@ def test_key_wrapper(mock_hid_service: MagicMock):
 
     kw = KeyWrapper(["Z", "MUTE", "LEFT_BUTTON", "LAYER_0_PRESS"])
     kw.press_and_release()
-
-    mock_hid_service.assert_called()

@@ -1,7 +1,7 @@
 import json
+import logging
 import os
 import subprocess
-import logging
 
 DEVICE_NAME = "CIRCUITPY"
 
