@@ -1,3 +1,4 @@
+from typing import Generator
 from roki.firmware import logging
 
 try:
@@ -37,6 +38,62 @@ class Loop:
                 break
 
             yield i
+
+
+class WeightedLoop(Loop):
+    __slots__ = (
+        "max_iterations",
+        "sentinel",
+        "total_weight",
+    )
+
+    def __init__(
+        self,
+        max_iterations: int = 0,
+        stop_when: "Callable[[], bool]" = lambda: False,
+    ) -> None:
+        super().__init__(max_iterations, stop_when)
+        self.total_weight = 0
+
+    def iterate(self) -> Generator["Iteration", None, None]:
+        for i in count():
+            logger.debug(f"Iteration: {i}")
+
+            if (0 < self.max_iterations <= i) or self.sentinel():
+                break
+
+            yield Iteration(self, i)
+
+
+class Iteration:
+    __slots__ = (
+        "iteration",
+        "loop",
+        "weight",
+    )
+
+    iteration: int
+    loop: WeightedLoop
+    weight: int
+
+    def __init__(self, loop: WeightedLoop, iteration: int):
+        self.loop = loop
+        self.iteration = iteration
+
+    def for_weight(self, w: int):
+        if self.iteration == 0:
+            self.loop.total_weight += w
+
+        # self.loop.iterate
+        # pass
+        return self
+
+    def __enter__(self):
+        if self.iteration % self.weight == 1:
+            pass
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        pass
 
 
 class Cycle:

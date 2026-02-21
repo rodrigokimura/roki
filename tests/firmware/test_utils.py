@@ -11,6 +11,7 @@ from roki.firmware.utils import (
     encode_float,
     encode_vector,
     get_coords,
+    WeightedLoop,
 )
 
 
@@ -90,3 +91,17 @@ def test_blink_led(mock_sleep: MagicMock):
     blink_led()
 
     mock_sleep.assert_called()
+
+
+def test_weighted_loop():
+    for i in WeightedLoop(5).iterate():
+        print(i)
+
+        with i.for_weight(1):
+            pass
+
+        with i.for_weight(1):
+            pass
+
+        print("total weight")
+        print(i.loop.total_weight)
