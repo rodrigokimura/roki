@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 try:
-    from .config import Config
-except ImportError:
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        from .config import Config
+except Exception:
     pass
 
 

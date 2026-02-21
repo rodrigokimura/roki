@@ -17,6 +17,7 @@ from roki.cli.file_management import (
     delete_files_by_extension,
 )
 from roki.cli.html_generator import Generator
+from roki.cli.options import VERBOSE_OPTION
 from roki.cli.utils import (
     create_mount_point,
     debug_codes,
@@ -42,69 +43,25 @@ class LogLevel(int, Enum):
     CRITICAL = logging.CRITICAL
 
 
-def format_by_level(level: int):
-    LEVELS = {
-        logging.DEBUG: "debug",
-        logging.INFO: "info",
-        logging.WARNING: "warning",
-        logging.ERROR: "error",
-        logging.CRITICAL: "critical",
-    }
-    COLORS = {
-        logging.DEBUG: typer.colors.MAGENTA,
-        logging.INFO: typer.colors.CYAN,
-        logging.WARNING: typer.colors.YELLOW,
-        logging.ERROR: typer.colors.RED,
-        logging.CRITICAL: typer.colors.BRIGHT_RED,
-    }
-    level_part = f"[{LEVELS.get(level, LEVELS[logging.INFO]).upper():^10}]"
-    level_part = typer.style(
-        level_part,
-        fg=COLORS.get(level),
-        bold=True,
-    )
-
-    message_part = typer.style(
-        "%(message)s",
-        fg=COLORS.get(level),
-        bold=True,
-    )
-    time_part = typer.style(
-        "%(asctime)s",
-        dim=True,
-    )
-    # return f"{level_part} {time_part} %(name)s {message_part} - %(pathname)s:%(lineno)d"
-    return f"{level_part} [%(process)d] {time_part} %(name)s {message_part}"
-
-
-class LevelBasedFormatter(logging.Formatter):
-    def format(self, record: logging.LogRecord):
-        log_fmt = format_by_level(record.levelno)
-        formatter = logging.Formatter(log_fmt, datefmt="%Y-%m-%d %H:%M:%S")
-        return formatter.format(record)
-
-
-def main_callback():
-    handler = logging.StreamHandler()
-    handler.setFormatter(LevelBasedFormatter())
-    handler.setLevel(logging.DEBUG)
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        handlers=[handler],
-    )
-
-
 app = typer.Typer(
     name="roki",
-    callback=main_callback,
     pretty_exceptions_short=False,
 )
+
+
+@app.command(name="test", hidden=True)
+def test_command(
+    _: int = VERBOSE_OPTION,
+):
+    logger.info("this is an info log")
+    logger.error("this is an error log")
+    logger.debug("this is a debug log")
 
 
 @app.command(name="u")
 @app.command(name="upload")
 def upload_code(
+    _: int = VERBOSE_OPTION,
     side: Literal["r", "l", "right", "left"] = typer.Option(
         "left",
         "--side",
@@ -235,6 +192,7 @@ def upload_code(
 
 @app.command(name="run")
 def run(
+    _: int = VERBOSE_OPTION,
     side: Literal["r", "l", "right", "left"] = typer.Option(
         "left",
         "--side",
@@ -271,7 +229,7 @@ def run(
         logger.info("No params override")
         preprend_code = ""
 
-    files = [
+    files: list[str] = [
         os.path.join(firmware_relative_tree, "boot.py"),
         os.path.join(firmware_relative_tree, "code.py"),
     ]
@@ -279,7 +237,9 @@ def run(
 
 
 @app.command()
-def serve():
+def serve(
+    _: int = VERBOSE_OPTION,
+):
     """Run configuration server"""
 
     generate()
@@ -299,14 +259,18 @@ def serve():
 
 @app.command(name="g")
 @app.command(name="generate")
-def generate():
+def generate(
+    _: int = VERBOSE_OPTION,
+):
     """Generate html file"""
 
     Generator().generate_html()
 
 
 @app.command()
-def config():
+def config(
+    _: int = VERBOSE_OPTION,
+):
     """Open configurator TUI"""
 
     logger.info("Opening configurator TUI")
