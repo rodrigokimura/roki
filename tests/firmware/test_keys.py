@@ -70,5 +70,11 @@ def test_key_wrapper(mock_hid_service: MagicMock):
 
     init(Config())
 
-    kw = KeyWrapper(["Z", "MUTE", "LEFT_BUTTON", "LAYER_0_PRESS"])
-    kw.press_and_release()
+    for k in (
+        "Z",
+        "MUTE",
+        "LEFT_BUTTON",
+        "LAYER_0_PRESS",
+    ):
+        kw = KeyWrapper(k)
+        kw.press_and_release()
