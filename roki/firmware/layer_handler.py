@@ -15,6 +15,9 @@ class LayerHandler:
         "config",
     )
 
+    _prev: int
+    config: Config
+
     def __init__(self, config: Config) -> None:
         self._prev = 0
         self.config = config
@@ -65,6 +68,9 @@ class Command:
         "index",
         "type_",
     )
+
+    index: int
+    type_: str | None
 
     def __init__(self, index: int = 0, type_: str | None = None) -> None:
         self.index = index

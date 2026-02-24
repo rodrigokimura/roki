@@ -17,7 +17,7 @@ def mock_imported_modules():
     module_paths: set[str] = set()
     for m in MOCK_MODULES:
         namespaces = m.split(".")
-        ns = []
+        ns: list[str] = []
         for n in namespaces:
             ns.append(n)
             module_paths.add(".".join(ns))

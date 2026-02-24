@@ -9,11 +9,11 @@ from adafruit_hid.keycode import Keycode
 from adafruit_hid.mouse import Mouse as _Mouse
 
 from roki.firmware import logging
-from roki.firmware.layer_handler import Commands, LayerHandler
+from roki.firmware.layer_handler import Command, Commands, LayerHandler
 from roki.firmware.params import Params
 
 try:
-    from typing import Literal, Sequence, TypeAlias
+    from typing import Callable, Literal, Sequence, TypeAlias
 
     DPad = Literal["u", "d", "l", "r", "su", "sd"]
 except ImportError:
@@ -103,18 +103,26 @@ except ImportError:
 
 
 sender_map: dict[Device, Code] = {}
+sender_press: dict[Device, Callable] = {}
+sender_release: dict[Device, Callable] = {}
+sender_release_all: dict[Device, Callable] = {}
 kb: Keyboard | None = None
 mouse: Mouse | None = None
 media: Media | None = None
+lh: LayerHandler | None = None
 
 hid: HIDService | None = None
 
 
 def init(c: Config):
     global sender_map
+    global sender_press
+    global sender_release
+    global sender_release_all
     global kb
     global mouse
     global media
+    global lh
     global hid
 
     if hid is None:
@@ -122,79 +130,81 @@ def init(c: Config):
         kb = Keyboard(hid.devices)
         mouse = Mouse(hid.devices)
         media = Media(hid.devices)
+        lh = LayerHandler(c)
 
         sender_map = {
             kb: KeyboardCode(),
             mouse: MouseButton(),
             media: MediaFunction(),
-            LayerHandler(c): Commands(),
+            lh: Commands(),
+        }
+        sender_press = {
+            kb: kb.press,
+            mouse: mouse.press,
+            media: media.press,
+            lh: lh.on_press,
+        }
+        sender_release = {
+            kb: kb.release,
+            mouse: mouse.release,
+            media: lambda _: media.release(),
+            lh: lh.on_release,
+        }
+        sender_release_all = {
+            kb: kb.release_all,
+            mouse: mouse.release_all,
+            media: media.release,
+            lh: lh.on_release,
         }
 
 
 class KeyWrapper:
     __slots__ = (
-        "params",
-        "is_layer_handler",
         "name",
+        "sender",
+        "key_code",
+        "is_layer_handler",
     )
 
-    def __init__(self, keys: str | list[str] | None = None) -> None:
+    name: str
+    sender: Device | None
+    key_code: int | DPad | Command
+    is_layer_handler: bool
+
+    def __init__(self, key: str | None = None) -> None:
         global sender_map
-        keys = keys or "noop"
-        if isinstance(keys, str):
-            keys = [keys.upper()]
-        else:
-            keys = [key.upper() for key in keys]
+        key = key or "noop"
+
         from roki.firmware.params import Params
 
         if Params().DEBUG:
-            self.name = keys
+            self.name = key
 
-        self.params = tuple(
-            (sender, key_container.get(key))
-            for sender, key_container in sender_map.items()
-            for key in keys
-            if key in key_container
-        )
-        self.is_layer_handler = any(isinstance(s, LayerHandler) for s, _ in self.params)
+        self.sender = None
+        self.key_code = 0
+        for sender, key_container in sender_map.items():
+            if key in key_container:
+                self.sender = sender
+                self.key_code = key_container.get(key)
 
-    def _press(self, sender: Device, key_code: Any) -> None:
-        if isinstance(sender, Media):
-            sender.press(key_code)
-        elif isinstance(sender, Keyboard):
-            sender.press(key_code)
-        elif isinstance(sender, Mouse):
-            sender.press(key_code)
-        elif isinstance(sender, LayerHandler):
-            sender.on_press(key_code)
+        self.is_layer_handler = isinstance(self.sender, LayerHandler)
 
     def _release(self, sender: Device, key_code: Any) -> None:
-        if isinstance(sender, Media):
-            sender.release()
-        elif isinstance(sender, Keyboard):
-            sender.release(key_code)
-        elif isinstance(sender, Mouse):
-            sender.release(key_code)
-        elif isinstance(sender, LayerHandler):
-            sender.on_release(key_code)
+        sender_release[sender](key_code)
 
     def press(self) -> None:
-        for sender, key_code in self.params:
-            self._press(sender, key_code)
+        if self.sender:
+            sender_press[self.sender](self.key_code)
 
     def release(self) -> None:
-        for sender, key_code in self.params:
-            self._release(sender, key_code)
         if self.is_layer_handler:
             self.release_all()
+        elif self.sender:
+            sender_release[self.sender](self.key_code)
 
     def release_all(self) -> None:
-        if kb:
-            kb.release_all()
-        if mouse:
-            mouse.release_all()
-        if media:
-            media.release()
+        if self.sender:
+            sender_release_all[self.sender](self.key_code)
 
     def press_and_release(self) -> None:
         self.press()

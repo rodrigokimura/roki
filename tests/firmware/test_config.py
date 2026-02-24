@@ -10,6 +10,44 @@ def mock_init():
         yield m
 
 
+@pytest.fixture()
+def layer_dict():
+    return {
+        "name": "main",
+        "color": "#3584e4",
+        "primary_keys": [
+            ["ESCAPE", "ONE", "TWO", "THREE", "FOUR", "FIVE"],
+            ["TAB", "Q", "W", "E", "R", "T"],
+            ["LEFT_SHIFT", "A", "S", "D", "F", "G"],
+            ["LAYER_1_HOLD", "Z", "X", "C", "V", "B"],
+            [
+                "LEFT_CONTROL",
+                "LEFT_GUI",
+                "LEFT_ALT",
+                "SPACEBAR",
+                "ENTER",
+                "CAPS_LOCK",
+            ],
+        ],
+        "secondary_keys": [
+            ["SIX", "SEVEN", "EIGHT", "NINE", "ZERO", "LAYER_EXTRAS"],
+            ["Y", "U", "I", "O", "P", "GRAVE_ACCENT"],
+            ["H", "J", "K", "L", "FORWARD_SLASH", "RIGHT_SHIFT"],
+            ["N", "M", "COMMA", "PERIOD", "KEYPAD_BACKSLASH", "LAYER_1_HOLD"],
+            [
+                "ESCAPE",
+                "BACKSPACE",
+                "SPACEBAR",
+                "RIGHT_ALT",
+                "RIGHT_GUI",
+                "RIGHT_CONTROL",
+            ],
+        ],
+        "primary_encoder": ["VOLUME_INCREMENT", "VOLUME_DECREMENT"],
+        "secondary_encoder": ["UP_ARROW", "DOWN_ARROW"],
+    }
+
+
 @pytest.mark.parametrize(
     "input",
     [
@@ -33,3 +71,13 @@ def test_parse_color_invalid():
 
     with pytest.raises(ValueError):
         parse_color("ffffffffffff")
+
+
+def test_layer_from_dict(layer_dict: dict):
+    from roki.firmware.config import Layer
+
+    layer = Layer.from_dict(layer_dict)
+
+    assert isinstance(layer, Layer)
+
+    print(layer)

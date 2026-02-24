@@ -23,7 +23,6 @@ from roki.firmware.utils import (
     Loop,
     decode_float,
     encode_float,
-    get_coords,
 )
 
 logger = logging.getLogger(__name__)
@@ -82,7 +81,7 @@ class Roki:
             interval=interval,
             max_events=max_events,
         )
-        self.config = config
+        self.config: Config = config
         self.ble = BLERadio()
         self.mouse_speed = 10
         self.max_iterations_main_loop = max_iterations_main_loop
@@ -207,8 +206,7 @@ class Primary(Roki):
 
     def _handle_message(self, message_id: int, payload_1: int, payload_2: int):
         if message_id == KEY:
-            row, col = get_coords(payload_1)
-            key = self.config.layer.secondary_keys[row][col]
+            key = self.config.layer.secondary_keys[payload_1]
             self._process_key_wrapper(key, bool(payload_2))
         elif self.config.extras:
             if message_id == ENCODER:
@@ -257,9 +255,7 @@ class Primary(Roki):
 
     def process_primary_keys(self):
         if event := self.key_matrix.events.get():
-            row, col = get_coords(event.key_number, self.col_count)
-
-            key = self.config.layer.primary_keys[row][col]
+            key = self.config.layer.primary_keys[event.key_number]
             self._process_key_wrapper(key, event.pressed)
 
     def _process_key_wrapper(self, key: KeyWrapper, pressed: bool):

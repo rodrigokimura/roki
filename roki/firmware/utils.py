@@ -81,7 +81,7 @@ class Debouncer:
         return self.value - self.last_value
 
 
-def get_coords(i: int, col_count: int = 6):
+def get_coords(i: int, col_count: int = 6) -> tuple[int, int]:
     c = i % col_count
     r = i // col_count
     return r, c

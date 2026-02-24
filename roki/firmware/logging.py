@@ -26,9 +26,9 @@ def format_by_level(level: int) -> str:
         50: bold_red,
     }
 
-    level_part = colors[level] + f"[{names[level].upper():^10}]" + reset
-    time_part = dim + "%(created)s" + reset
-    message_part = colors[level] + "%(message)s" + reset
+    level_part: str = colors[level] + f"[{names[level].upper():^10}]" + reset
+    time_part: str = dim + "%(created)s" + reset
+    message_part: str = colors[level] + "%(message)s" + reset
     return f"{level_part} {time_part} %(name)s {message_part}"
 
 

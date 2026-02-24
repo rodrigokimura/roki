@@ -31,8 +31,8 @@ def parse_color(
 class Layer:
     name: str
     color: tuple[int, int, int]
-    primary_keys: tuple[tuple[KeyWrapper, ...], ...]
-    secondary_keys: tuple[tuple[KeyWrapper, ...], ...]
+    primary_keys: tuple[KeyWrapper, ...]
+    secondary_keys: tuple[KeyWrapper, ...]
     primary_encoder_cw: KeyWrapper
     primary_encoder_ccw: KeyWrapper
     secondary_encoder_cw: KeyWrapper
@@ -45,22 +45,29 @@ class Layer:
         i.name = data.get("name", "no name")
         c = data.get("color", "#000000")
         i.color = parse_color(c)
+
         i.primary_keys = tuple(
-            tuple(reversed([KeyWrapper(k) for k in row]))
+            KeyWrapper(k)
             for row in data.get(
-                "primary_keys" if is_left_side else "secondary_keys", (("",),)
+                "primary_keys" if is_left_side else "secondary_keys",
+                (("",),),
             )
+            for k in reversed(row)
         )
+
         cw, ccw = data.get("primary_encoder", ("", ""))
         i.primary_encoder_cw = KeyWrapper(cw)
         i.primary_encoder_ccw = KeyWrapper(ccw)
 
         i.secondary_keys = tuple(
-            tuple(KeyWrapper(k) for k in row)
+            KeyWrapper(k)
             for row in data.get(
-                "secondary_keys" if is_left_side else "primary_keys", (("",),)
+                "secondary_keys" if is_left_side else "primary_keys",
+                (("",),),
             )
+            for k in row
         )
+
         cw, ccw = data.get("primary_encoder", ("", ""))
         i.secondary_encoder_cw = KeyWrapper(cw)
         i.secondary_encoder_ccw = KeyWrapper(ccw)
@@ -74,8 +81,10 @@ class Config:
         "layer_index",
         "extras",
     )
+
     layers: tuple[Layer, ...]
     is_left_side: bool
+    layer_index: int
     extras: bool
 
     def __init__(self, layers: list[dict] | None = None) -> None:
@@ -89,7 +98,7 @@ class Config:
         self.is_left_side = is_left_side
 
     @property
-    def layer(self):
+    def layer(self) -> Layer:
         return self.layers[self.layer_index]
 
     @classmethod
