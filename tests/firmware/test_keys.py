@@ -66,7 +66,7 @@ def test_media_function():
 
 def test_key_wrapper(mock_hid_service: MagicMock):
     from roki.firmware.config import Config
-    from roki.firmware.keys import KeyWrapper, init
+    from roki.firmware.keys import init, BaseKey
 
     init(Config())
 
@@ -76,5 +76,6 @@ def test_key_wrapper(mock_hid_service: MagicMock):
         "LEFT_BUTTON",
         "LAYER_0_PRESS",
     ):
-        kw = KeyWrapper(k)
-        kw.press_and_release()
+        kw = BaseKey.build(k)
+        kw.press()
+        kw.release()

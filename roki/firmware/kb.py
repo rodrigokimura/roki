@@ -14,7 +14,7 @@ from roki.firmware import logging
 from roki.firmware.buzzer import Buzzer
 from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
-from roki.firmware.keys import KeyWrapper
+from roki.firmware.keys import BaseKey
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 from roki.firmware.service import RokiService
 from roki.firmware.utils import (
@@ -258,7 +258,7 @@ class Primary(Roki):
             key = self.config.layer.primary_keys[event.key_number]
             self._process_key_wrapper(key, event.pressed)
 
-    def _process_key_wrapper(self, key: KeyWrapper, pressed: bool):
+    def _process_key_wrapper(self, key: BaseKey, pressed: bool):
         if pressed:
             key.press()
             # self.buzzer.play_notes((("C3", 1),), 0.05)

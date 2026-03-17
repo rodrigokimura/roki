@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from roki.firmware import logging
-from roki.firmware.keys import KeyWrapper, init
+from roki.firmware.keys import init, BaseKey
 from roki.firmware.params import Params
 
 logger = logging.getLogger(__name__)
@@ -31,12 +31,12 @@ def parse_color(
 class Layer:
     name: str
     color: tuple[int, int, int]
-    primary_keys: tuple[KeyWrapper, ...]
-    secondary_keys: tuple[KeyWrapper, ...]
-    primary_encoder_cw: KeyWrapper
-    primary_encoder_ccw: KeyWrapper
-    secondary_encoder_cw: KeyWrapper
-    secondary_encoder_ccw: KeyWrapper
+    primary_keys: tuple[BaseKey, ...]
+    secondary_keys: tuple[BaseKey, ...]
+    primary_encoder_cw: BaseKey
+    primary_encoder_ccw: BaseKey
+    secondary_encoder_cw: BaseKey
+    secondary_encoder_ccw: BaseKey
 
     @classmethod
     def from_dict(cls, data: dict) -> Layer:
@@ -47,7 +47,7 @@ class Layer:
         i.color = parse_color(c)
 
         i.primary_keys = tuple(
-            KeyWrapper(k)
+            BaseKey.build(k)
             for row in data.get(
                 "primary_keys" if is_left_side else "secondary_keys",
                 (("",),),
@@ -56,11 +56,11 @@ class Layer:
         )
 
         cw, ccw = data.get("primary_encoder", ("", ""))
-        i.primary_encoder_cw = KeyWrapper(cw)
-        i.primary_encoder_ccw = KeyWrapper(ccw)
+        i.primary_encoder_cw = BaseKey.build(cw)
+        i.primary_encoder_ccw = BaseKey.build(ccw)
 
         i.secondary_keys = tuple(
-            KeyWrapper(k)
+            BaseKey.build(k)
             for row in data.get(
                 "secondary_keys" if is_left_side else "primary_keys",
                 (("",),),
@@ -69,8 +69,8 @@ class Layer:
         )
 
         cw, ccw = data.get("primary_encoder", ("", ""))
-        i.secondary_encoder_cw = KeyWrapper(cw)
-        i.secondary_encoder_ccw = KeyWrapper(ccw)
+        i.secondary_encoder_cw = BaseKey.build(cw)
+        i.secondary_encoder_ccw = BaseKey.build(ccw)
         return i
 
 

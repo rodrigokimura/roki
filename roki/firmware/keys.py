@@ -13,7 +13,7 @@ from roki.firmware.layer_handler import Command, Commands, LayerHandler
 from roki.firmware.params import Params
 
 try:
-    from typing import Callable, Literal, Sequence, TypeAlias
+    from typing import Literal, Sequence, TypeAlias, Type
 
     DPad = Literal["u", "d", "l", "r", "su", "sd"]
 except ImportError:
@@ -92,8 +92,6 @@ class MediaFunction:
 
 
 try:
-    from typing import Any
-
     from .config import Config
 
     Device: TypeAlias = Keyboard | Mouse | Media | LayerHandler
@@ -102,23 +100,135 @@ except ImportError:
     pass
 
 
-sender_map: dict[Device, Code] = {}
-sender_press: dict[Device, Callable] = {}
-sender_release: dict[Device, Callable] = {}
-sender_release_all: dict[Device, Callable] = {}
-kb: Keyboard | None = None
-mouse: Mouse | None = None
-media: Media | None = None
-lh: LayerHandler | None = None
+kb: Keyboard = None  # type: ignore lazy initialization
+mouse: Mouse = None  # type: ignore lazy initialization
+media: Media = None  # type: ignore lazy initialization
+lh: LayerHandler = None  # type: ignore lazy initialization
+
 
 hid: HIDService | None = None
 
 
+class BaseKey:
+    key_code: int | DPad | Command
+
+    __slots__ = ("key_code",)
+
+    @classmethod
+    def build(cls, key: str | None) -> BaseKey:
+        if not key:
+            return NoopKey()
+
+        sender_map: tuple[tuple[Code, Type[BaseKey]], ...] = (
+            (KeyboardCode(), KeyboardKey),
+            (MouseButton(), MouseKey),
+            (MediaFunction(), MultiMediaKey),
+            (Commands(), LayerHandlerKey),
+        )
+
+        for code, key_class in sender_map:
+            if key in code:
+                key_code = code.get(key)
+
+                return key_class(key_code)
+
+        return NoopKey()
+
+    def __init__(self, key_code: int | DPad | Command):
+        self.key_code = key_code
+
+    def press(self) -> None:
+        raise NotImplementedError()
+
+    def release(self) -> None:
+        raise NotImplementedError()
+
+    def release_all(self) -> None:
+        raise NotImplementedError()
+
+
+class NoopKey(BaseKey):
+    def __init__(self):
+        pass
+
+    def press(self):
+        pass
+
+    def release(self):
+        pass
+
+    def release_all(self):
+        pass
+
+
+class MouseKey(BaseKey):
+    key_code: int | DPad
+
+    def press(self):
+        global mouse
+        mouse.press(self.key_code)
+
+    def release(self):
+        global mouse
+        mouse.press(self.key_code)
+
+    def release_all(self):
+        global mouse
+        mouse.release_all()
+
+
+class KeyboardKey(BaseKey):
+    key_code: int
+
+    def press(self):
+        global kb
+        kb.press(self.key_code)
+
+    def release(self):
+        global kb
+        kb.release(self.key_code)
+
+    def release_all(self):
+        global kb
+        kb.release_all()
+
+
+class MultiMediaKey(BaseKey):
+    key_code: int
+
+    def press(self):
+        global media
+        media.press(self.key_code)
+
+    def release(self):
+        global media
+        media.release()
+
+    def release_all(self):
+        global media
+        media.release()
+
+
+class LayerHandlerKey(BaseKey):
+    key_code: Command
+
+    def press(self):
+        global lh
+        if lh:
+            lh.on_press(self.key_code)
+
+    def release(self):
+        global lh
+        if lh:
+            lh.on_release(self.key_code)
+
+    def release_all(self):
+        global kb
+        if kb:
+            kb.release_all()
+
+
 def init(c: Config):
-    global sender_map
-    global sender_press
-    global sender_release
-    global sender_release_all
     global kb
     global mouse
     global media
@@ -132,92 +242,6 @@ def init(c: Config):
         media = Media(hid.devices)
         lh = LayerHandler(c)
 
-        sender_map = {
-            kb: KeyboardCode(),
-            mouse: MouseButton(),
-            media: MediaFunction(),
-            lh: Commands(),
-        }
-        sender_press = {
-            kb: kb.press,
-            mouse: mouse.press,
-            media: media.press,
-            lh: lh.on_press,
-        }
-        sender_release = {
-            kb: kb.release,
-            mouse: mouse.release,
-            media: lambda _: media.release(),
-            lh: lh.on_release,
-        }
-        sender_release_all = {
-            kb: kb.release_all,
-            mouse: mouse.release_all,
-            media: media.release,
-            lh: lh.on_release,
-        }
-
-
-class KeyWrapper:
-    __slots__ = (
-        "name",
-        "sender",
-        "key_code",
-        "is_layer_handler",
-    )
-
-    name: str
-    sender: Device | None
-    key_code: int | DPad | Command
-    is_layer_handler: bool
-
-    def __init__(self, key: str | None = None) -> None:
-        global sender_map
-        key = key or "noop"
-
-        from roki.firmware.params import Params
-
-        if Params().DEBUG:
-            self.name = key
-
-        self.sender = None
-        self.key_code = 0
-        for sender, key_container in sender_map.items():
-            if key in key_container:
-                self.sender = sender
-                self.key_code = key_container.get(key)
-
-        self.is_layer_handler = isinstance(self.sender, LayerHandler)
-
-    def _release(self, sender: Device, key_code: Any) -> None:
-        sender_release[sender](key_code)
-
-    def press(self) -> None:
-        if self.sender:
-            sender_press[self.sender](self.key_code)
-
-    def release(self) -> None:
-        if self.is_layer_handler:
-            self.release_all()
-        elif self.sender:
-            sender_release[self.sender](self.key_code)
-
-    def release_all(self) -> None:
-        if self.sender:
-            sender_release_all[self.sender](self.key_code)
-
-    def press_and_release(self) -> None:
-        self.press()
-        self.release()
-
 
 if Params().DEBUG:
-
-    class KeyWrapper(KeyWrapper):
-        def press(self):
-            logger.debug("Keys: " + str(self.name) + " Event: PRESS")
-            super().press()
-
-        def release(self):
-            logger.debug("Keys: " + str(self.name) + " Event: RELEASE")
-            super().release()
+    pass
