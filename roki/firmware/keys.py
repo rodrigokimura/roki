@@ -143,9 +143,6 @@ class BaseKey:
     def release(self) -> None:
         raise NotImplementedError()
 
-    def release_all(self) -> None:
-        raise NotImplementedError()
-
 
 class NoopKey(BaseKey):
     def __init__(self):
@@ -155,9 +152,6 @@ class NoopKey(BaseKey):
         pass
 
     def release(self):
-        pass
-
-    def release_all(self):
         pass
 
 
@@ -172,10 +166,6 @@ class MouseKey(BaseKey):
         global mouse
         mouse.press(self.key_code)
 
-    def release_all(self):
-        global mouse
-        mouse.release_all()
-
 
 class KeyboardKey(BaseKey):
     key_code: int
@@ -187,10 +177,6 @@ class KeyboardKey(BaseKey):
     def release(self):
         global kb
         kb.release(self.key_code)
-
-    def release_all(self):
-        global kb
-        kb.release_all()
 
 
 class MultiMediaKey(BaseKey):
@@ -204,28 +190,19 @@ class MultiMediaKey(BaseKey):
         global media
         media.release()
 
-    def release_all(self):
-        global media
-        media.release()
-
 
 class LayerHandlerKey(BaseKey):
     key_code: Command
 
     def press(self):
         global lh
-        if lh:
-            lh.on_press(self.key_code)
+        lh.on_press(self.key_code)
 
     def release(self):
         global lh
-        if lh:
-            lh.on_release(self.key_code)
-
-    def release_all(self):
         global kb
-        if kb:
-            kb.release_all()
+        kb.release_all()
+        lh.on_release(self.key_code)
 
 
 def init(c: Config):

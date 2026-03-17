@@ -151,10 +151,10 @@
           "F12"
         ],
         [
-          "MINUS",
-          "EQUALS",
-          null,
-          null,
+          "MOUSE_MOVE_LEFT",
+          "MOUSE_MOVE_DOWN",
+          "MOUSE_MOVE_UP",
+          "MOUSE_MOVE_RIGHT",
           "PLAY_PAUSE",
           "VOLUME_INCREMENT"
         ],

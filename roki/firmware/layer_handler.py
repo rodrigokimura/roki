@@ -23,23 +23,10 @@ class LayerHandler:
         self.config = config
 
     def on_press(self, command: Command) -> None:
-        if command.press_or_hold:
-            if command.index != self.config.layer_index:
-                self._prev = self.config.layer_index
-                self.config.layer_index = command.index
-        elif command.type_ == "inc":
-            index = self.config.layer_index + 1
-            max_layer = len(self.config.layers) - 1
-            self.config.layer_index = min(index, max_layer)
-        elif command.type_ == "dec":
-            index = self.config.layer_index - 1
-            self.config.layer_index = max(index, 0)
-        else:
-            self.config.extras = not self.config.extras
+        command.press(self)
 
     def on_release(self, command: Command) -> None:
-        if command.type_ == "hold":
-            self.config.layer_index = self._prev
+        command.release(self)
 
 
 class Commands:
@@ -56,37 +43,77 @@ class Commands:
                 index = 0
             else:
                 raise NotImplementedError()
-            return Command(int(index), type_)
-        return Command()
+
+            command_classes: dict[str, type[Command]] = {
+                "press": OnPressCommand,
+                "hold": OnHoldCommand,
+                "inc": OnPressIncrementCommand,
+                "dec": OnPressDecrementCommand,
+                "extras": OnPressExtrasCommand,
+            }
+            return command_classes[type_.lower()](int(index))
+
+        return Command(0)
 
     def __contains__(self, n: str) -> bool:
         return n.lower().startswith("layer_")
 
 
 class Command:
-    __slots__ = (
-        "index",
-        "type_",
-    )
+    __slots__ = ("index",)
 
     index: int
-    type_: str | None
 
-    def __init__(self, index: int = 0, type_: str | None = None) -> None:
+    def __init__(self, index: int = 0):
+        pass
+
+    def press(self, lh: LayerHandler):
+        raise NotImplementedError
+
+    def release(self, lh: LayerHandler):
+        raise NotImplementedError
+
+
+class OnPressCommand(Command):
+    def __init__(self, index: int):
         self.index = index
-        if not type_:
-            self.type_ = None
-        elif type_.lower() not in (
-            "press",
-            "hold",
-            "inc",
-            "dec",
-            "extras",
-        ):
-            self.type_ = None
-        else:
-            self.type_ = type_.lower()
 
-    @property
-    def press_or_hold(self):
-        return self.type_ in ("press", "hold")
+    def press(self, lh: LayerHandler):
+        if self.index != lh.config.layer_index:
+            lh._prev = lh.config.layer_index
+            lh.config.layer_index = self.index
+
+    def release(self, lh: LayerHandler):
+        pass
+
+
+class OnPressIncrementCommand(OnPressCommand):
+    def __init__(self, index: int = 0):
+        pass
+
+    def press(self, lh: LayerHandler):
+        index = lh.config.layer_index + 1
+        max_layer = len(lh.config.layers) - 1
+        lh.config.layer_index = min(index, max_layer)
+
+
+class OnPressDecrementCommand(OnPressCommand):
+    def __init__(self, index: int = 0):
+        pass
+
+    def press(self, lh: LayerHandler):
+        index = lh.config.layer_index - 1
+        lh.config.layer_index = max(index, 0)
+
+
+class OnHoldCommand(OnPressCommand):
+    def release(self, lh: LayerHandler):
+        lh.config.layer_index = lh._prev
+
+
+class OnPressExtrasCommand(OnPressCommand):
+    def __init__(self, index: int = 0):
+        pass
+
+    def press(self, lh: LayerHandler):
+        lh.config.extras = not lh.config.extras
