@@ -167,8 +167,8 @@
           "VOLUME_DECREMENT"
         ],
         [
-          null,
-          null,
+          "MINUS",
+          "EQUALS",
           "LEFT_BRACKET",
           null,
           null,

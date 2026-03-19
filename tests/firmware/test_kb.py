@@ -289,9 +289,7 @@ def test_primary_run_with_local_key_press(
     event.key_number = 1
     event.pressed.side_effect = cycle([False, True])
     mock_key_events.return_value = event
-    with patch.object(
-        primary, "_process_key_wrapper", wraps=primary._process_key_wrapper
-    ) as m:
+    with patch.object(primary, "_process_key", wraps=primary._process_key) as m:
         primary.run()
         m.assert_called()
 

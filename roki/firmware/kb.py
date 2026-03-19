@@ -200,14 +200,14 @@ class Primary(Roki):
             0.05,
         )
 
-    def get_message(self):
+    def get_message(self) -> tuple[int, int, int, int]:
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
         return service.readinto(self.buffer)
 
-    def _handle_message(self, message_id: int, payload_1: int, payload_2: int):
+    def _handle_message(self, message_id: int, payload_1: int, payload_2: int) -> None:
         if message_id == KEY:
             key = self.config.layer.secondary_keys[payload_1]
-            self._process_key_wrapper(key, bool(payload_2))
+            self._process_key(key, bool(payload_2))
         elif self.config.extras:
             if message_id == ENCODER:
                 for _ in range(payload_1):
@@ -227,7 +227,7 @@ class Primary(Roki):
         )
         self._process_thumb_stick(x, y)
 
-    def _process_thumb_stick(self, x: float, y: float):
+    def _process_thumb_stick(self, x: float, y: float) -> None:
         from .keys import mouse
 
         if mouse is None:  # pragma: no cover
@@ -256,9 +256,9 @@ class Primary(Roki):
     def process_primary_keys(self):
         if event := self.key_matrix.events.get():
             key = self.config.layer.primary_keys[event.key_number]
-            self._process_key_wrapper(key, event.pressed)
+            self._process_key(key, event.pressed)
 
-    def _process_key_wrapper(self, key: BaseKey, pressed: bool):
+    def _process_key(self, key: BaseKey, pressed: bool):
         if pressed:
             key.press()
             # self.buzzer.play_notes((("C3", 1),), 0.05)
@@ -312,8 +312,8 @@ class Secondary(Roki):
                 self.max_iterations_ble,
                 lambda: not self.ble.connected,
             ).iterate():
-                self.process_encoder()
                 self.process_keys()
+                self.process_encoder()
                 self.process_thumb_stick()
 
     def process_encoder(self):
