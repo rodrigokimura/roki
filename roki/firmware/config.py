@@ -52,7 +52,7 @@ class Layer:
                 "primary_keys" if is_left_side else "secondary_keys",
                 (("",),),
             )
-            for k in reversed(row)
+            for k in (reversed(row) if is_left_side else row)
         )
 
         cw, ccw = data.get("primary_encoder", ("", ""))
@@ -65,7 +65,7 @@ class Layer:
                 "secondary_keys" if is_left_side else "primary_keys",
                 (("",),),
             )
-            for k in row
+            for k in (row if is_left_side else reversed(row))
         )
 
         cw, ccw = data.get("primary_encoder", ("", ""))
@@ -90,7 +90,7 @@ class Config:
     def __init__(self, layers: list[dict] | None = None) -> None:
         init(self)
         self.layer_index = 0
-        self.extras = False
+        self.extras = True
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
 
         is_left_side = Params().IS_LEFT_SIDE
