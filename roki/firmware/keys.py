@@ -196,6 +196,8 @@ class LayerHandlerKey(BaseKey):
 
     def press(self):
         global lh
+        global kb
+        kb.release_all()
         lh.on_press(self.key_code)
 
     def release(self):

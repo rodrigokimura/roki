@@ -42,7 +42,7 @@
           "LEFT_ALT",
           "SPACEBAR",
           "ENTER",
-          "CAPS_LOCK"
+          "LAYER_EXTRAS"
         ]
       ],
       "secondary_keys": [
@@ -52,7 +52,7 @@
           "EIGHT",
           "NINE",
           "ZERO",
-          "LAYER_EXTRAS"
+          "ESCAPE"
         ],
         [
           "Y",
@@ -79,7 +79,7 @@
           "LAYER_1_HOLD"
         ],
         [
-          "ESCAPE",
+          "LAYER_EXTRAS",
           "BACKSPACE",
           "SPACEBAR",
           "RIGHT_ALT",
@@ -167,8 +167,8 @@
           "VOLUME_DECREMENT"
         ],
         [
-          null,
-          null,
+          "MINUS",
+          "EQUALS",
           "LEFT_BRACKET",
           null,
           null,

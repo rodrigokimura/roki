@@ -1,4 +1,6 @@
+from roki.firmware.layer_handler import OnPressExtrasCommand
 import _bleio
+from roki.firmware.keys import BaseKey, LayerHandlerKey
 import board
 import rotaryio
 from adafruit_ble import BLEConnection, BLERadio
@@ -14,7 +16,6 @@ from roki.firmware import logging
 from roki.firmware.buzzer import Buzzer
 from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
-from roki.firmware.keys import BaseKey
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 from roki.firmware.service import RokiService
 from roki.firmware.utils import (
@@ -200,26 +201,23 @@ class Primary(Roki):
             0.05,
         )
 
-    def get_message(self):
+    def get_message(self) -> tuple[int, int, int, int]:
         service: RokiService = self.peripheral_conn[RokiService]  # type: ignore
         return service.readinto(self.buffer)
 
-    def _handle_message(self, message_id: int, payload_1: int, payload_2: int):
+    def _handle_message(self, message_id: int, payload_1: int, payload_2: int) -> None:
         if message_id == KEY:
             key = self.config.layer.secondary_keys[payload_1]
-            self._process_key_wrapper(key, bool(payload_2))
-        elif self.config.extras:
-            if message_id == ENCODER:
-                for _ in range(payload_1):
-                    self.config.layer.secondary_encoder_cw.press()
-                    self.config.layer.secondary_encoder_cw.release()
-                for _ in range(payload_2):
-                    self.config.layer.secondary_encoder_ccw.press()
-                    self.config.layer.secondary_encoder_ccw.release()
-            elif message_id == THUMB_STICK:
-                self._process_thumb_stick(
-                    decode_float(payload_1), decode_float(payload_2)
-                )
+            self._process_key(key, bool(payload_2))
+        elif message_id == ENCODER:
+            for _ in range(payload_1):
+                self.config.layer.secondary_encoder_cw.press()
+                self.config.layer.secondary_encoder_cw.release()
+            for _ in range(payload_2):
+                self.config.layer.secondary_encoder_ccw.press()
+                self.config.layer.secondary_encoder_ccw.release()
+        elif message_id == THUMB_STICK:
+            self._process_thumb_stick(decode_float(payload_1), decode_float(payload_2))
 
     def process_primary_thumb_stick(self):
         x, y = self.calibration.get_normalized(
@@ -227,7 +225,7 @@ class Primary(Roki):
         )
         self._process_thumb_stick(x, y)
 
-    def _process_thumb_stick(self, x: float, y: float):
+    def _process_thumb_stick(self, x: float, y: float) -> None:
         from .keys import mouse
 
         if mouse is None:  # pragma: no cover
@@ -256,9 +254,9 @@ class Primary(Roki):
     def process_primary_keys(self):
         if event := self.key_matrix.events.get():
             key = self.config.layer.primary_keys[event.key_number]
-            self._process_key_wrapper(key, event.pressed)
+            self._process_key(key, event.pressed)
 
-    def _process_key_wrapper(self, key: BaseKey, pressed: bool):
+    def _process_key(self, key: BaseKey, pressed: bool):
         if pressed:
             key.press()
             # self.buzzer.play_notes((("C3", 1),), 0.05)
@@ -312,9 +310,10 @@ class Secondary(Roki):
                 self.max_iterations_ble,
                 lambda: not self.ble.connected,
             ).iterate():
-                self.process_encoder()
                 self.process_keys()
-                self.process_thumb_stick()
+                if self.config.extras:
+                    self.process_encoder()
+                    self.process_thumb_stick()
 
     def process_encoder(self):
         self.encoder_position.update(self.encoder.position)
@@ -329,9 +328,18 @@ class Secondary(Roki):
 
     def process_keys(self):
         if event := self.key_matrix.events.get():
-            message_id = KEY
-            payload = int(event.pressed)
-            self.send_message(message_id, (event.key_number, payload))
+            key = self.config.layer.secondary_keys[event.key_number]
+            # TODO: avoid check at this level
+            if (
+                isinstance(key, LayerHandlerKey)
+                and isinstance(key.key_code, OnPressExtrasCommand)
+                and event.pressed
+            ):
+                self.config.extras = not self.config.extras
+            else:
+                message_id = KEY
+                payload = int(event.pressed)
+                self.send_message(message_id, (event.key_number, payload))
 
     def process_thumb_stick(self):
         x, y = self.calibration.get_normalized(
