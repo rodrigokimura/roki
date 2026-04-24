@@ -90,7 +90,7 @@ class Config:
     def __init__(self, layers: list[dict] | None = None) -> None:
         init(self)
         self.layer_index = 0
-        self.extras = True
+        self.extras = False
         self.layers = tuple(Layer.from_dict(layer) for layer in layers or tuple())
 
         is_left_side = Params().IS_LEFT_SIDE
