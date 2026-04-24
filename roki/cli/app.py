@@ -26,6 +26,11 @@ firmware_relative_tree = "roki/firmware"
 app = typer.Typer(name="roki")
 
 
+@app.command(name="t")
+def upload_for_windows():
+    print("asdasd")
+
+
 @app.command(name="u")
 @app.command(name="upload")
 def upload_code(side: str = typer.Option("r")):
