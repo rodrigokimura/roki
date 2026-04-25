@@ -66,7 +66,7 @@ def test_media_function():
 
 def test_key_wrapper(mock_hid_service: MagicMock):
     from roki.firmware.config import Config
-    from roki.firmware.keys import init, BaseKey
+    from roki.firmware.keys import BaseKey, init
 
     init(Config())
 

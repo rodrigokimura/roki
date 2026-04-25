@@ -1,6 +1,6 @@
-from roki.cli.html_generator import Generator
-
 import pytest
+
+from roki.cli.html_generator import Generator
 
 
 @pytest.fixture

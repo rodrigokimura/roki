@@ -9,7 +9,6 @@ from roki.firmware.logging import (
 )
 from roki.firmware.params import Params
 
-
 # ---------------------------------------------------------------------------
 # Params singleton reset
 # ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
-from unittest.mock import patch
 from importlib import import_module
+from unittest.mock import patch
 
 
 def test_local_params():

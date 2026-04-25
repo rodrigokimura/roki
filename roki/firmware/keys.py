@@ -13,7 +13,7 @@ from roki.firmware.layer_handler import Command, Commands, LayerHandler
 from roki.firmware.params import Params
 
 try:
-    from typing import Literal, Sequence, TypeAlias, Type
+    from typing import Literal, Sequence, Type, TypeAlias
 
     DPad = Literal["u", "d", "l", "r", "su", "sd"]
 except ImportError:

@@ -1,6 +1,4 @@
-from roki.firmware.layer_handler import OnPressExtrasCommand
 import _bleio
-from roki.firmware.keys import BaseKey, LayerHandlerKey
 import board
 import rotaryio
 from adafruit_ble import BLEConnection, BLERadio
@@ -16,6 +14,8 @@ from roki.firmware import logging
 from roki.firmware.buzzer import Buzzer
 from roki.firmware.calibration import BaseCalibration, Calibration
 from roki.firmware.config import Config
+from roki.firmware.keys import BaseKey, LayerHandlerKey
+from roki.firmware.layer_handler import OnPressExtrasCommand
 from roki.firmware.messages import ENCODER, KEY, THUMB_STICK
 from roki.firmware.service import RokiService
 from roki.firmware.utils import (

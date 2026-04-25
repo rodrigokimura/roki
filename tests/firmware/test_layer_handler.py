@@ -9,9 +9,9 @@ from roki.firmware.layer_handler import (
     LayerHandler,
     OnHoldCommand,
     OnPressCommand,
-    OnPressIncrementCommand,
     OnPressDecrementCommand,
     OnPressExtrasCommand,
+    OnPressIncrementCommand,
 )
 
 if TYPE_CHECKING:
