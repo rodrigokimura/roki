@@ -1,4 +1,5 @@
 import pytest
+
 from roki.cli.config.models import Key
 
 

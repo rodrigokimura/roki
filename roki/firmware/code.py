@@ -3,15 +3,14 @@ import board
 from roki.firmware import logging
 from roki.firmware.params import Params
 
-
 Params.from_env()
 
 logger = logging.getLogger(__name__)
 
 
 def main():
-    from roki.firmware.kb import Primary, Secondary
     from roki.firmware.config import Config
+    from roki.firmware.kb import Primary, Secondary
 
     # pin mapping for the nice!nano
     config = Config.read()

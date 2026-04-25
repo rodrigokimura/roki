@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 
 from roki.firmware import logging
-from roki.firmware.keys import init, BaseKey
+from roki.firmware.keys import BaseKey, init
 from roki.firmware.params import Params
 
 logger = logging.getLogger(__name__)
