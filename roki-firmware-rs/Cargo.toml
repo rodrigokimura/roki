@@ -8,7 +8,7 @@ description = "Rust + Embassy firmware for RoKi split keyboard"
 
 [dependencies]
 # ── Async runtime ──────────────────────────────────
-embassy-executor = { version = "0.6", features = ["arch-cortex-m", "executor-thread"] }
+embassy-executor = { version = "0.6", features = ["arch-cortex-m", "executor-thread", "integrated-timers"] }
 embassy-time     = "0.3"
 embassy-sync     = "0.6"
 embassy-futures  = "0.1"

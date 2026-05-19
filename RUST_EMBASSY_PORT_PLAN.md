@@ -2,7 +2,7 @@
 
 > Branch: `plan/rust-embassy-port`  
 > Target platform: nice!nano v2 (nRF52840, BLE)  
-> Status: M0 complete — project compiles; modules scaffolded; warnings cleanup in progress
+> Status: **M0 + M1 complete** — crate compiles with zero build errors; modules scaffolded and aligned to embassy-nrf v0.2.0. Warnings cleaned. Primary/secondary tasks are stubs awaiting BLE wiring.
 
 ---
 
