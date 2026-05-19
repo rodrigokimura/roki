@@ -41,3 +41,9 @@ pub fn decode_float(value: u8) -> f32 {
 pub fn pack_packet(counter: u8, msg_id: u8, payload: (u8, u8)) -> [u8; 4] {
     [counter, msg_id, payload.0, payload.1]
 }
+
+/// Unpack a 4-byte inter-half packet.
+#[inline]
+pub fn unpack_packet(packet: [u8; 4]) -> (u8, u8, u8, u8) {
+    (packet[0], packet[1], packet[2], packet[3])
+}

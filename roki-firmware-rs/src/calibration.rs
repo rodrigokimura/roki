@@ -1,4 +1,3 @@
-use embassy_nrf::nvmc::Nvmc;
 use embedded_storage::nor_flash::NorFlash;
 use serde::{Deserialize, Serialize};
 

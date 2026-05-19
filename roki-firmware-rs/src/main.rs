@@ -18,6 +18,8 @@ pub mod utils;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_nrf::gpio::Pin;
+use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
+use embassy_sync::channel::Channel;
 use panic_probe as _;
 
 use crate::buzzer::Buzzer;
@@ -31,18 +33,13 @@ use crate::thumbstick::thumbstick_task;
 
 // ── Shared channels ──────────────────────────────────────────────────────
 
-// We use embassy_sync channels for inter-task communication.
-// Capacity tuned for expected event rates:
-//   - Keys: ~16 events (5×6 matrix, max 2-key rollover in a burst)
-//   - Encoder: 4 events (one per detent × direction)
-//   - Thumbstick: 4 events (XY updates)
-
-use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
-use embassy_sync::channel::Channel;
-
 pub static KEY_EVENTS: Channel<ThreadModeRawMutex, KeyEvent, 16> = Channel::new();
 pub static ENCODER_EVENTS: Channel<ThreadModeRawMutex, EncoderEvent, 4> = Channel::new();
 pub static THUMB_EVENTS: Channel<ThreadModeRawMutex, ThumbstickEvent, 4> = Channel::new();
+
+/// Channel for inter-half packets (secondary → primary).
+/// Populated by the BLE notification handler task on the primary side.
+pub static INTER_HALF_PACKETS: Channel<ThreadModeRawMutex, [u8; 4], 8> = Channel::new();
 
 // ── Main entry point ─────────────────────────────────────────────────────
 
@@ -50,32 +47,20 @@ pub static THUMB_EVENTS: Channel<ThreadModeRawMutex, ThumbstickEvent, 4> = Chann
 async fn main(spawner: Spawner) {
     defmt::info!("RoKi firmware starting...");
 
-    // Initialize nRF52840 peripherals via embassy
     let p = embassy_nrf::init(Default::default());
 
-    // ── Detect which side this is ─────────────────────────────────────────
-    // In the Python firmware this was selected via the `IS_LEFT_SIDE`
-    // environment variable. For the Rust build we use a compile-time
-    // feature flag (`left-side`) so the same firmware binary does NOT
-    // need a GPIO at boot. If you want runtime detection, bridge a
-    // different GPIO to GND and read it here.
     let is_left = cfg!(feature = "left-side");
-
     defmt::info!("Side detected: {}", if is_left { "LEFT (primary)" } else { "RIGHT (secondary)" });
 
-    // ── Shared config ─────────────────────────────────────────────────────
     let config = Config::load();
     defmt::debug!("Loaded {} layers", config.layers.len());
 
     // ── Spawn buzzer task ─────────────────────────────────────────────────
     let buzzer = Buzzer::new(p.PWM0, p.P0_06.into());
     spawner.must_spawn(buzzer::buzzer_task(buzzer));
-
-    // Play startup tone
     Buzzer::queue_startup_tone().await;
 
     // ── Spawn input device tasks ──────────────────────────────────────────
-    // Pin lists for the matrix scanner
     let rows = [
         p.P0_24.degrade(),
         p.P1_00.degrade(),
@@ -108,9 +93,10 @@ async fn main(spawner: Spawner) {
         THUMB_EVENTS.sender(),
     ));
 
-    // ── Spawn side-specific task ──────────────────────────────────────────
+    // ── Spawn side-specific BLE + HID task ────────────────────────────────
     if is_left {
         spawner.must_spawn(primary_task(
+            spawner,
             config,
             KEY_EVENTS.receiver(),
             ENCODER_EVENTS.receiver(),
@@ -124,8 +110,4 @@ async fn main(spawner: Spawner) {
             THUMB_EVENTS.receiver(),
         ));
     }
-
-    // Main task drops to idle; all work is in spawned tasks.
-    // We could join the Buzzer task if we want clean shutdown, but there
-    // is none on an MCU.
 }
