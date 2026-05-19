@@ -174,6 +174,28 @@ probe-rs run --chip nRF52840_xxAA target/thumbv7em-none-eabihf/release/roki-firm
 ### Quick reference: one-liners
 
 ```bash
+# --- Rust firmware (recommended) ---
+
+# Build + flash both halves (interactive)
+roki flash
+
+# Build + flash left half only
+roki flash --side left
+
+# Build without flashing
+roki build
+
+# Check compilation
+roki check
+
+# Stream RTT logs from left half
+roki logs
+
+# Stream RTT logs with trace verbosity
+roki logs --level trace
+
+# --- Raw cargo (advanced) ---
+
 # Right half (UF2)
 cargo build --release && make uf2
 
@@ -184,7 +206,7 @@ cargo build --release --features left-side && make uf2
 cargo run --release --features left-side
 
 # Left half with trace logs
-cargo run --release --features left-side -- DEFMT_LOG=trace
+DEFMT_LOG=trace cargo run --release --features left-side
 
 # Clean
 cargo clean && rm -f *.uf2
@@ -211,7 +233,7 @@ There is **no runtime filesystem** on the nice!nano, so every keymap change curr
 ## Future milestones
 
 - [ ] M7 — Battery service + power tuning
-- [ ] M8 — Host tooling (`roki flash` one-command)
+- [x] M8 — Host tooling (`roki flash` one-command build + flash)
 - [ ] M9 — **USB Mass Storage Class (MSC) drag-and-drop keymap**
 
 ### M9 — USB Mass Storage keymap (planned)
@@ -261,5 +283,5 @@ This avoids the recompilation step for non-technical users and matches the Pytho
 - [x] Boot calibration — switch-hold at boot, 5s center sample, edge rotation, flash save
 - [x] Reconnection — auto-retry loops for host and secondary on both halves
 - [ ] M7 — Battery service + power tuning
-- [ ] M8 — Host tooling (`roki flash` one-command)
+- [x] M8 — Host tooling (`roki flash` one-command build + flash)
 - [ ] M9 — **USB Mass Storage Class (MSC) drag-and-drop keymap**

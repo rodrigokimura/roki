@@ -10,8 +10,12 @@
 > - ✅ Keycodes — Full keypad + application keys
 > - ✅ UF2 build — Makefile + `build-uf2.sh`
 > - ✅ Calibration — Boot-time thumbstick calibration with buzzer feedback
+> - ✅ HID over GATT (M5) — HOGP keyboard+mouse+consumer reports, host advertising
+> - ✅ Polish — zero warnings, consumer reports wired
 > - ✅ BLE inter-half — SoftDevice init, RokiService GATT, scan/connect, notify
 > - ✅ Reconnection loops — auto-retry on host and secondary disconnect for both halves
+> - ✅ Host tooling (M8) — `roki flash`, `roki build`, `roki check`, `roki logs`
+>   commands that wrap cargo + elf2uf2 + drive detection
 >
 > **Status:** All planned milestones complete. The crate compiles and links for
 > `thumbv7em-none-eabihf` with zero warnings. Ready for on-device testing.
