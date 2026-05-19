@@ -28,6 +28,8 @@ from roki.cli.utils import (
 )
 from roki.tui.app import Configurator
 
+from roki.cli.rust_tooling import build as rust_build, check as rust_check, flash as rust_flash, logs as rust_logs
+
 _WINDOWS = os.name == "nt"
 
 firmware_relative_tree = os.path.join("roki", "firmware")
@@ -47,6 +49,66 @@ app = typer.Typer(
     name="roki",
     pretty_exceptions_short=False,
 )
+
+
+@app.command(name="b")
+@app.command(name="build")
+def build(
+    side: Literal["right", "left", "both"] = typer.Option(
+        "both", "--side", "-s",
+        help="Which half to build: left, right, or both",
+    ),
+    _: int = VERBOSE_OPTION,
+):
+    """Compile the Rust firmware without flashing."""
+    rust_build(side=side)
+
+
+@app.command(name="c")
+@app.command(name="check")
+def check(
+    side: Literal["right", "left", "both"] = typer.Option(
+        "both", "--side", "-s",
+        help="Which half to check",
+    ),
+    _: int = VERBOSE_OPTION,
+):
+    """Run cargo check for the firmware."""
+    rust_check(side=side)
+
+
+@app.command(name="f")
+@app.command(name="flash")
+def flash(
+    side: Literal["right", "left", "both"] = typer.Option(
+        "both", "--side", "-s",
+        help="Which half to flash",
+    ),
+    wait: bool = typer.Option(
+        True, "--wait/--no-wait",
+        help="Prompt to press Enter between halves (interactive mode)",
+    ),
+    _: int = VERBOSE_OPTION,
+):
+    """Build and flash firmware to nice!nano via UF2 bootloader."""
+    rust_flash(side=side, wait=wait)
+
+
+@app.command(name="l")
+@app.command(name="logs")
+def logs(
+    side: Literal["right", "left"] = typer.Option(
+        "left", "--side", "-s",
+        help="Which half to attach probe-rs to",
+    ),
+    level: Literal["error", "warn", "info", "debug", "trace"] = typer.Option(
+        "info", "--level", "-l",
+        help="defmt log level",
+    ),
+    _: int = VERBOSE_OPTION,
+):
+    """Stream RTT debug logs via probe-rs."""
+    rust_logs(side=side, level=level)
 
 
 @app.command(name="test", hidden=True)
