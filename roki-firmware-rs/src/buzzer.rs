@@ -72,6 +72,13 @@ impl Buzzer {
             ("C3", 100), ("", 50), ("D3", 200),
         ])).await;
     }
+
+    /// Queue a host-connected tone (ascending triad, higher pitch).
+    pub async fn queue_host_connected_tone() {
+        let _ = COMMAND_CHANNEL.send(BuzzerCommand::Sequence(&[
+            ("E3", 100), ("", 50), ("G3", 100), ("", 50), ("C4", 200),
+        ])).await;
+    }
 }
 
 // ── Task-level command channel ───────────────────────────────────────────

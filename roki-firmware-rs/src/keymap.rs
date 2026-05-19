@@ -487,7 +487,10 @@ impl HidState {
         }
     }
 
-    /// Clear all pressed keys (e.g. on layer switch).
+    /// Return the current 6-key + modifier state as (keys, modifiers).
+    pub fn keyboard_report(&self) -> ([u8; 6], u8) {
+        (self.keyboard.keys, self.keyboard.modifiers)
+    }
     pub fn release_all(&mut self) {
         self.keyboard = KeyboardReport::default();
         self.mouse = MouseReport::default();

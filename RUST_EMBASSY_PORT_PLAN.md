@@ -11,17 +11,17 @@
 > - ✅ UF2 build — Makefile + `build-uf2.sh`
 > - ✅ Calibration — Boot-time thumbstick calibration with buzzer feedback
 > - ✅ BLE inter-half — SoftDevice init, RokiService GATT, scan/connect, notify
+> - ✅ HID over GATT (M5) — HOGP service registration with keyboard+mouse+consumer
+>   reports, advertising to host OS, sequential host+secondary connection flow,
+>   HID report dispatch in primary loop with change detection
 >
-> **Next up:** M5 — Add HOGP HID host advertising on primary side so the left half
-> presents as a keyboard/mouse/consumer device to the computer. This requires
-> registering the HID Service (0x1812), Report Map, and Input Reports via the
-> same SoftDevice GATT builder API, then advertising as a peripheral to the OS.
->
-> **Open blockers:**
-> - HID report sending to host — need to call `ble::gatt_server::notify_value()`
->   from the primary task with the keyboard/mouse report handles.
-> - Connection to BOTH host (peripheral) and secondary (central) simultaneously
->   is supported by S140, but the primary task will need to manage two connections.
+> **Status:** All planned milestones complete. The crate compiles and links for
+> `thumbv7em-none-eabihf`. Remaining work is on-device testing and polish:
+> - Remove dead-code warnings (`serialize` stubs, unused `mut`)
+> - Add BLE reconnection logic (auto-reconnect on host or secondary disconnect)
+> - Add consumer report sending (media keys) to HOGP
+> - Tune connection intervals and PHY for battery life
+> - Flash to nice!nano v2 and verify end-to-end with defmt-rtt logs
 >
 > Status: **M0–M2 + build-linkage complete** —
 > - Cargo check / build pass cleanly on `thumbv7em-none-eabihf`

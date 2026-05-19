@@ -18,7 +18,7 @@ pub fn init_softdevice() -> &'static mut Softdevice {
             accuracy: raw::NRF_CLOCK_LF_ACCURACY_250_PPM as u8,
         }),
         conn_gap: Some(raw::ble_gap_conn_cfg_t {
-            conn_count: 1,
+            conn_count: 2,
             event_length: 24,
         }),
         conn_gatt: Some(raw::ble_gatt_conn_cfg_t {
@@ -28,7 +28,7 @@ pub fn init_softdevice() -> &'static mut Softdevice {
             write_cmd_tx_queue_size: 4,
         }),
         conn_gatts: Some(raw::ble_gatts_conn_cfg_t {
-            hvn_tx_queue_size: 4,
+            hvn_tx_queue_size: 8,
         }),
         ..Default::default()
     };
