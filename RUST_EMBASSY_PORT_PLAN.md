@@ -10,8 +10,18 @@
 > - ✅ Keycodes — Full keypad + application keys
 > - ✅ UF2 build — Makefile + `build-uf2.sh`
 > - ✅ Calibration — Boot-time thumbstick calibration with buzzer feedback
+> - ✅ BLE inter-half — SoftDevice init, RokiService GATT, scan/connect, notify
 >
-> **Next up:** M3–M5 — SoftDevice init, BLE advertising, HOGP, split-half packet flow.
+> **Next up:** M5 — Add HOGP HID host advertising on primary side so the left half
+> presents as a keyboard/mouse/consumer device to the computer. This requires
+> registering the HID Service (0x1812), Report Map, and Input Reports via the
+> same SoftDevice GATT builder API, then advertising as a peripheral to the OS.
+>
+> **Open blockers:**
+> - HID report sending to host — need to call `ble::gatt_server::notify_value()`
+>   from the primary task with the keyboard/mouse report handles.
+> - Connection to BOTH host (peripheral) and secondary (central) simultaneously
+>   is supported by S140, but the primary task will need to manage two connections.
 >
 > Status: **M0–M2 + build-linkage complete** —
 > - Cargo check / build pass cleanly on `thumbv7em-none-eabihf`
