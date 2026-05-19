@@ -6,7 +6,7 @@ use embassy_time::{Duration, Timer};
 use nrf_softdevice::ble::central::{self, ConnectConfig, ScanConfig};
 use nrf_softdevice::ble::gatt_client;
 use nrf_softdevice::ble::peripheral::{self, advertise_connectable, ConnectableAdvertisement};
-use nrf_softdevice::ble::{Address};
+use nrf_softdevice::ble::{Address, Connection};
 use nrf_softdevice::raw;
 
 use core::cell::RefCell;
@@ -17,27 +17,12 @@ use crate::buzzer::Buzzer;
 use crate::config::Config;
 use crate::keymap::{EncoderEvent, HidState, KeyAction, KeyEvent, ThumbstickEvent};
 use crate::layers::LayerHandler;
-use crate::logging::{info, trace};
+use crate::logging::{info, trace, warn};
 
 // ── Cross-task shared host connection ────────────────────────────────────
 
-static HOST_CONN: Mutex<ThreadModeRawMutex, RefCell<Option<nrf_softdevice::ble::Connection>>> =
+static HOST_CONN: Mutex<ThreadModeRawMutex, RefCell<Option<Connection>>> =
     Mutex::new(RefCell::new(None));
-
-/// Dedicated task that runs the GATT client event loop for inter-half packets.
-#[embassy_executor::task]
-async fn ble_packet_handler_task(
-    conn: nrf_softdevice::ble::Connection,
-    client: RokiClient,
-) {
-    gatt_client::run(&conn, &client, |evt| {
-        let RokiClientEvent::Packet(pkt) = evt;
-        trace!("RX inter-half packet: {:?}", pkt);
-        let _ = crate::INTER_HALF_PACKETS.try_send(pkt);
-    })
-    .await;
-    info!("Secondary disconnected");
-}
 
 /// Walk advertisement data and check if it contains the given 128-bit UUID.
 fn ad_contains_uuid_128(data: &[u8], uuid: &[u8; 16]) -> bool {
@@ -61,48 +46,38 @@ fn ad_contains_uuid_128(data: &[u8], uuid: &[u8; 16]) -> bool {
     false
 }
 
+// ── Background task: maintain link to secondary half ───────────────────
+
 #[embassy_executor::task]
-pub async fn primary_task(
-    spawner: Spawner,
-    config: Config,
-    key_rx: Receiver<'static, ThreadModeRawMutex, KeyEvent, 16>,
-    encoder_rx: Receiver<'static, ThreadModeRawMutex, EncoderEvent, 4>,
-    thumb_rx: Receiver<'static, ThreadModeRawMutex, ThumbstickEvent, 4>,
-) {
-    info!("Primary (left) side starting");
-
-    // ── Enable SoftDevice ────────────────────────────────────────────────
-    let sd = crate::ble::init_softdevice();
-
-    // ── Scan for and connect to secondary ────────────────────────────────
-    let peer_addr = loop {
-        let result = nrf_softdevice::ble::central::scan(
-            sd,
-            &ScanConfig::default(),
-            |report| {
-                let data = unsafe {
-                    core::slice::from_raw_parts(report.data.p_data, report.data.len as usize)
-                };
-                if ad_contains_uuid_128(data, &ROKI_UUID_128) {
-                    Some(Address::from_raw(report.peer_addr))
-                } else {
-                    None
+async fn secondary_link_task(sd: &'static nrf_softdevice::Softdevice) {
+    loop {
+        // Scan
+        let peer_addr = loop {
+            match nrf_softdevice::ble::central::scan(
+                sd,
+                &ScanConfig::default(),
+                |report| {
+                    let data = unsafe {
+                        core::slice::from_raw_parts(report.data.p_data, report.data.len as usize)
+                    };
+                    if ad_contains_uuid_128(data, &ROKI_UUID_128) {
+                        Some(Address::from_raw(report.peer_addr))
+                    } else {
+                        None
+                    }
+                },
+            )
+            .await
+            {
+                Ok(addr) => break addr,
+                Err(_) => {
+                    Timer::after(Duration::from_secs(1)).await;
                 }
-            },
-        )
-        .await;
-
-        match result {
-            Ok(addr) => break addr,
-            Err(_) => {
-                info!("Scan timeout, retrying...");
-                Timer::after(Duration::from_secs(1)).await;
             }
-        }
-    };
-    info!("Found secondary at address {:x}", peer_addr.bytes());
+        };
+        info!("Found secondary {:x}", peer_addr.bytes());
 
-    let secondary_conn = {
+        // Connect
         let peer_ref = &peer_addr;
         let whitelist_arr = [peer_ref];
         let cfg = ConnectConfig {
@@ -118,41 +93,123 @@ pub async fn primary_task(
             },
             att_mtu: None,
         };
-        match central::connect(sd, &cfg).await {
+        let conn = match central::connect(sd, &cfg).await {
             Ok(c) => {
                 info!("Connected to secondary {:x}", c.peer_address().bytes());
                 Buzzer::queue_peripheral_connected_tone().await;
                 c
             }
             Err(e) => {
-                info!("Connection failed: {}", defmt::Debug2Format(&e));
-                return;
+                warn!("Secondary connect failed: {}", defmt::Debug2Format(&e));
+                Timer::after(Duration::from_secs(2)).await;
+                continue;
             }
-        }
-    };
+        };
 
-    // ── Discover RokiService on secondary ────────────────────────────────
-    let client: RokiClient = match gatt_client::discover(&secondary_conn).await {
-        Ok(c) => c,
-        Err(e) => {
-            info!("Service discovery failed: {}", defmt::Debug2Format(&e));
-            return;
-        }
-    };
+        // Discover
+        let client: RokiClient = match gatt_client::discover(&conn).await {
+            Ok(c) => c,
+            Err(e) => {
+                warn!("Secondary discovery failed: {}", defmt::Debug2Format(&e));
+                Timer::after(Duration::from_secs(2)).await;
+                continue;
+            }
+        };
 
-    if let Err(e) = client.enable_notifications(&secondary_conn).await {
-        info!("Failed to enable notifications: {}", defmt::Debug2Format(&e));
-        return;
+        if let Err(e) = client.enable_notifications(&conn).await {
+            warn!("Secondary notifications failed: {}", defmt::Debug2Format(&e));
+            Timer::after(Duration::from_secs(2)).await;
+            continue;
+        }
+        info!("Notifications enabled on secondary");
+
+        // Run GATT client event loop inline. Returns when connection drops.
+        gatt_client::run(&conn, &client, |evt| {
+            let RokiClientEvent::Packet(pkt) = evt;
+            trace!("RX inter-half packet: {:?}", pkt);
+            let _ = crate::INTER_HALF_PACKETS.try_send(pkt);
+        })
+        .await;
+
+        warn!("Secondary disconnected — reconnecting in 1s...");
+        Timer::after(Duration::from_secs(1)).await;
     }
-    info!("Notifications enabled on RokiService");
+}
 
-    spawner.must_spawn(ble_packet_handler_task(secondary_conn, client));
+// ── Background task: maintain link to host computer ────────────────────
 
-    // ── Register HID service and advertise to host ─────────────────────────
+#[embassy_executor::task]
+async fn host_link_task(sd: &'static nrf_softdevice::Softdevice) {
+    use nrf_softdevice::ble::advertisement_builder::{
+        AdvertisementBuilder, Flag, ServiceList, ServiceUuid16,
+    };
+
+    loop {
+        let adv_data = AdvertisementBuilder::<31>::new()
+            .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])
+            .services_16(ServiceList::Complete, &[ServiceUuid16::HUMAN_INTERFACE_DEVICE])
+            .short_name("Roki")
+            .build();
+
+        info!("Advertising HID service to host...");
+        let conn = match advertise_connectable(
+            sd,
+            ConnectableAdvertisement::ScannableUndirected {
+                adv_data: adv_data.as_ref(),
+                scan_data: &[],
+            },
+            &peripheral::Config::default(),
+        )
+        .await
+        {
+            Ok(c) => {
+                info!("Host connected: {:x}", c.peer_address().bytes());
+                Buzzer::queue_host_connected_tone().await;
+                c
+            }
+            Err(e) => {
+                warn!("Host advertise failed: {}", defmt::Debug2Format(&e));
+                Timer::after(Duration::from_secs(5)).await;
+                continue;
+            }
+        };
+
+        HOST_CONN.lock(|cell| {
+            *cell.borrow_mut() = Some(conn);
+        });
+        info!("HID reports active — keyboard + mouse + consumer");
+
+        // Keep the slot alive. We refresh it every 30s so that a stale
+        // (silently disconnected) host connection gets cleared and we
+        // can accept a new host.  In production, monitor GAP disconnection
+        // events to clear immediately instead of polling.
+        Timer::after(Duration::from_secs(30)).await;
+        info!("Host slot refresh — clearing stale connection");
+        HOST_CONN.lock(|cell| {
+            *cell.borrow_mut() = None;
+        });
+    }
+}
+
+// ── Primary task (main HID loop) ───────────────────────────────────────
+
+#[embassy_executor::task]
+pub async fn primary_task(
+    spawner: Spawner,
+    config: Config,
+    key_rx: Receiver<'static, ThreadModeRawMutex, KeyEvent, 16>,
+    encoder_rx: Receiver<'static, ThreadModeRawMutex, EncoderEvent, 4>,
+    thumb_rx: Receiver<'static, ThreadModeRawMutex, ThumbstickEvent, 4>,
+) {
+    info!("Primary (left) side starting");
+
+    let sd = crate::ble::init_softdevice();
+
+    // Register HID service once; static lifetime so all link tasks can reference it.
     let hid_server = match HidServer::register(sd) {
         Ok(h) => h,
         Err(e) => {
-            info!("HID service registration failed: {}", defmt::Debug2Format(&e));
+            warn!("HID service registration failed: {}", defmt::Debug2Format(&e));
             return;
         }
     };
@@ -165,51 +222,18 @@ pub async fn primary_task(
         }
     };
 
-    use nrf_softdevice::ble::advertisement_builder::{AdvertisementBuilder, Flag, ServiceList, ServiceUuid16};
-    let adv_data = AdvertisementBuilder::<31>::new()
-        .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])
-        .services_16(ServiceList::Complete, &[ServiceUuid16::HUMAN_INTERFACE_DEVICE])
-        .short_name("Roki")
-        .build();
-    let scan_data = &[];
+    info!("Spawning secondary + host link tasks...");
+    spawner.must_spawn(secondary_link_task(sd));
+    spawner.must_spawn(host_link_task(sd));
 
-    info!("Advertising HID service to host...");
-    let host_conn = match advertise_connectable(
-        sd,
-        ConnectableAdvertisement::ScannableUndirected {
-            adv_data: adv_data.as_ref(),
-            scan_data,
-        },
-        &peripheral::Config::default(),
-    )
-    .await
-    {
-        Ok(c) => {
-            info!("Host connected: {:x}", c.peer_address().bytes());
-            Buzzer::queue_host_connected_tone().await;
-            c
-        }
-        Err(e) => {
-            info!("Host advertise failed: {}", defmt::Debug2Format(&e));
-            return;
-        }
-    };
-
-    HOST_CONN.lock(|cell| {
-        *cell.borrow_mut() = Some(host_conn);
-    });
-    info!("HID reports active — keyboard + mouse + consumer");
-
-    // ── Main keyboard loop ───────────────────────────────────────────────
     let mut hid_state = HidState::new();
     let mut layer = LayerHandler::<8>::new();
     let mouse_speed: i8 = 10;
     let mut last_keys: [u8; 6] = [0; 6];
     let mut last_mods: u8 = 0;
+    let mut last_consumer: u16 = 0;
     let mut last_mouse_x: i8 = 0;
     let mut last_mouse_y: i8 = 0;
-
-    let mut last_consumer: u16 = 0;
 
     loop {
         let mut changed = false;
@@ -310,8 +334,10 @@ pub async fn primary_task(
                 }
                 crate::protocol::THUMB_STICK => {
                     if p1 != 0 || p2 != 0 {
-                        hid_state.mouse.x = (crate::protocol::decode_float(p1) * mouse_speed as f32) as i8;
-                        hid_state.mouse.y = (crate::protocol::decode_float(p2) * mouse_speed as f32) as i8;
+                        hid_state.mouse.x =
+                            (crate::protocol::decode_float(p1) * mouse_speed as f32) as i8;
+                        hid_state.mouse.y =
+                            (crate::protocol::decode_float(p2) * mouse_speed as f32) as i8;
                     } else {
                         hid_state.mouse.x = 0;
                         hid_state.mouse.y = 0;
@@ -322,29 +348,29 @@ pub async fn primary_task(
             }
         }
 
-        // ── Send HID reports to host if we have a connection ──
+        // ── Send HID reports to host ──
         HOST_CONN.lock(|cell| {
             if let Some(ref host_conn) = *cell.borrow() {
                 let (keys, mods) = hid_state.keyboard_report();
                 let (mx, my) = (hid_state.mouse.x, hid_state.mouse.y);
 
-                // Keyboard report (only emit on change to save airtime)
+                // Keyboard
                 if changed || keys != last_keys || mods != last_mods {
-                    hid_ref.send_keyboard(host_conn, mods, keys);
+                    let _ = hid_ref.send_keyboard(host_conn, mods, keys);
                     last_keys = keys;
                     last_mods = mods;
                 }
 
-                // Consumer report (media keys)
+                // Consumer/media
                 let consumer = hid_state.consumer_report();
                 if consumer != last_consumer {
-                    hid_ref.send_consumer(host_conn, consumer);
+                    let _ = hid_ref.send_consumer(host_conn, consumer);
                     last_consumer = consumer;
                 }
 
-                // Mouse report (emit every frame while moving)
+                // Mouse
                 if mx != 0 || my != 0 || mx != last_mouse_x || my != last_mouse_y {
-                    hid_ref.send_mouse(host_conn, 0, mx, my, 0);
+                    let _ = hid_ref.send_mouse(host_conn, 0, mx, my, 0);
                     last_mouse_x = mx;
                     last_mouse_y = my;
                 }
