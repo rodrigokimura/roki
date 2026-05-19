@@ -20,7 +20,7 @@ pub const THUMB_STICK: u8 = 3;
 #[inline]
 pub fn encode_float(value: f32) -> u8 {
     let negative = if value < 0.0 { 1u8 } else { 0u8 };
-    let magnitude = (value.abs() * 127.0).round() as u8;
+    let magnitude = (value.abs() * 127.0 + 0.5) as u8;
     (negative << 7) | (magnitude & 0x7F)
 }
 

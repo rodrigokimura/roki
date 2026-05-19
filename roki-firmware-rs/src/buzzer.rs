@@ -2,7 +2,7 @@ use embassy_nrf::gpio::AnyPin;
 use embassy_nrf::peripherals::PWM0;
 use embassy_nrf::pwm::{Prescaler, SimplePwm};
 use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
-use embassy_sync::channel::{Channel, Receiver, Sender};
+use embassy_sync::channel::{Channel, Receiver};
 use embassy_time::{Duration, Timer};
 
 use crate::logging::info;
@@ -40,7 +40,7 @@ impl Buzzer {
     }
 
     pub fn tone(&mut self, freq: u32, duration_ms: u16) {
-        self.pwm.set_freq(freq.hz());
+        self.pwm.set_period(freq);
         // 50% duty cycle ≈ max volume without distortion on a piezo
         self.pwm.set_duty(0, (self.pwm.max_duty() + 1) / 2);
         // The caller must sleep for `duration_ms` before stopping.

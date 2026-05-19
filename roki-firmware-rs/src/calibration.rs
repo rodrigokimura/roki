@@ -1,4 +1,5 @@
 use embassy_nrf::nvmc::Nvmc;
+use embedded_storage::nor_flash::NorFlash;
 use serde::{Deserialize, Serialize};
 
 use crate::logging::{debug, info};
@@ -62,10 +63,10 @@ impl CalibrationData {
         };
 
         // Erase the page first (Nordic flash requires page-erase before write)
-        nvmc.erase(CALIBRATION_PAGE);
+        let _ = nvmc.erase(CALIBRATION_PAGE, CALIBRATION_PAGE + FLASH_PAGE_SIZE as u32);
 
         // Write the data
-        nvmc.write(CALIBRATION_PAGE, encoded);
+        let _ = nvmc.write(CALIBRATION_PAGE, encoded);
 
         info!("Calibration saved to flash ({} bytes)", encoded.len());
     }
@@ -75,7 +76,7 @@ impl CalibrationData {
 ///
 /// These are the same fields computed in `BaseCalibration._get_normalized_x/y`
 /// in the Python firmware, but precomputed once at boot.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct NormalizedCalibration {
     pub lower_mid_x: i16,
     pub upper_mid_x: i16,

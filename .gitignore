@@ -5,3 +5,5 @@ index.html
 *.FCBak
 *.bak
 *.pem
+roki-firmware-rs/target/
+roki-firmware-rs/Cargo.lock

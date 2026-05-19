@@ -1,4 +1,4 @@
-use embassy_nrf::gpio::{AnyPin, Input, Pull};
+use embassy_nrf::gpio::{Input, Pull};
 use embassy_nrf::peripherals::SAADC;
 use embassy_nrf::saadc::{self, Saadc};
 use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
@@ -17,20 +17,24 @@ embassy_nrf::bind_interrupts!(struct Irqs {
 #[embassy_executor::task]
 pub async fn thumbstick_task(
     saadc_peripheral: SAADC,
-    pin_x: AnyPin,
-    pin_y: AnyPin,
-    pin_switch: AnyPin,
+    pin_x: embassy_nrf::peripherals::P0_31,
+    pin_y: embassy_nrf::peripherals::P0_29,
+    pin_switch: embassy_nrf::peripherals::P0_22,
     calibration: NormalizedCalibration,
     tx: Sender<'static, ThreadModeRawMutex, ThumbstickEvent, 4>,
 ) {
     // Two single-ended channels
-    let channel_cfg_x = saadc::ChannelConfig::single_ended(pin_x);
-    let channel_cfg_y = saadc::ChannelConfig::single_ended(pin_y);
+    let mut channel_cfg_x = saadc::ChannelConfig::single_ended(pin_x);
+    channel_cfg_x.gain = saadc::Gain::GAIN1_6;
+    channel_cfg_x.reference = saadc::Reference::INTERNAL;
+    channel_cfg_x.time = saadc::Time::_10US;
 
-    let config = saadc::Config::default()
-        .gain(saadc::Gain::GAIN1_6)
-        .reference(saadc::Reference::INTERNAL)
-        .resolution(saadc::Resolution::_12BIT);
+    let mut channel_cfg_y = saadc::ChannelConfig::single_ended(pin_y);
+    channel_cfg_y.gain = saadc::Gain::GAIN1_6;
+    channel_cfg_y.reference = saadc::Reference::INTERNAL;
+    channel_cfg_y.time = saadc::Time::_10US;
+
+    let config = saadc::Config::default();
 
     let mut saadc = Saadc::new(
         saadc_peripheral,

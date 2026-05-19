@@ -4,7 +4,7 @@
 /// Each row is an output, each column is an input with pull-down.
 /// We drive one row high at a time and read all columns.
 
-use embassy_nrf::gpio::{AnyPin, Input, Output, Pin, Pull};
+use embassy_nrf::gpio::{AnyPin, Input, Output, Pull};
 use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
 use embassy_sync::channel::Sender;
 use embassy_time::{Duration, Instant, Timer};

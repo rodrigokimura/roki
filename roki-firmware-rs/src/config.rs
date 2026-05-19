@@ -14,7 +14,7 @@ use crate::logging::{debug, error, info};
 // ── Layer configuration ──────────────────────────────────────────────────
 
 /// A single layer parsed from JSON.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 pub struct Layer {
     pub name: heapless::String<32>,
     pub color: (u8, u8, u8),
@@ -42,8 +42,9 @@ pub struct Config {
 // ── JSON parsing helpers ────────────────────────────────────────
 
 mod serde_utils {
-    use serde::{Deserialize, Deserializer};
+    use serde::{Deserialize, Deserializer, Serialize};
     use crate::keymap::KeyAction;
+    use heapless::Vec;
 
     pub mod key_matrix {
         use super::*;
@@ -52,7 +53,7 @@ mod serde_utils {
         where
             D: Deserializer<'de>,
         {
-            let rows: Vec<Vec<Option<heapless::String<32>>>, 8> = Vec::deserialize(deserializer)?;
+            let rows: Vec<Vec<Option<heapless::String<32>>, 6>, 8> = Deserialize::deserialize(deserializer)?;
             let mut result = [KeyAction::Noop; 30];
             let mut idx = 0usize;
 
@@ -66,23 +67,36 @@ mod serde_utils {
             }
             Ok(result)
         }
+
+        pub fn serialize<S>(_value: &[KeyAction; 30], _serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            unreachable!()
+        }
     }
 
     pub mod encoder_pair {
         use super::*;
-        use heapless::Vec;
 
         pub fn deserialize<'de, D>(deserializer: D) -> Result<KeyAction, D::Error>
         where
             D: Deserializer<'de>,
         {
-            let pair: Vec<Option<heapless::String<32>>, 2> = Vec::deserialize(deserializer)?;
+            let pair: Vec<Option<heapless::String<32>>, 2> = Deserialize::deserialize(deserializer)?;
             if let Some(first) = pair.get(0) {
                 if let Some(s) = first {
                     return Ok(KeyAction::from_str(s.as_str()));
                 }
             }
             Ok(KeyAction::Noop)
+        }
+
+        pub fn serialize<S>(_value: &KeyAction, _serializer: S) -> Result<S::Ok, S::Error>
+        where
+            S: serde::Serializer,
+        {
+            unreachable!()
         }
     }
 }
@@ -188,14 +202,14 @@ impl Config {
                 info!("Loaded {} layers from config", layers.len());
             }
             Err(e) => {
-                error!("Failed to parse config.json: {:?}", e);
+                error!("Failed to parse config.json: {}", defmt::Debug2Format(&e));
                 // fallback: one empty layer
             }
         }
 
         // Load calibration from flash
         let calibration = CalibrationData::load()
-            .map(NormalizedCalibration::from_data)
+            .map(|data| NormalizedCalibration::from_data(&data))
             .unwrap_or_else(|| {
                 info!("No calibration in flash; using defaults (zero)");
                 NormalizedCalibration::from_data(&CalibrationData::default())

@@ -2,7 +2,7 @@
 
 use embassy_nrf::gpio::AnyPin;
 use embassy_nrf::peripherals::QDEC;
-use embassy_nrf::qdec::{self, Qdec, SamplePeriod};
+use embassy_nrf::qdec::{self, Config, Qdec, SamplePeriod};
 use embassy_sync::blocking_mutex::raw::ThreadModeRawMutex;
 use embassy_sync::channel::Sender;
 
@@ -16,26 +16,28 @@ pub async fn encoder_task(
     pin_b: AnyPin,
     tx: Sender<'static, ThreadModeRawMutex, EncoderEvent, 4>,
 ) {
-    let config = qdec::Config::default()
-        .sample_period(SamplePeriod::_2048US)
-        .led_preuse(false);
+    let mut config = Config::default();
+    config.period = SamplePeriod::_2048us;
+    config.led_pre_usecs = 0;
 
-    let mut qdec = Qdec::new(qdec_peripheral, pin_a, pin_b, None, config);
-    let mut last_pos: i32 = 0;
+    let mut qdec = Qdec::new(qdec_peripheral, Irqs, pin_a, pin_b, config);
+    let mut last_pos: i16 = 0;
 
     debug!("Encoder task started");
 
     loop {
-        let report = qdec.read().await;
-        if let Some(pos) = report.acc() {
-            let diff = pos - last_pos;
-            last_pos = pos;
+        let pos = qdec.read().await;
+        let diff = pos - last_pos;
+        last_pos = pos;
 
-            if diff > 0 {
-                let _ = tx.send(EncoderEvent { delta: diff as i8 }).await;
-            } else if diff < 0 {
-                let _ = tx.send(EncoderEvent { delta: diff as i8 }).await;
-            }
+        if diff > 0 {
+            let _ = tx.send(EncoderEvent { delta: diff as i8 }).await;
+        } else if diff < 0 {
+            let _ = tx.send(EncoderEvent { delta: diff as i8 }).await;
         }
     }
 }
+
+embassy_nrf::bind_interrupts!(struct Irqs {
+    QDEC => qdec::InterruptHandler<embassy_nrf::peripherals::QDEC>;
+});

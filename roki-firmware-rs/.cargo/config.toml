@@ -10,6 +10,3 @@ rustflags = [
     "-C", "link-arg=-Tlink.x",
     "-C", "link-arg=-Tdefmt.x",
 ]
-
-[unstable]
-build-std = ["core"]

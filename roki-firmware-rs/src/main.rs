@@ -17,6 +17,7 @@ pub mod utils;
 
 use defmt_rtt as _;
 use embassy_executor::Spawner;
+use embassy_nrf::gpio::Pin;
 use embassy_time::Timer;
 use panic_probe as _;
 
@@ -68,7 +69,7 @@ async fn main(spawner: Spawner) {
     defmt::debug!("Loaded {} layers", config.layers.len());
 
     // ── Spawn buzzer task ─────────────────────────────────────────────────
-    let buzzer = Buzzer::new(p.PWM0, p.P0_06);
+    let buzzer = Buzzer::new(p.PWM0, p.P0_06.into());
     spawner.must_spawn(buzzer::buzzer_task(buzzer));
 
     // Play startup tone
@@ -95,15 +96,15 @@ async fn main(spawner: Spawner) {
     spawner.must_spawn(matrix_task(rows, cols, KEY_EVENTS.sender()));
     spawner.must_spawn(encoder_task(
         p.QDEC,
-        p.P0_17.degrade(),
-        p.P0_20.degrade(),
+        p.P0_17.into(),
+        p.P0_20.into(),
         ENCODER_EVENTS.sender(),
     ));
     spawner.must_spawn(thumbstick_task(
         p.SAADC,
-        p.P0_31.degrade(),
-        p.P0_29.degrade(),
-        p.P0_22.degrade(),
+        p.P0_31,
+        p.P0_29,
+        p.P0_22,
         config.calibration.clone(),
         THUMB_EVENTS.sender(),
     ));
