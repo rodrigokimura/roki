@@ -190,9 +190,48 @@ cargo run --release --features left-side -- DEFMT_LOG=trace
 cargo clean && rm -f *.uf2
 ```
 
-## Architecture
+### 8. Change the keymap (compile-time)
 
-| Module | Responsibility |
+The keymap JSON (`config/default.json`) is embedded at build time via `include_str!`. Edit it, then rebuild both halves:
+
+```bash
+# Edit roki-firmware-rs/config/default.json
+# Then rebuild:
+cd roki-firmware-rs
+
+# Right half
+cargo build --release && make uf2
+
+# Left half
+cargo build --release --features left-side && make uf2
+```
+
+There is **no runtime filesystem** on the nice!nano, so every keymap change currently requires recompilation. A future milestone (M9) will add USB MSC drag-and-drop support for live keymap updates without rebuilding.
+
+## Future milestones
+
+- [ ] M7 — Battery service + power tuning
+- [ ] M8 — Host tooling (`roki flash` one-command)
+- [ ] M9 — **USB Mass Storage Class (MSC) drag-and-drop keymap**
+
+### M9 — USB Mass Storage keymap (planned)
+
+The CircuitPython firmware exposed the nice!nano as a USB storage device when plugged into a PC, allowing users to drag-and-drop a `config.json` to change the keymap without recompiling. The Rust port will replicate this with `embassy-usb`:
+
+| Aspect | Plan |
+|---|---|
+| USB class | MSC (Mass Storage Class) over `embassy-usb` |
+| Filesystem | Tiny virtual FAT12/16 image in flash or RAM |
+| Exposed file | `config.json` (read/write) |
+| Detection | Monitor SCSI `WRITE(10)` to detect file modification |
+| Validation | Parse incoming JSON with `serde-json-core`, validate key names |
+| Reload | Store validated config to a dedicated flash page; load at next boot |
+| Safety | Keep a CRC-32 checksum; fallback to embedded default on parse failure |
+| Coexistence | MSC only activates when USB VBUS is detected and no BLE host is connected (avoid HID/MSC composite complexity) |
+
+This avoids the recompilation step for non-technical users and matches the Python firmware's workflow exactly.
+
+## Architecture
 |--------|----------------|
 | `main.rs` | Embassy executor init, task spawning, side detection |
 | `matrix.rs` | 5×6 GPIO matrix scan |
@@ -223,3 +262,4 @@ cargo clean && rm -f *.uf2
 - [x] Reconnection — auto-retry loops for host and secondary on both halves
 - [ ] M7 — Battery service + power tuning
 - [ ] M8 — Host tooling (`roki flash` one-command)
+- [ ] M9 — **USB Mass Storage Class (MSC) drag-and-drop keymap**

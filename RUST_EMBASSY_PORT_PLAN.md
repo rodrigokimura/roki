@@ -14,7 +14,13 @@
 > - ✅ Reconnection loops — auto-retry on host and secondary disconnect for both halves
 >
 > **Status:** All planned milestones complete. The crate compiles and links for
-> `thumbv7em-none-eabihf` with zero warnings. Ready for on-device testing:
+> `thumbv7em-none-eabihf` with zero warnings. Ready for on-device testing.
+>
+> **Next steps (future milestones):**
+> - **M9 — USB Mass Storage Config (drag-and-drop keymap)** — Expose the nice!nano
+>   as a USB MSC device when plugged into a PC, presenting a virtual FAT filesystem
+>   with `config.json`. Detect writes, validate JSON, and reload keymap without
+>   recompiling. This matches the CircuitPython `storage` + `usb_msc` behavior.
 > - Flash to nice!nano v2 and verify end-to-end with defmt-rtt logs
 > - Tune connection intervals and PHY for battery life (if needed after testing)
 >
