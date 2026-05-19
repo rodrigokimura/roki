@@ -7,10 +7,11 @@
 > - ✅ M1 — Matrix scanner + Buzzer PWM task
 > - ✅ M2 — Encoder (QDEC) + Thumbstick (SAADC + calibration)
 > - ✅ Build linkage — `embassy-executor/integrated-timers` fixes `_embassy_time_schedule_wake`
+> - ✅ Keycodes — Full keypad + application keys
+> - ✅ UF2 build — Makefile + `build-uf2.sh`
+> - ✅ Calibration — Boot-time thumbstick calibration with buzzer feedback
 >
-> **Next up:** M3/M4 — Wire SoftDevice init, advertise HOGP, verify split-half packet flow.
->
-> **Open blockers:** `nrf-softdevice` v0.1.0 GATT macro API is crude; may need raw `sd_ble_gatts_service_add` calls for the custom `RokiService`. HID service (HOGP) will likely require significant exploration of the SoftDevice S140 GATT server register sequence.
+> **Next up:** M3–M5 — SoftDevice init, BLE advertising, HOGP, split-half packet flow.
 >
 > Status: **M0–M2 + build-linkage complete** —
 > - Cargo check / build pass cleanly on `thumbv7em-none-eabihf`
