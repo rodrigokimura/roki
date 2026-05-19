@@ -198,6 +198,7 @@ pub async fn primary_task(
     HOST_CONN.lock(|cell| {
         *cell.borrow_mut() = Some(host_conn);
     });
+    info!("HID reports active — keyboard + mouse + consumer");
 
     // ── Main keyboard loop ───────────────────────────────────────────────
     let mut hid_state = HidState::new();
@@ -207,6 +208,8 @@ pub async fn primary_task(
     let mut last_mods: u8 = 0;
     let mut last_mouse_x: i8 = 0;
     let mut last_mouse_y: i8 = 0;
+
+    let mut last_consumer: u16 = 0;
 
     loop {
         let mut changed = false;
@@ -330,6 +333,13 @@ pub async fn primary_task(
                     hid_ref.send_keyboard(host_conn, mods, keys);
                     last_keys = keys;
                     last_mods = mods;
+                }
+
+                // Consumer report (media keys)
+                let consumer = hid_state.consumer_report();
+                if consumer != last_consumer {
+                    hid_ref.send_consumer(host_conn, consumer);
+                    last_consumer = consumer;
                 }
 
                 // Mouse report (emit every frame while moving)

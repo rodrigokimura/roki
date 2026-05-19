@@ -491,6 +491,13 @@ impl HidState {
     pub fn keyboard_report(&self) -> ([u8; 6], u8) {
         (self.keyboard.keys, self.keyboard.modifiers)
     }
+
+    /// Return the current consumer/media usage code.
+    pub fn consumer_report(&self) -> u16 {
+        self.consumer.usage
+    }
+
+    /// Clear all pressed keys (e.g. on layer switch).
     pub fn release_all(&mut self) {
         self.keyboard = KeyboardReport::default();
         self.mouse = MouseReport::default();

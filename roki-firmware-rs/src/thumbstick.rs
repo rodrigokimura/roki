@@ -47,7 +47,7 @@ pub async fn thumbstick_task(
     let switch = Input::new(pin_switch, Pull::Up);
 
     // ── Boot-time calibration ─────────────────────────────────────────
-    let mut calibration = if !switch.is_high() {
+    let calibration = if !switch.is_high() {
         info!("Thumbstick switch held at boot — entering calibration mode");
         let new_cal = run_boot_calibration(&mut saadc, &switch).await;
         new_cal.save_to_flash();

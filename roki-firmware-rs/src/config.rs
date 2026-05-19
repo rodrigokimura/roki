@@ -67,6 +67,7 @@ mod serde_utils {
             Ok(result)
         }
 
+        #[allow(dead_code)]
         pub fn serialize<S>(_value: &[KeyAction; 30], _serializer: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer,
@@ -91,6 +92,7 @@ mod serde_utils {
             Ok(KeyAction::Noop)
         }
 
+        #[allow(dead_code)]
         pub fn serialize<S>(_value: &KeyAction, _serializer: S) -> Result<S::Ok, S::Error>
         where
             S: serde::Serializer,
