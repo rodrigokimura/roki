@@ -2,7 +2,21 @@
 
 > Branch: `plan/rust-embassy-port`  
 > Target platform: nice!nano v2 (nRF52840, BLE)  
-> Status: **M0 + M1 complete** — crate compiles with zero build errors; modules scaffolded and aligned to embassy-nrf v0.2.0. Warnings cleaned. Primary/secondary tasks are stubs awaiting BLE wiring.
+> **Milestones achieved:**
+> - ✅ M0 — Project skeleton (`cargo check`/`cargo build` pass)
+> - ✅ M1 — Matrix scanner + Buzzer PWM task
+> - ✅ M2 — Encoder (QDEC) + Thumbstick (SAADC + calibration)
+> - ✅ Build linkage — `embassy-executor/integrated-timers` fixes `_embassy_time_schedule_wake`
+>
+> **Next up:** M3/M4 — Wire SoftDevice init, advertise HOGP, verify split-half packet flow.
+>
+> **Open blockers:** `nrf-softdevice` v0.1.0 GATT macro API is crude; may need raw `sd_ble_gatts_service_add` calls for the custom `RokiService`. HID service (HOGP) will likely require significant exploration of the SoftDevice S140 GATT server register sequence.
+>
+> Status: **M0–M2 + build-linkage complete** —
+> - Cargo check / build pass cleanly on `thumbv7em-none-eabihf`
+> - Embassy timer driver wired (`embassy-executor/integrated-timers`)
+> - All hardware modules aligned to `embassy-nrf` v0.2.0 APIs
+> - Left/right feature flag available: `--features left-side`
 
 ---
 
