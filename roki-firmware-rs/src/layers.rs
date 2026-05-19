@@ -2,7 +2,6 @@
 ///
 /// Ported from `roki/firmware/layer_handler.py`.
 
-use crate::keymap::KeyAction;
 use crate::logging::debug;
 
 /// A command that mutates the layer state.

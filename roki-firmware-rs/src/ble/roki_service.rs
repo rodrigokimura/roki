@@ -4,7 +4,7 @@
 /// The actual service definition and packet read/write will be added
 /// once the SoftDevice plumbing is in place.
 
-use nrf_softdevice::ble::{Connection, Uuid};
+use nrf_softdevice::ble::Connection;
 
 /// Base UUID bytes: "reffuBtekcaP" + "\x00\x00\xaf\xad"
 /// Then bytes at index -3 and -4 are set from the 16-bit UUID.

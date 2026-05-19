@@ -18,7 +18,6 @@ pub mod utils;
 use defmt_rtt as _;
 use embassy_executor::Spawner;
 use embassy_nrf::gpio::Pin;
-use embassy_time::Timer;
 use panic_probe as _;
 
 use crate::buzzer::Buzzer;

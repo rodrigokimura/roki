@@ -5,8 +5,6 @@
 /// commands. It also owns the global HID report state that the
 /// primary side sends to the host.
 
-use core::fmt;
-use heapless::String;
 use heapless::Vec;
 use serde::{Deserialize, Serialize};
 

@@ -14,8 +14,6 @@
 /// and report structures; the actual GATT registration happens in the
 /// primary task when it starts advertising.
 
-use heapless::Vec;
-
 /// HID Report IDs used by our descriptor.
 pub const RID_KEYBOARD: u8 = 1;
 pub const RID_MOUSE: u8 = 2;

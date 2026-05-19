@@ -4,12 +4,11 @@
 /// We parse it at boot with `serde-json-core` (no-std JSON parser).
 
 use heapless::Vec;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 use crate::calibration::{CalibrationData, NormalizedCalibration};
 use crate::keymap::KeyAction;
-use crate::layers::LayerCommand;
-use crate::logging::{debug, error, info};
+use crate::logging::{error, info};
 
 // ── Layer configuration ──────────────────────────────────────────────────
 
@@ -42,7 +41,7 @@ pub struct Config {
 // ── JSON parsing helpers ────────────────────────────────────────
 
 mod serde_utils {
-    use serde::{Deserialize, Deserializer, Serialize};
+    use serde::{Deserialize, Deserializer};
     use crate::keymap::KeyAction;
     use heapless::Vec;
 
@@ -118,11 +117,6 @@ fn parse_hex_color(hex: &str) -> (u8, u8, u8) {
 // ── Config loading ───────────────────────────────────────────────────────
 
 /// Raw JSON structure matching the Python config.json format.
-#[derive(Deserialize)]
-struct RawConfig {
-    pub layers: heapless::Vec<RawLayer, 8>,
-}
-
 #[derive(Deserialize)]
 struct RawLayer {
     pub name: heapless::String<32>,

@@ -2,7 +2,7 @@
 
 > Branch: `plan/rust-embassy-port`  
 > Target platform: nice!nano v2 (nRF52840, BLE)  
-> Status: Planning — not yet implemented
+> Status: M0 complete — project compiles; modules scaffolded; warnings cleanup in progress
 
 ---
 

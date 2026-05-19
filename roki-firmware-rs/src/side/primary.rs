@@ -5,7 +5,7 @@ use embassy_time::{Duration, Timer};
 use crate::buzzer::Buzzer;
 use crate::config::Config;
 use crate::keymap::{EncoderEvent, HidState, KeyAction, KeyEvent, ThumbstickEvent};
-use crate::layers::{LayerCommand, LayerHandler};
+use crate::layers::LayerHandler;
 use crate::logging::{info, trace};
 
 /// Global shared HID state (primary side only).

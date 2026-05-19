@@ -25,7 +25,7 @@ pub async fn secondary_task(
     // TODO: Create RokiService, start advertising
 
     let mut counter = Cycle::new(0, 100);
-    let mut layer = LayerHandler::<8>::new();
+    let layer = LayerHandler::<8>::new();
     let mut send_thumb = false;
 
     loop {

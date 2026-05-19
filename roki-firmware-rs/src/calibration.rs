@@ -86,7 +86,7 @@ pub struct NormalizedCalibration {
     pub upper_mid_y: i16,
     pub min_y: i16,
     pub max_y: i16,
-    limit: f32,
+    _limit: f32,
 }
 
 impl NormalizedCalibration {
@@ -101,7 +101,7 @@ impl NormalizedCalibration {
             max_y: data.max_y,
             lower_mid_y: data.mid_y - ((data.mid_y - data.min_y) as f32 * limit) as i16,
             upper_mid_y: data.mid_y + ((data.max_y - data.mid_y) as f32 * limit) as i16,
-            limit,
+            _limit: limit,
         }
     }
 

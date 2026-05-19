@@ -39,7 +39,7 @@ impl Buzzer {
         Self { pwm }
     }
 
-    pub fn tone(&mut self, freq: u32, duration_ms: u16) {
+    pub fn tone(&mut self, freq: u32, _duration_ms: u16) {
         self.pwm.set_period(freq);
         // 50% duty cycle ≈ max volume without distortion on a piezo
         self.pwm.set_duty(0, (self.pwm.max_duty() + 1) / 2);
