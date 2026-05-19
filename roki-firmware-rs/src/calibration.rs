@@ -52,7 +52,14 @@ impl CalibrationData {
 
     /// Write calibration to a dedicated flash page.
     /// This blocks while the NVMC does its erase + write cycle.
-    pub fn save(&self, nvmc: &mut Nvmc<'_>) {
+    pub fn save_to_flash(&self) {
+        let mut nvmc = embassy_nrf::nvmc::Nvmc::new(
+            unsafe { embassy_nrf::peripherals::NVMC::steal() }
+        );
+        self.save(&mut nvmc);
+    }
+
+    pub fn save(&self, nvmc: &mut embassy_nrf::nvmc::Nvmc<'_>) {
         let mut buf = [0u8; 128];
         let encoded = match postcard::to_slice(self, &mut buf) {
             Ok(b) => b,
