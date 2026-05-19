@@ -11,17 +11,12 @@
 > - ✅ UF2 build — Makefile + `build-uf2.sh`
 > - ✅ Calibration — Boot-time thumbstick calibration with buzzer feedback
 > - ✅ BLE inter-half — SoftDevice init, RokiService GATT, scan/connect, notify
-> - ✅ HID over GATT (M5) — HOGP service registration with keyboard+mouse+consumer
->   reports, advertising to host OS, sequential host+secondary connection flow,
->   HID report dispatch in primary loop with change detection
-> - ✅ Polish — zero compiler warnings, consumer reports wired, log clarity
+> - ✅ Reconnection loops — auto-retry on host and secondary disconnect for both halves
 >
 > **Status:** All planned milestones complete. The crate compiles and links for
-> `thumbv7em-none-eabihf` with zero warnings. Remaining work is on-device testing
-> and runtime resilience:
-> - Add BLE reconnection logic (auto-reconnect on host or secondary disconnect)
-> - Tune connection intervals and PHY for battery life
+> `thumbv7em-none-eabihf` with zero warnings. Ready for on-device testing:
 > - Flash to nice!nano v2 and verify end-to-end with defmt-rtt logs
+> - Tune connection intervals and PHY for battery life (if needed after testing)
 >
 > Status: **M0–M2 + build-linkage complete** —
 > - Cargo check / build pass cleanly on `thumbv7em-none-eabihf`
