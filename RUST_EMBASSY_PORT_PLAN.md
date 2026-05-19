@@ -14,12 +14,12 @@
 > - ✅ HID over GATT (M5) — HOGP service registration with keyboard+mouse+consumer
 >   reports, advertising to host OS, sequential host+secondary connection flow,
 >   HID report dispatch in primary loop with change detection
+> - ✅ Polish — zero compiler warnings, consumer reports wired, log clarity
 >
 > **Status:** All planned milestones complete. The crate compiles and links for
-> `thumbv7em-none-eabihf`. Remaining work is on-device testing and polish:
-> - Remove dead-code warnings (`serialize` stubs, unused `mut`)
+> `thumbv7em-none-eabihf` with zero warnings. Remaining work is on-device testing
+> and runtime resilience:
 > - Add BLE reconnection logic (auto-reconnect on host or secondary disconnect)
-> - Add consumer report sending (media keys) to HOGP
 > - Tune connection intervals and PHY for battery life
 > - Flash to nice!nano v2 and verify end-to-end with defmt-rtt logs
 >
